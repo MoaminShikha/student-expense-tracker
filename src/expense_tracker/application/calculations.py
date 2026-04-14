@@ -47,7 +47,8 @@ class BalanceSnapshot:
 class BalanceEngine:
     """Defines deterministic balance calculations for Stage 1."""
 
-    def calculate_free_money(self, opening_balance: Decimal, total_income: Decimal, total_committed: Decimal, total_spent: Decimal) -> Decimal:
+    def calculate_free_money(self, opening_balance: Decimal, total_income: Decimal, total_committed: Decimal,
+                             total_spent: Decimal) -> Decimal:
         """
         Calculate free money for the full session scope.
 
@@ -57,11 +58,13 @@ class BalanceEngine:
         :param total_spent: Sum of all spend transactions.
         :return: Calculated free money.
         """
-        pass
+        return opening_balance + total_income - total_committed - total_spent
 
-    def calculate_monthly_budget(self, income_this_month: Decimal, charges_this_month: Decimal, spent_this_month: Decimal, red_threshold: Decimal = Decimal("130")) -> MonthlyBudgetView:
+    def calculate_monthly_budget(self, income_this_month: Decimal, charges_this_month: Decimal,
+                                 spent_this_month: Decimal,
+                                 red_threshold: Decimal = Decimal("130")) -> MonthlyBudgetView:
         """
-        Calculate monthly budget outputs and ozn-track state.
+        Calculate monthly budget outputs and on-track state.
 
         :param income_this_month: Sum of income entries in the current month.
         :param charges_this_month: Sum of committed charges due in the current month.
@@ -71,7 +74,8 @@ class BalanceEngine:
         """
         pass
 
-    def classify_on_track_state(self, monthly_budget: Decimal, monthly_spent: Decimal, red_threshold: Decimal = Decimal("130")) -> OnTrackState:
+    def classify_on_track_state(self, monthly_budget: Decimal, monthly_spent: Decimal,
+                                red_threshold: Decimal = Decimal("130")) -> OnTrackState:
         """
         Classify monthly on-track status from monthly budget usage.
 
@@ -80,7 +84,18 @@ class BalanceEngine:
         :param red_threshold: Red-state threshold percentage.
         :return: Classified on-track state.
         """
-        pass
+        if monthly_budget <= Decimal("0"):
+            return OnTrackState.TIGHT_MONTH
+
+        on_track_pct = monthly_spent / monthly_budget * Decimal("100")
+
+        if on_track_pct < Decimal("100"):
+            return OnTrackState.GREEN
+
+        if on_track_pct < red_threshold:
+            return OnTrackState.YELLOW
+
+        return OnTrackState.RED
 
     def classify_balance_state(self, free_money: Decimal, caution_threshold: Decimal) -> BalanceState:
         """
@@ -90,9 +105,18 @@ class BalanceEngine:
         :param caution_threshold: Caution-state threshold.
         :return: Classified balance state.
         """
-        pass
+        if free_money > caution_threshold:
+            return BalanceState.NORMAL
 
-    def build_snapshot(self, opening_balance: Decimal, total_income: Decimal, total_committed: Decimal, total_spent: Decimal, income_this_month: Decimal, charges_this_month: Decimal, spent_this_month: Decimal, caution_threshold: Decimal, red_threshold: Decimal = Decimal("130")) -> BalanceSnapshot:
+        if free_money > Decimal("0"):
+            return BalanceState.CAUTION
+
+        return BalanceState.CRISIS
+
+    def build_snapshot(self, opening_balance: Decimal, total_income: Decimal, total_committed: Decimal,
+                       total_spent: Decimal, income_this_month: Decimal, charges_this_month: Decimal,
+                       spent_this_month: Decimal, caution_threshold: Decimal,
+                       red_threshold: Decimal = Decimal("130")) -> BalanceSnapshot:
         """
         Build the complete Stage 1 balance snapshot.
 
@@ -108,4 +132,3 @@ class BalanceEngine:
         :return: Calculated balance snapshot.
         """
         pass
-
