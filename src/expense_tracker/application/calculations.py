@@ -72,7 +72,12 @@ class BalanceEngine:
         :param red_threshold: Red-state threshold percentage.
         :return: Calculated monthly budget view.
         """
-        pass
+        monthly_budget = income_this_month - charges_this_month
+        monthly_spent = spent_this_month
+        monthly_left = monthly_budget - monthly_spent
+        on_track_state = self.classify_on_track_state(monthly_budget, monthly_spent, red_threshold)
+        return MonthlyBudgetView(monthly_budget=monthly_budget, monthly_spent=monthly_spent, monthly_left=monthly_left,
+                                 on_track_state=on_track_state)
 
     def classify_on_track_state(self, monthly_budget: Decimal, monthly_spent: Decimal,
                                 red_threshold: Decimal = Decimal("130")) -> OnTrackState:
@@ -131,4 +136,10 @@ class BalanceEngine:
         :param red_threshold: Red-state threshold percentage.
         :return: Calculated balance snapshot.
         """
-        pass
+        free_money = self.calculate_free_money(opening_balance, total_income, total_committed, total_spent)
+        monthly_view = self.calculate_monthly_budget(income_this_month, charges_this_month, spent_this_month,
+                                                     red_threshold)
+        balance_state = self.classify_balance_state(free_money, caution_threshold)
+        return BalanceSnapshot(free_money=free_money, monthly_budget=monthly_view.monthly_budget,
+                               monthly_spent=monthly_view.monthly_spent, monthly_left=monthly_view.monthly_left,
+                               on_track_state=monthly_view.on_track_state, balance_state=balance_state)
