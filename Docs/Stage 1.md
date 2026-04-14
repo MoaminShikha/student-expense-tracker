@@ -123,7 +123,6 @@ erDiagram
         uuid session_id PK
         date start_date
         Decimal opening_balance
-        str period_name
     }
     IncomeEntry {
         uuid income_id PK
@@ -182,7 +181,6 @@ erDiagram
 session_id       uuid
 start_date       date
 opening_balance  Decimal
-period_name      str | None     # optional label, e.g. "Year 1"
 ```
 
 **IncomeEntry**

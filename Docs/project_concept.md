@@ -86,7 +86,7 @@ PatternDetector will not fire until BOTH conditions are met: at least 14 calenda
 ### New data entities from resolutions
 - **BalanceThreshold** — stores the student caution threshold. App-suggested, student-overridable.
 - **FuzzyChargeLog** — separate store for date-only charges. Never touches BalanceEngine.
-- **AppSession** — replaces AcademicYearContext. Fields: start_date, opening_balance, optional period_name. No end date.
+- **AppSession** — replaces AcademicYearContext. Fields: start_date and opening_balance. No end date.
 
 ---
 

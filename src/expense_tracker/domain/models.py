@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 
@@ -14,6 +13,5 @@ class AppSession:
     session_id: UUID
     start_date: date
     opening_balance: Decimal
-    period_name: Optional[str] = None
 
 

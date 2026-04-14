@@ -621,7 +621,6 @@ AcademicYearContext is replaced by a simpler **AppSession** entity:
 |---|---|---|
 | start_date | date | Date the student first set up the app |
 | opening_balance | decimal | Balance at first setup |
-| period_name | string, nullable | Optional label (e.g. "Year 1", "Post-grad") |
 
 No end date. No hard boundary. The app runs until the student stops using it.
 
