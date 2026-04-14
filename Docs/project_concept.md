@@ -100,6 +100,7 @@ PatternDetector will not fire until BOTH conditions are met: at least 14 calenda
 - Monthly budgeting unit — not daily, not academic year
 - No manual savings tip lists — automatic surface only
 - Pattern detection requires 14 days AND 20 transactions before firing — no premature insights
+- No contextual discovery features yet (nearby stores, housing listings) — planned for a future stage beyond Stage 7
 
 ---
 
@@ -192,6 +193,25 @@ That is the problem statement. The app is the answer.
 
 *Delivers: production-grade. Optional, additive, never breaking.*
 
+
+---
+
+## Future Vision (beyond Stage 7)
+
+Features that belong to the product's long-term roadmap but are deliberately outside the current build scope. They are noted here so they are not forgotten and not accidentally built too early.
+
+### Contextual discovery — nearby savings
+
+The app knows the student's spending patterns. A future stage could use location context to surface genuinely relevant local information:
+
+- **Nearby cheaper supermarkets** — if the student consistently overspends on groceries, the app could surface discount options (Rami Levy, Osher Ad, local shuk) near their current location or university campus
+- **Student discounts nearby** — shops, cafés, transport, and services within walking distance that offer student pricing the student may not know about
+- **Housing listings** — when a student's rent is flagged as a major budget pressure, surface relevant dorm availability or shared apartment listings near their university (Yad2, Madlan integration)
+
+This feature is fundamentally different from the rest of the app: it requires **external data sources** (location APIs, supermarket data, housing APIs), **location permissions**, and **Israeli-specific data partnerships**. It should not be built until Stages 1–7 are stable and the core tracking product is genuinely useful on its own.
+
+The design principle for when it is built: **surface one relevant thing at the right moment** — not a directory, not a list of 20 options. If the student just logged ₪340 on groceries and the app knows a cheaper supermarket is 400 metres away, that is one sentence worth saying. Once.
+
 ---
 
 ## Status
@@ -210,4 +230,4 @@ That is the problem statement. The app is the answer.
 
 ---
 
-*Last updated: April 2026 — v1.4: build stages locked (7 stages), data model before reporting before intelligence before UI*
+*Last updated: April 2026 — v1.5: future vision added — contextual discovery (nearby stores, housing), external data stage noted beyond Stage 7*

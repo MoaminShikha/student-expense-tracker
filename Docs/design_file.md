@@ -455,32 +455,78 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ## Rollout / Migration Notes
 
-1. **Stage 1 — Core session + foundational CLI model (continuous scope):**
-   Implement the working CLI core around `AppSession`, `IncomeEntry`, `CommittedCharge`, `FuzzyCharge`, and `Transaction`. Include recurring charges and fuzzy charges from day one as model primitives, not later add-ons. This stage is complete when the app can run continuously, compute balance state reliably, and produce the core safe-to-spend output.
+1. **Stage 1 (CLI + CSV/JSON):** No deployment needed — runs locally. The student is the only user. Data lives in a single file. This stage is complete when all core calculations work correctly from the command line.
 
-2. **Stage 2 — Persistence hardening (lock data before feature expansion):**
-   Stabilize storage and continuity first. Move from file storage to SQLite with a clear schema for Stage 1 entities, restart-safe reads/writes, and a one-time migration path if early file data exists.
+2. **Stage 1 → Stage 2 (introduce SQLite):** The CSV/JSON data model must be migrated to SQLite schema. A one-time migration script converts existing data. CLI commands remain unchanged — storage is swapped underneath. No backward compatibility issues as this is a single-user local tool.
 
-3. **Stage 3 — Reminder and resolution flows (proof of promise):**
-   Add pre-charge reminders before reporting features. Include per-charge reminder lead time, recurring next-occurrence behavior when paid, and fuzzy-charge reminder + resolution handling through the Occurrences flow.
+3. **Stage 2 → Stage 3 (introduce web UI):** FastAPI backend wraps the existing logic. No logic changes — only a new interface layer. The CLI continues to work. The web dashboard reads from and writes to the same SQLite database. Deployment is localhost only.
 
-4. **Stage 4 — Summaries and history views:**
-   Add retrospective visibility after reminders are working: monthly totals, category breakdowns, period history, and custom date-range filtering. Keep this read-focused layer separate from calculation logic.
+4. **Stage 3 → Stage 4 (add pattern detection):** New PatternDetector component and InsightState table added to existing schema. Existing data automatically becomes input for pattern analysis. No migration needed — analysis runs on existing transaction history. Rollback is safe — removing the component does not affect core calculations.
 
-5. **Stage 5 — Pattern detection and insight state:**
-   Introduce data-earned insights only after summary/reporting is stable. Enforce hard gates (minimum days + minimum transactions), one-insight-per-category-per-period behavior, and persisted suppression state.
+5. **Stage 4 → Stage 5 (polish features):** Multi-currency requires a new currency field on IncomeEntry and exchange rate lookup. This is an additive schema change — existing NIS-only records remain valid. Natural language input is a UI-layer addition only — no schema change required.
 
-6. **Stage 6 — Web interface on top of stable logic:**
-   Add FastAPI + web UI after the CLI workflows and insight logic are stable. The web layer reuses existing engines and storage contracts. CLI remains first-class and continues to operate independently.
+6. **Stage 5 → Stage 6 (optional: local bank connectivity):** Read-only connection to the student's local Israeli bank account to automatically import cleared transactions. Manual logging remains as the primary path — bank import supplements it. This is a very late stage and depends on available bank APIs or OFX/CSV export support from Israeli banks. No architectural changes to core logic required — bank-imported transactions feed into the existing TransactionLog.
 
-7. **Stage 7 — Optional integrations and expansion:**
-   Add non-core enhancements without breaking prior stages: local bank API import (if available), multi-currency support, nearby discounts discovery, nearby apartment discovery/listings, and natural-language entry/polish features.
-   These Stage 7 items depend on location capability and external provider APIs/datasets, so they are explicitly out of scope for core offline stages.
-
-**Rollback concern for all stages:** Every stage must remain independently functional. Rolling back means stopping at the previous stable stage, never invalidating already-proven core calculation behavior.
+**Rollback concern for all stages:** Because each stage is independently functional, rolling back means stopping at the previous stage. No stage destroys the functionality of the one before it.
 
 ---
 
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+## Future Features — Contextual Discovery
+
+*Planned beyond Stage 7. Noted here to prevent premature building and to preserve the idea clearly.*
+
+### What it is
+
+A layer of external, location-aware information surfaced at the moment it is most relevant to the student's financial situation. Unlike the rest of the app — which works entirely on the student's own data — contextual discovery requires external data sources and location permissions.
+
+### Planned features
+
+**Nearby cheaper supermarkets**
+If the student consistently overspends on groceries, the app surfaces discount supermarket options near their campus or home. Relevant Israeli chains: Rami Levy, Osher Ad, Victory. Trigger: grocery spend tracking 30%+ above monthly average. Output: one sentence, once — "Rami Levy is 400m from your campus and typically 15–20% cheaper on basics."
+
+**Student discounts nearby**
+Shops, cafes, transport operators, and services within a defined radius that offer student pricing the student may not know about. Shown the first time the student logs a spend in a category where a nearby student discount exists.
+
+**Housing listings**
+When rent is flagged as the dominant budget pressure (>40% of monthly budget), surface relevant Yad2 or Madlan listings for shared apartments or university dorms near the student's university. One listing type, relevant to their city, shown once.
+
+### Why this is deferred
+
+| Reason | Detail |
+|---|---|
+| External data dependency | Requires supermarket price APIs, location services, housing listing APIs — none in the current architecture |
+| Location permissions | A new trust boundary — student must explicitly grant location access |
+| Israeli-specific data | Supermarket chains, dorm availability, and student discount programmes require local data partnerships |
+| Premature complexity | Building this before Stages 1–7 are stable would distract from the core product |
+
+### Design principle when built
+
+Surface one relevant thing at the right moment. Not a directory. Not a list of 20 options. If the student just logged high grocery spend and a cheaper supermarket is 400 metres away, that is one sentence. Once. Consistent with the behavioural nudge philosophy throughout the app.
+
+
+---
 
 ## Weakness 6 Resolution — Pattern Detection Threshold
 

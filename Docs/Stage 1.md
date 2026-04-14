@@ -1,5 +1,5 @@
 # Stage 1 Implementation Plan
-## Expense Tracker — CLI Core
+## Student Expense Tracker — CLI Core
 
 > Stage 1 delivers a complete, fully-usable CLI tool. Every decision made here must survive untouched through Stages 2–7.
 > No reminders, no summaries, no web UI, no insights. Just the data model, the calculations, and the commands.
@@ -15,7 +15,7 @@ A command-line tool that:
 - Logs daily spending
 - Calculates and displays free money and monthly on-track state
 
-**Definition of done:** A user can run `session init`, log their rent and scholarship, log a coffee, and see an honest number telling them whether they are on track this month.
+**Definition of done:** A student can run `session init`, log their rent and scholarship, log a coffee, and see an honest number telling them whether they are on track this month.
 
 ---
 
@@ -246,12 +246,6 @@ category         enum(food, transport, education, entertainment, other) | None
 date             date
 ```
 
-**Derived dashboard states (calculated outputs, not persisted entities)**
-```
-on_track_state   enum(green, yellow, red, tight_month)
-balance_state    enum(normal, caution, crisis)
-```
-
 ---
 
 ## BalanceEngine — Calculation Contracts
@@ -296,6 +290,10 @@ flowchart LR
     E2 & I7 --> E3 --> O4
     E3 & I9 --> E4 --> O5
     O1 & I8 --> O6
+
+    style IN fill:#f8f8f8,stroke:#ddd
+    style ENG fill:#dbeafe,stroke:#1d4ed8
+    style OUT fill:#dcfce7,stroke:#15803d
 ```
 
 ### Formulas
@@ -464,7 +462,7 @@ mindmap
 
 ## Repository Interfaces
 
-Defined as `typing.Protocol`. The Stage 1 adapter writes to local JSON files. Stage 2 replaces the adapter with PostgreSQL — **service code does not change**.
+Defined as `typing.Protocol`. The Stage 1 adapter writes to local JSON files. Stage 2 replaces the adapter with SQLite — **service code does not change**.
 
 ```mermaid
 graph TD
@@ -477,7 +475,7 @@ graph TD
     SVC --> TR[TransactionRepository\nProtocol]
 
     SR & IR & CR & FR & TR --> A1[JSON File Adapter\nStage 1]
-    A1 -.->|replaced in Stage 2| A2[PostgreSQL Adapter\nStage 2]
+    A1 -.->|replaced in Stage 2| A2[SQLite Adapter\nStage 2]
     A1 --> FS[(local .json files)]
 
     style SVC fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
@@ -534,7 +532,7 @@ graph BT
 ### Unit — `tests/test_calculations.py`
 - Free money formula with known inputs
 - Monthly budget calculation (income this month minus charges this month)
-- On-track percentage and state boundaries (exactly at 100%, 129.99%, 130%)
+- On-track percentage and state boundaries (exactly at 100%, 110%, 130%)
 - Balance state boundaries (positive, zero, negative free money)
 - Edge cases: no income logged yet, no charges logged yet, empty month
 
@@ -615,7 +613,7 @@ Run the full test suite. Fix any failures. Freeze Stage 1 behaviour in docs. Wri
 
 ## Stage 2 Handoff Note
 
-Stage 2 replaces the local JSON adapter with PostgreSQL. To prepare for a clean handoff:
+Stage 2 replaces the local JSON adapter with SQLite. To prepare for a clean handoff:
 - All repository interactions must go through the Protocol interfaces — no direct file I/O in service code
 - The JSON schema used in Stage 1 storage must be documented so the migration script knows what to expect
 - No Stage 2 logic (summaries, history queries) may be added to Stage 1 modules, even as stubs
