@@ -157,23 +157,172 @@ Raise the most specific type. Catch at the boundary where the error can be handl
 
 After every logical unit of work — a class defined, a lifecycle implemented, a test layer passing — remind me to commit.
 
-Format:
-```
-type(scope): short description in present tense
-```
-
-Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
-
-Scope = the directory that changed: `domain`, `application`, `infrastructure`, `ports`, `cli`, `tests`
+### Commit message format
 
 ```
-feat(domain): add FuzzyCharge entity and status enum
-feat(application): implement recurring charge next-occurrence generation
-test(application): verify fuzzy charge non-deduction invariant
-refactor(domain): split models.py into models/ package
+type(scope): concise summary of the main change
+
+- what changed and why (one line per logical change)
+- what changed and why
+- what changed and why
 ```
 
-Never suggest: `update`, `fix stuff`, `WIP`, `added files`, or any message that does not say exactly what changed.
+**Line 1 — subject:** `type(scope): summary`
+- Present tense, lowercase, no period, under 72 characters
+- Summarises the single most important change in the commit
+
+**Lines 3+ — bullet body:** one bullet per logical change
+- Each bullet is one sentence: what changed and why
+- Ordered from most significant to least significant
+- Skip the body entirely if the subject line is self-explanatory
+
+**Types:**
+
+| Type | When to use |
+|---|---|
+| `feat` | new behaviour, new class, new command |
+| `fix` | corrects a bug or wrong behaviour |
+| `refactor` | restructures code without changing behaviour |
+| `test` | adds or fixes tests |
+| `chore` | tooling, config, dependencies, CI |
+| `docs` | documentation only |
+
+**Scope** = the layer or directory that owns the change:
+`domain`, `application`, `infrastructure`, `ports`, `cli`, `tests`, `shared`
+
+### Examples
+
+Single-change commit — subject only:
+```
+feat(domain): add FuzzyCharge entity and FuzzyChargeStatus enum
+```
+
+Multi-change commit — subject + ordered bullets:
+```
+refactor(domain): split models.py into one-file-per-concern package
+
+- move OnTrackState and BalanceState to domain/models/balance.py — domain types belong in domain layer
+- split entities into session.py, income.py, charges.py, transaction.py
+- re-export everything from models/__init__.py so existing imports are unchanged
+```
+
+Mixed scope commit:
+```
+feat(application): implement recurring charge auto-generation in ChargeService
+
+- add add_recurring_charge: creates RecurringRule and first CommittedCharge occurrence
+- add mark_paid: marks charge paid and auto-generates next occurrence when rule exists
+- add parse_day_of_month validator — rejects values outside 1–28 per spec
+```
+
+### Never use
+`update`, `fix stuff`, `WIP`, `added files`, `changes`, `misc`, or any subject that does not
+describe exactly what changed. A commit must be readable in a `git log --oneline` without opening the diff.
+
+---
+
+## Testing Standards
+
+### Structure
+
+- One test class per method or behaviour under test — `class TestCalculateFreeMoney`, `class TestClassifyBalanceState`
+- Test class names are `Test` + the thing being tested, in PascalCase
+- Test method names are `test_` + what the case covers, in snake_case — descriptive enough to read without opening the body
+- No `unittest.TestCase` — use plain pytest classes throughout
+
+### Fixtures
+
+- Shared setup lives in `conftest.py`, never duplicated across test functions
+- One `conftest.py` per test directory — root `tests/conftest.py` handles `sys.path`, layer-specific `conftest.py` handles fixtures
+- Fixtures are typed and have a one-line docstring
+
+```python
+# tests/conftest.py — sys.path only
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+# tests/unit/conftest.py — unit fixtures
+@pytest.fixture
+def engine() -> BalanceEngine:
+    """Provide a shared BalanceEngine instance for all unit tests."""
+    return BalanceEngine()
+```
+
+### Parametrize format
+
+Use `pytest.param(..., id="...")` for every parametrized case. The `id` shows in the test runner output. A `#` comment on the same line explains the intent in the source file. Both are required — they serve different readers.
+
+```python
+@pytest.mark.parametrize(
+    "free_money,caution_threshold,expected",
+    [
+        pytest.param(
+            Decimal("150"), Decimal("100"), BalanceState.NORMAL,
+            id="above caution threshold — normal state",  # free money safely above the warning line
+        ),
+        pytest.param(
+            Decimal("0"), Decimal("100"), BalanceState.CRISIS,
+            id="zero free money — crisis boundary",  # zero is not safe — triggers crisis
+        ),
+    ],
+)
+def test_classify_balance_state(
+    self,
+    engine: BalanceEngine,
+    free_money: Decimal,
+    caution_threshold: Decimal,
+    expected: BalanceState,
+) -> None:
+    assert engine.classify_balance_state(free_money, caution_threshold) is expected
+```
+
+**`id=` rules:**
+- Short label — appears in `pytest -v` output and CI logs
+- Format: `"what the value is — what state it triggers"` using an em dash separator
+- Never: `"case1"`, `"test0"`, `"positive"` alone — always say what it checks
+
+**`#` comment rules:**
+- One sentence explaining why this case exists or what edge it covers
+- Goes on the line with `id=`, after a comma
+- Never restate the id — add something the id couldn't fit
+
+### Non-parametrized tests
+
+Use an inline `#` comment at the top of the test body as a one-line scenario description:
+
+```python
+def test_composes_all_outputs(self, engine: BalanceEngine) -> None:
+    # healthy session: positive free money, under monthly budget — all green
+    result = engine.build_snapshot(...)
+    assert result.balance_state is BalanceState.NORMAL
+```
+
+### What to test
+
+- Every boundary value — not just happy path
+- Every state transition — not just the common case
+- The thing that would break if the logic were wrong — not just that it runs
+- One concept per test — if the assertion list grows beyond 4–5 lines, consider splitting
+
+---
+
+## Stage Kickoff Rule
+
+At the start of every new stage, before writing any code, create a status document in `Docs/`.
+
+File name: `stage{N}_implementation_status.md`
+
+The document must cover:
+1. **What this stage delivers** — definition of done in plain terms
+2. **Scope boundaries** — explicit in-scope and out-of-scope lists
+3. **Build sequence** — ordered phases with dependencies noted
+4. **Module map** — every file that will be created or modified, with its responsibility
+5. **What is already built** — anything carried over from prior stages, marked complete
+6. **What is missing** — every class, method, test, and adapter not yet implemented
+7. **Test plan** — what each test layer covers and what the passing criteria are
+8. **Risks** — known edge cases or design decisions that need care
+
+The document is a live record — update it as the stage progresses.
+It becomes the handoff note for the next stage when the current stage closes.
 
 ---
 

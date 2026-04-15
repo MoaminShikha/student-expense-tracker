@@ -212,17 +212,15 @@ amount           Decimal
 frequency        enum(monthly)  # Stage 1: monthly only
                                # weekly and custom deferred to Stage 2 —
                                # they require different anchor fields not modelled here
-day_of_month     int            # required, range 1–28
-                               # capped at 28 to avoid month-end edge cases
-                               # (29/30/31 do not exist in all months)
+day_of_month     int            # required, range 1–31
 reminder_days    int            # default 3, overridable per charge
 ```
 
 > **Stage 1 constraint — monthly only:** `weekly` and `custom` frequencies need anchor fields
 > that don't exist in this model (day-of-week, interval in days, explicit date list). Rather than
 > ship undefined behaviour, Stage 1 locks `frequency` to `monthly` only. `day_of_month` is
-> required — omitting it when using `--recurring` is a validation error. Capped at 28 to avoid
-> month-end edge cases (February, 30-day months). Weekly and custom are designed properly in Stage 2.
+> required — omitting it when using `--recurring` is a validation error. Valid range is 1–31.
+> Weekly and custom are designed properly in Stage 2.
 
 **FuzzyCharge**
 ```
@@ -605,7 +603,7 @@ Run the full test suite. Fix any failures. Freeze Stage 1 behaviour in docs. Wri
 | Scope creep into Stage 2+ features | Explicit out-of-scope list in this document. Any addition requires updating this plan first. |
 | Business logic leaking into CLI | Rule: `cli.py` contains no arithmetic, no domain decisions, no direct model mutation. |
 | Division by zero in on_track_pct | `monthly_budget <= 0` check is the first operation in the on-track calculation. Returns `tight_month` state before any division is attempted. Unit test required. |
-| `day_of_month` out of range for short months | `day_of_month` capped at 28 in validation. Any value 29–31 is rejected with a clear error at `charge add --recurring` time, not at occurrence-generation time. |
+| `day_of_month` out of range | `day_of_month` validated to range 1–31. Values outside this range are rejected with a clear error at `charge add --recurring` time, not at occurrence-generation time. |
 
 ---
 
