@@ -9,8 +9,8 @@
 
 ## Overall Position
 
-**Current phase:** End of Phase B — Calculations complete. Phase C not started.
-**Test suite:** 25 / 25 passing (Phases A and B only).
+**Current phase:** Mid Phase C — core service lifecycles in progress.
+**Test suite:** 101 / 101 passing (unit suite).
 
 ```mermaid
 gantt
@@ -44,14 +44,15 @@ gantt
 ```mermaid
 pie title Phases Complete vs Remaining
     "Complete (A + B)" : 2
-    "Not Started (C + D + E + F)" : 4
+    "In Progress (C)" : 1
+    "Not Started (D + E + F)" : 3
 ```
 
 ```mermaid
 graph LR
     A["Phase A\nContracts\n✅ COMPLETE"]:::done
     B["Phase B\nCalculations\n✅ COMPLETE"]:::done
-    C["Phase C\nLifecycles\n❌ NOT STARTED"]:::todo
+    C["Phase C\nLifecycles\n⚙️ IN PROGRESS"]:::partial
     D["Phase D\nStorage\n❌ NOT STARTED"]:::todo
     E["Phase E\nCLI Wiring\n⚠️ 1 of 10 commands"]:::partial
     F["Phase F\nQuality Gate\n❌ NOT STARTED"]:::todo
@@ -98,13 +99,13 @@ graph TD
         LoggingConfigurationError
     end
 
-    subgraph validators["domain/validators.py ⚠️"]
+    subgraph validators["domain/validators.py ✅"]
         V1["parse_opening_balance ✅"]
-        V2["parse_amount ❌"]
-        V3["parse_income_source_tag ❌"]
-        V4["parse_due_date ❌"]
-        V5["parse_day_of_month ❌"]
-        V6["parse_transaction_category ❌"]
+        V2["parse_amount ✅"]
+        V3["parse_income_source_tag ✅"]
+        V4["parse_due_date ✅"]
+        V5["parse_day_of_month ✅"]
+        V6["parse_transaction_category ✅"]
     end
 ```
 
@@ -118,11 +119,11 @@ graph TD
 | `Transaction` | `domain/models.py` | ✅ |
 | All enums | `domain/models.py` | ✅ |
 | `parse_opening_balance` | `domain/validators.py` | ✅ |
-| `parse_amount` | `domain/validators.py` | ❌ Missing |
-| `parse_income_source_tag` | `domain/validators.py` | ❌ Missing |
-| `parse_due_date` | `domain/validators.py` | ❌ Missing |
-| `parse_day_of_month` | `domain/validators.py` | ❌ Missing |
-| `parse_transaction_category` | `domain/validators.py` | ❌ Missing |
+| `parse_amount` | `domain/validators.py` | ✅ |
+| `parse_income_source_tag` | `domain/validators.py` | ✅ |
+| `parse_due_date` | `domain/validators.py` | ✅ |
+| `parse_day_of_month` | `domain/validators.py` | ✅ |
+| `parse_transaction_category` | `domain/validators.py` | ✅ |
 | `SessionRepository` | `ports/repositories.py` | ✅ |
 | `IncomeRepository` | `ports/repositories.py` | ✅ |
 | `ChargeRepository` | `ports/repositories.py` | ✅ |
@@ -132,8 +133,8 @@ graph TD
 | Exception hierarchy | `shared/exceptions.py` | ✅ |
 | `LoggerFactory` | `infrastructure/logging_config.py` | ✅ |
 
-> **Note on validators:** `parse_opening_balance` exists. The 5 remaining validators are
-> Phase C prerequisites — they must exist before any service can be written.
+> **Note on validators:** all Stage 1 validator functions are now implemented and covered by
+> `tests/unit/test_validators.py`.
 
 ---
 
@@ -201,50 +202,52 @@ graph LR
 | Unit tests — snapshot composition (2 cases) | `tests/unit/test_calculations.py` | ✅ |
 | Cross-cutting tests — exceptions + logging | `tests/unit/test_shared_cross_cutting.py` | ✅ |
 
-**Total: 25 / 25 tests passing.**
+**Total: calculations remain fully green; full unit suite now passes 84 / 84.**
 
 ---
 
-## Phase C — Charge Lifecycles `NOT STARTED`
+## Phase C — Charge Lifecycles `IN PROGRESS`
 
-This is the entire missing service layer. Nothing in this phase has been built.
+Core service wiring has started. Income and committed-charge base lifecycles are implemented; recurring, fuzzy, and spend lifecycles remain.
 
 ### Services needed
 
 ```mermaid
 graph TD
-    subgraph existing["application/services.py — Exists"]
+    subgraph existing["application/services/ — Implemented"]
         SS["SessionService\ninit_session ✅"]
         BS["BalanceService\nbuild_snapshot ⚠️\n(pass-through — Phase D wires it)"]
+        IS["IncomeService\nadd_income ✅"]
+        CS1["ChargeService\nadd_charge ✅\nadd_recurring_charge ✅\nmark_paid recurring ✅"]
     end
 
-    subgraph missing["application/services.py — Missing"]
-        IS["IncomeService ❌\nadd_income"]
-        CS["ChargeService ❌\nadd_charge\nadd_recurring_charge\nmark_paid"]
+    subgraph missing["application/services/ — Remaining"]
+        CS["ChargeService ⚠️\nremaining: fuzzy + spend"]
         FS["FuzzyChargeService ❌\nadd_fuzzy_charge\nresolve\ndiscard"]
         SP["SpendService ❌\nadd_transaction"]
     end
 
     style SS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style BS fill:#fef3c7,stroke:#92400e,color:#451a03
-    style IS fill:#f2f2f0,stroke:#ccc,color:#999
-    style CS fill:#f2f2f0,stroke:#ccc,color:#999
+    style IS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style CS1 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style CS fill:#fef3c7,stroke:#92400e,color:#451a03
     style FS fill:#f2f2f0,stroke:#ccc,color:#999
     style SP fill:#f2f2f0,stroke:#ccc,color:#999
 ```
 
 | Service | Method | Behaviour |
 |---|---|---|
-| `IncomeService` | `add_income(session_id, amount, source_tag, date)` | Validates amount > 0, creates `IncomeEntry`, persists |
-| `ChargeService` | `add_charge(session_id, name, amount, due_date)` | Creates `CommittedCharge` with `status=UPCOMING`, deducts free money immediately |
-| `ChargeService` | `add_recurring_charge(session_id, name, amount, day_of_month)` | Creates `RecurringRule`, generates first `CommittedCharge` occurrence immediately |
-| `ChargeService` | `mark_paid(charge_id)` | Sets `status=PAID`; if `recurring_rule_id` is set, generates next occurrence automatically |
+| `IncomeService` | `add_income(amount, source_tag, entry_date)` | ✅ Implemented — validates input, creates `IncomeEntry`, persists for active session |
+| `ChargeService` | `add_charge(name, amount, due_date)` | ✅ Implemented — creates `CommittedCharge` with `status=UPCOMING` for active session |
+| `ChargeService` | `add_recurring_charge(name, amount, day_of_month)` | ✅ Implemented — creates `RecurringRule` and first `CommittedCharge` occurrence |
+| `ChargeService` | `mark_paid(charge_id)` | ✅ Implemented — marks paid and creates the next recurring occurrence when linked to a rule |
 | `FuzzyChargeService` | `add_fuzzy_charge(session_id, name, due_date, estimated_amount)` | Creates `FuzzyCharge` with `status=PENDING` — **no deduction** |
 | `FuzzyChargeService` | `resolve(fuzzy_id, confirmed_amount)` | Sets `status=RESOLVED`, converts to `CommittedCharge`, deducts free money at this moment |
 | `FuzzyChargeService` | `discard(fuzzy_id)` | Sets `status=DISCARDED` — no deduction ever |
 | `SpendService` | `add_transaction(session_id, amount, description, category, date)` | Validates amount > 0, creates `Transaction`, persists |
 
-### Charge lifecycles to implement
+### Charge lifecycles remaining
 
 ```mermaid
 stateDiagram-v2
@@ -278,7 +281,13 @@ stateDiagram-v2
     discarded --> [*] : no deduction ever
 ```
 
-### Service tests needed (`tests/unit/test_services.py` — file does not exist)
+### Service tests status
+
+Implemented files:
+- `tests/unit/test_income_service.py`
+- `tests/unit/test_charge_service.py`
+
+Still needed for remaining Phase C behavior:
 
 | Test | What it verifies |
 |---|---|
@@ -407,8 +416,8 @@ graph TD
 
 | Item | Status |
 |---|---|
-| Full test suite green | ⚠️ 25/25 pass — but only Phases A + B covered |
-| `tests/unit/test_services.py` exists | ❌ |
+| Full test suite green | ✅ 101/101 unit tests pass |
+| Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py` |
 | `tests/unit/test_repository.py` exists | ❌ |
 | `tests/unit/test_cli_flows.py` exists | ❌ |
 | Stage 1 behaviour frozen in docs | ❌ |
@@ -422,7 +431,7 @@ graph TD
 graph TD
     subgraph layer_domain["Domain Layer"]
         M["models.py\n✅ Complete"]
-        V["validators.py\n⚠️ 1 of 6 validators"]
+        V["validators.py\n✅ 6 of 6 validators"]
     end
 
     subgraph layer_ports["Ports Layer"]
@@ -431,7 +440,7 @@ graph TD
 
     subgraph layer_app["Application Layer"]
         C["calculations.py\n✅ Complete + tested"]
-        S["services.py\n⚠️ 2 of 8 methods\nBalanceService is a pass-through"]
+        S["services/\n⚠️ In progress\nSession + Income + Charge(base + recurring) implemented"]
     end
 
     subgraph layer_infra["Infrastructure Layer"]
@@ -446,10 +455,12 @@ graph TD
 
     subgraph layer_tests["Tests"]
         T1["test_calculations.py\n✅ 22 tests"]
-        T2["test_shared_cross_cutting.py\n✅ 3 tests"]
-        T3["test_services.py\n❌ Missing"]
-        T4["test_repository.py\n❌ Missing"]
-        T5["test_cli_flows.py\n❌ Missing"]
+        T2["test_shared_cross_cutting.py\n✅ 8 tests"]
+        T3["test_validators.py\n✅ 50 tests"]
+        T4["test_income_service.py\n✅ 4 tests"]
+        T5["test_charge_service.py\n✅ 22 tests"]
+        T6["test_repository.py\n❌ Missing"]
+        T7["test_cli_flows.py\n❌ Missing"]
     end
 
     style M fill:#1a6b3c,color:#fff,stroke:#1a6b3c
@@ -459,13 +470,15 @@ graph TD
     style Main fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T1 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T2 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style V fill:#fef3c7,stroke:#92400e,color:#451a03
+    style V fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style S fill:#fef3c7,stroke:#92400e,color:#451a03
     style J fill:#fef3c7,stroke:#92400e,color:#451a03
     style Cli fill:#fef3c7,stroke:#92400e,color:#451a03
-    style T3 fill:#f2f2f0,stroke:#ccc,color:#999
-    style T4 fill:#f2f2f0,stroke:#ccc,color:#999
-    style T5 fill:#f2f2f0,stroke:#ccc,color:#999
+    style T3 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T4 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T5 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T6 fill:#f2f2f0,stroke:#ccc,color:#999
+    style T7 fill:#f2f2f0,stroke:#ccc,color:#999
 ```
 
 ---
@@ -476,21 +489,21 @@ Build in this order. Each step unblocks the next.
 
 ```mermaid
 flowchart LR
-    S1["1. Write 5 missing\nvalidators\ndomain/validators.py"]
-    S2["2. IncomeService\n+ tests\nsimplest lifecycle"]
-    S3["3. ChargeService\nadd_charge\none-off only first"]
-    S4["4. ChargeService\nadd_recurring_charge\n+ mark_paid\nnext-occurrence logic"]
-    S5["5. FuzzyChargeService\nadd / resolve / discard\nhighest-risk lifecycle"]
-    S6["6. SpendService\nadd_transaction"]
+    S1["1. FuzzyChargeService\nadd / resolve / discard\nkeep no-deduction invariant"]
+    S2["2. SpendService\nadd_transaction"]
+    S3["3. Begin Phase D\nJSON repositories\nstart with session + income + charge"]
+    S4["4. CLI wiring\nmap implemented services\nto command handlers"]
+    S5["5. Full unit + smoke gate\nthen freeze Stage 1 docs"]
+    S6["6. Stage 2 handoff\nlock final scope"]
 
     S1 --> S2 --> S3 --> S4 --> S5 --> S6
 
-    style S1 fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    style S1 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
     style S2 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
-    style S3 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
-    style S4 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    style S3 fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+    style S4 fill:#fef3c7,stroke:#92400e,color:#451a03
     style S5 fill:#fcebeb,color:#a32d2d,stroke:#a32d2d
-    style S6 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    style S6 fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
 ```
 
 > Phase D (JSON adapters) can begin **in parallel from step 3 onwards** — service tests use

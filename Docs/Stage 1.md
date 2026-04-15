@@ -4,6 +4,12 @@
 > Stage 1 delivers a complete, fully-usable CLI tool. Every decision made here must survive untouched through Stages 2–7.
 > No reminders, no summaries, no web UI, no insights. Just the data model, the calculations, and the commands.
 
+### Current checkpoint (2026-04-15)
+- Phase A and Phase B are complete.
+- Phase C is in progress: `IncomeService.add_income`, `ChargeService.add_charge`, `ChargeService.add_recurring_charge`, and recurring `ChargeService.mark_paid` behavior are implemented with unit tests.
+- Full `tests/unit` status at this checkpoint: `101 passed`.
+- Live implementation tracking is maintained in `Docs/stage1_implementation_status.md`.
+
 ---
 
 ## What Stage 1 Delivers
@@ -580,7 +586,7 @@ Define entity data classes, value objects, repository protocols, and typed error
 Implement `BalanceEngine` as pure functions. Write unit tests. Done when every formula is verified with known inputs.
 
 **Phase C — Charge lifecycles**
-Implement recurring charge auto-generation and fuzzy charge state transitions in `services.py`. Write service tests. Done when both lifecycles are behaviour-tested.
+Implement fuzzy charge state transitions and spend transactions in `services.py`. Base income, committed-charge creation, recurring-rule creation, and recurring next-occurrence generation are already in place; this phase completes the remaining lifecycle behavior and adds service coverage for those paths.
 
 **Phase D — Storage**
 Implement the local JSON file adapter for each repository protocol. Write repository tests. Done when data survives a simulated restart.

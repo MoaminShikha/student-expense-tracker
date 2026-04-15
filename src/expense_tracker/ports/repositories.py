@@ -109,6 +109,15 @@ class ChargeRepository(Protocol):
         """
         ...
 
+    def get_by_id(self, charge_id: UUID) -> CommittedCharge | None:
+        """
+        Fetch a committed charge by identifier.
+
+        :param charge_id: Identifier of the charge to fetch.
+        :return: Matching committed charge if found; otherwise None.
+        """
+        ...
+
 
 class RecurringRuleRepository(Protocol):
     """Defines storage operations for recurring charge rules."""
