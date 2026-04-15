@@ -3,7 +3,15 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
-from ..domain.models import AppSession, CommittedCharge, FuzzyCharge, FuzzyChargeStatus, IncomeEntry, Transaction
+from ..domain.models import (
+    AppSession,
+    CommittedCharge,
+    FuzzyCharge,
+    FuzzyChargeStatus,
+    IncomeEntry,
+    RecurringRule,
+    Transaction,
+)
 
 
 class SessionRepository(Protocol):
@@ -16,7 +24,7 @@ class SessionRepository(Protocol):
         :param session: The session to persist.
         :return: None.
         """
-        pass
+        ...
 
     def get_active(self) -> AppSession | None:
         """
@@ -24,7 +32,7 @@ class SessionRepository(Protocol):
 
         :return: Active session if present; otherwise None.
         """
-        pass
+        ...
 
 
 class IncomeRepository(Protocol):
@@ -37,7 +45,7 @@ class IncomeRepository(Protocol):
         :param entry: The income entry to persist.
         :return: None.
         """
-        pass
+        ...
 
     def list_for_session(self, session_id: UUID) -> list[IncomeEntry]:
         """
@@ -46,7 +54,7 @@ class IncomeRepository(Protocol):
         :param session_id: The session identifier.
         :return: Income entries for the session.
         """
-        pass
+        ...
 
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[IncomeEntry]:
         """
@@ -57,7 +65,7 @@ class IncomeRepository(Protocol):
         :param month: Calendar month filter.
         :return: Income entries for the month.
         """
-        pass
+        ...
 
 
 class ChargeRepository(Protocol):
@@ -70,7 +78,7 @@ class ChargeRepository(Protocol):
         :param charge: The committed charge to persist.
         :return: None.
         """
-        pass
+        ...
 
     def list_upcoming(self, session_id: UUID) -> list[CommittedCharge]:
         """
@@ -79,7 +87,7 @@ class ChargeRepository(Protocol):
         :param session_id: The session identifier.
         :return: Upcoming committed charges.
         """
-        pass
+        ...
 
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
         """
@@ -90,7 +98,7 @@ class ChargeRepository(Protocol):
         :param month: Calendar month filter.
         :return: Committed charges for the month.
         """
-        pass
+        ...
 
     def mark_paid(self, charge_id: UUID) -> None:
         """
@@ -99,7 +107,38 @@ class ChargeRepository(Protocol):
         :param charge_id: Identifier of the charge to update.
         :return: None.
         """
-        pass
+        ...
+
+
+class RecurringRuleRepository(Protocol):
+    """Defines storage operations for recurring charge rules."""
+
+    def add(self, rule: RecurringRule) -> None:
+        """
+        Persist one recurring rule.
+
+        :param rule: The recurring rule to persist.
+        :return: None.
+        """
+        ...
+
+    def get_by_id(self, rule_id: UUID) -> RecurringRule | None:
+        """
+        Fetch a recurring rule by identifier.
+
+        :param rule_id: The rule identifier.
+        :return: Matching rule if found; otherwise None.
+        """
+        ...
+
+    def list_for_session(self, session_id: UUID) -> list[RecurringRule]:
+        """
+        List all recurring rules for a session.
+
+        :param session_id: The session identifier.
+        :return: Recurring rules for the session.
+        """
+        ...
 
 
 class FuzzyChargeRepository(Protocol):
@@ -112,7 +151,7 @@ class FuzzyChargeRepository(Protocol):
         :param charge: The fuzzy charge to persist.
         :return: None.
         """
-        pass
+        ...
 
     def list_pending(self, session_id: UUID) -> list[FuzzyCharge]:
         """
@@ -121,7 +160,7 @@ class FuzzyChargeRepository(Protocol):
         :param session_id: The session identifier.
         :return: Pending fuzzy charges for the session.
         """
-        pass
+        ...
 
     def update_status(self, fuzzy_id: UUID, status: FuzzyChargeStatus) -> None:
         """
@@ -131,7 +170,7 @@ class FuzzyChargeRepository(Protocol):
         :param status: New fuzzy charge status.
         :return: None.
         """
-        pass
+        ...
 
 
 class TransactionRepository(Protocol):
@@ -144,7 +183,7 @@ class TransactionRepository(Protocol):
         :param transaction: The transaction to persist.
         :return: None.
         """
-        pass
+        ...
 
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
         """
@@ -155,6 +194,6 @@ class TransactionRepository(Protocol):
         :param month: Calendar month filter.
         :return: Transactions for the month.
         """
-        pass
+        ...
 
 

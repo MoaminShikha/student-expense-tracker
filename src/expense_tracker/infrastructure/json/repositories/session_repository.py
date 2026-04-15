@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from ...domain.models import AppSession
-from ...ports.repositories import SessionRepository
+from ....domain.models import AppSession
 
 
-class JsonSessionRepository(SessionRepository):
+class JsonSessionRepository:
     """JSON-backed session repository adapter for Stage 1."""
 
     def create(self, session: AppSession) -> None:
@@ -14,7 +13,7 @@ class JsonSessionRepository(SessionRepository):
         :param session: The session to persist.
         :return: None.
         """
-        pass
+        ...
 
     def get_active(self) -> AppSession | None:
         """
@@ -22,5 +21,4 @@ class JsonSessionRepository(SessionRepository):
 
         :return: Active session if present; otherwise None.
         """
-        pass
-
+        ...

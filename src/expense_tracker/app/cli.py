@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Sequence
 
-from ..application.services import SessionService
+from ..application.services import BalanceService, SessionService
 from ..domain.validators import parse_opening_balance
 from ..shared.exceptions import ApplicationError, ValidationError
 
@@ -11,14 +11,16 @@ from ..shared.exceptions import ApplicationError, ValidationError
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService) -> None:
         """
         Initialize command routing dependencies.
 
         :param session_service: Service for session-related commands.
+        :param balance_service: Service for dashboard balance commands.
         :return: None.
         """
         self._session_service = session_service
+        self._balance_service = balance_service
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -34,6 +36,9 @@ class CliApplication:
 
         if arguments[0] == "session" and len(arguments) > 1 and arguments[1] == "init":
             return self.handle_session_init(arguments[2:])
+
+        if arguments[0] == "dashboard" and len(arguments) > 1 and arguments[1] == "show":
+            return self.handle_dashboard_show(arguments[2:])
 
         self._logger.error("Unknown command: %s", " ".join(arguments))
         return 1
@@ -71,3 +76,25 @@ class CliApplication:
         self._logger.info("Session initialized successfully.")
         return 0
 
+    def handle_dashboard_show(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `dashboard show` command flow.
+
+        `dashboard show` accepts no arguments — all data is fetched from the
+        repository layer through the service layer. Manual argument passing is
+        not permitted; it would bypass the data layer entirely.
+
+        # TODO Phase D: inject income, charge, and transaction repositories into
+        # CliApplication; delegate aggregation to a DashboardService (or extend
+        # SessionService) that queries the repos, sums the totals, and calls
+        # BalanceService.build_snapshot. Print the returned BalanceSnapshot here.
+
+        :param arguments: Arguments passed after `dashboard show` (must be empty).
+        :return: Process exit code.
+        """
+        if arguments:
+            self._logger.error("dashboard show accepts no arguments. Data is fetched from the repository layer.")
+            return 1
+
+        self._logger.error("dashboard show is not yet available — repository layer not wired (Phase D).")
+        return 1

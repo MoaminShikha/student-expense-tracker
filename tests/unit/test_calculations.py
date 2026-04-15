@@ -8,7 +8,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-from expense_tracker.application.calculations import BalanceEngine, BalanceState, OnTrackState
+from expense_tracker.application.calculations import BalanceEngine
+from expense_tracker.domain.models import BalanceState, OnTrackState
 
 
 # Section: calculate_free_money

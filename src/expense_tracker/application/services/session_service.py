@@ -5,9 +5,9 @@ from datetime import date
 from decimal import Decimal
 from uuid import uuid4
 
-from ..domain.models import AppSession
-from ..ports.repositories import SessionRepository
-from ..shared.exceptions import ApplicationError, ValidationError
+from ...domain.models import AppSession
+from ...ports.repositories import SessionRepository
+from ...shared.exceptions import ApplicationError, ValidationError
 
 
 class SessionService:
@@ -18,6 +18,7 @@ class SessionService:
         Initialize the session service.
 
         :param session_repository: Repository abstraction for session persistence.
+        :param logger: Optional logger for session operations.
         :return: None.
         """
         self._session_repository = session_repository
@@ -30,6 +31,7 @@ class SessionService:
         :param opening_balance: Opening balance for the session.
         :return: None.
         """
+        # Guard independently — services must not rely on callers having validated.
         if opening_balance < 0:
             raise ValidationError("Opening balance cannot be negative.")
 

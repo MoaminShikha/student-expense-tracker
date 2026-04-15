@@ -2,21 +2,21 @@ from __future__ import annotations
 
 import logging
 import sys
-from dataclasses import dataclass
 from typing import Sequence
 
-from ..application.services import SessionService
+from ..application.calculations import BalanceEngine
+from ..application.services import BalanceService, SessionService
 from ..domain.models import AppSession
 from ..infrastructure.logging_config import LoggerFactory
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
 
 
-@dataclass
 class _InMemorySessionRepository:
-    """Simple repository used to bootstrap the Stage 1 CLI flow."""
+    """Simple in-process repository used to bootstrap the Stage 1 CLI flow."""
 
-    _active_session: AppSession | None = None
+    def __init__(self) -> None:
+        self._active_session: AppSession | None = None
 
     def create(self, session: AppSession) -> None:
         """
@@ -56,7 +56,9 @@ class ApplicationEntryPoint:
 
             session_repository = _InMemorySessionRepository()
             session_service = SessionService(session_repository, logger=logger)
-            cli_application = CliApplication(session_service)
+            balance_engine = BalanceEngine()
+            balance_service = BalanceService(balance_engine, logger=logger)
+            cli_application = CliApplication(session_service, balance_service)
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
             logging.getLogger(__name__).error("Application error: %s", exc)

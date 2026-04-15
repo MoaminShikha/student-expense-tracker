@@ -7,15 +7,6 @@ from enum import Enum
 from uuid import UUID
 
 
-class IncomeSourceTag(str, Enum):
-    """Supported income source tags."""
-
-    SCHOLARSHIP = "scholarship"
-    FAMILY = "family"
-    WORK = "work"
-    OTHER = "other"
-
-
 class ChargeStatus(str, Enum):
     """State of a committed charge."""
 
@@ -36,45 +27,6 @@ class FuzzyChargeStatus(str, Enum):
     OVERDUE = "overdue"
     RESOLVED = "resolved"
     DISCARDED = "discarded"
-
-
-class TransactionCategory(str, Enum):
-    """Supported spend categories."""
-
-    FOOD = "food"
-    TRANSPORT = "transport"
-    EDUCATION = "education"
-    ENTERTAINMENT = "entertainment"
-    CLOTHING = "clothing"
-    HEALTH = "health"
-    BILLS = "bills"
-    INVESTMENTS = "investments"
-    LOANS = "loans"
-    SAVINGS = "savings"
-    CASH = "cash"
-    DEBT = "debt"
-    INVESTMENT_RETURNS = "investment_returns"
-    OTHER = "other"
-
-
-@dataclass(frozen=True)
-class AppSession:
-    """Represents the active student budgeting session."""
-
-    session_id: UUID
-    start_date: date
-    opening_balance: Decimal
-
-
-@dataclass(frozen=True)
-class IncomeEntry:
-    """Represents one income entry for a session."""
-
-    income_id: UUID
-    session_id: UUID
-    amount: Decimal
-    source_tag: IncomeSourceTag
-    date: date
 
 
 @dataclass(frozen=True)
@@ -113,17 +65,3 @@ class FuzzyCharge:
     due_date: date
     estimated_amount: Decimal | None
     status: FuzzyChargeStatus
-
-
-@dataclass(frozen=True)
-class Transaction:
-    """Represents one spend transaction."""
-
-    transaction_id: UUID
-    session_id: UUID
-    amount: Decimal
-    description: str
-    category: TransactionCategory | None
-    date: date
-
-
