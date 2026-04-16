@@ -512,4 +512,231 @@ flowchart LR
 
 ---
 
+## Runtime Architecture
+
+How the layers connect at runtime — entry point through storage.
+
+```mermaid
+flowchart LR
+    MAIN["app/main.py\nbootstrap"] --> CLI["app/cli.py\ncommand router"]
+    CLI --> SVC["application/services/*.py\nuse-case orchestration"]
+    SVC --> VAL["domain/validators.py\nparse + validate"]
+    SVC --> MOD["domain/models/*.py\nentities + enums"]
+    SVC --> CALC["application/calculations.py\npure math engine"]
+    SVC --> PORT["ports/repositories.py\nstorage contracts"]
+    PORT --> INF["infrastructure/json/repositories/*.py\nJSON adapters"]
+    SVC --> ERR["shared/exceptions.py\ntyped errors"]
+
+    T["tests/unit/*\nverification"] -. checks .-> SVC
+    T -. checks .-> VAL
+    T -. checks .-> CALC
+    T -. checks .-> ERR
+
+    style MAIN fill:#fef3c7,stroke:#92400e,color:#451a03
+    style CLI fill:#fef3c7,stroke:#92400e,color:#451a03
+    style SVC fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    style VAL fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    style MOD fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    style CALC fill:#dcfce7,stroke:#15803d,color:#14532d
+    style PORT fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+    style INF fill:#ccfbf1,stroke:#0f766e,color:#134e4a
+    style ERR fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d
+    style T fill:#dcfce7,stroke:#15803d,color:#14532d
+```
+
+---
+
+## File Catalogue
+
+What each runtime file takes, what it passes on, and what it does.
+
+### Runtime files
+
+| File | Takes from | Passes to | Role |
+|---|---|---|---|
+| `app/main.py` | CLI args, logger factory, repo/service instances | `CliApplication.run(...)` | Application bootstrap and wiring |
+| `app/cli.py` | parsed args, service objects | service methods, terminal output | Command routing layer |
+| `application/calculations.py` | `Decimal` inputs, calendar totals | `BalanceSnapshot`, state enums | Pure balance math — no side effects |
+| `application/services/session_service.py` | opening balance, session repo, logger | `SessionRepository.create(...)` | Starts new budgeting session |
+| `application/services/income_service.py` | amount, tag, date, session, income repo | `IncomeRepository.add(...)` | Logs income into current session |
+| `application/services/charge_service.py` | charge inputs, charge/rule repos, session | one-off charges, recurring rules, next occurrences | Creates and updates committed charges |
+| `application/services/balance_service.py` | pre-aggregated totals, `BalanceEngine`, logger | `BalanceSnapshot` | Builds dashboard snapshot |
+| `domain/validators.py` | raw strings from CLI | typed `Decimal`, `date`, enums, or `ValidationError` | Converts user input to domain-safe values |
+| `domain/models/session.py` | UUID, date, Decimal fields | `AppSession` | Session entity definition |
+| `domain/models/income.py` | amount, tag, date | `IncomeEntry`, `IncomeSourceTag` | Income entity definition |
+| `domain/models/charges.py` | charge and rule fields | `CommittedCharge`, `RecurringRule`, `FuzzyCharge`, enums | Charge entity definitions |
+| `domain/models/balance.py` | monthly and session totals | `MonthlyBudgetView`, `BalanceSnapshot`, enums | Dashboard output model definitions |
+| `domain/models/transaction.py` | spend fields | `Transaction`, `TransactionCategory` | Spending entity definition |
+| `ports/repositories.py` | domain entities and UUIDs | `Protocol` contracts for storage | Boundary between application and infrastructure |
+| `infrastructure/logging_config.py` | level, logger name | configured logger | Application logging setup |
+| `infrastructure/json/repositories/session_repository.py` | `AppSession`, JSON storage state | active session read/write | JSON-backed session adapter (stub) |
+| `shared/exceptions.py` | failure conditions | typed exception hierarchy | Project-wide error boundary |
+
+### Test files
+
+| File | Takes from | Passes to | Role |
+|---|---|---|---|
+| `tests/conftest.py` | project root, pytest startup | `src/` on import path, terminal formatting | Shared pytest setup + colored output |
+| `tests/unit/conftest.py` | `BalanceEngine` class | reusable `engine` fixture | Shared unit fixture |
+| `tests/unit/test_calculations.py` | `engine` fixture, numeric inputs | output assertions | Verifies pure balance math |
+| `tests/unit/test_validators.py` | raw strings, `ValidationError`, enums | typed values or failure assertions | Verifies parser and validation rules |
+| `tests/unit/test_shared_cross_cutting.py` | exception classes, logger factory | type and config assertions | Verifies shared errors and logging |
+| `tests/unit/test_income_service.py` | in-memory repos, `IncomeService`, session fixture | persisted entries or exceptions | Verifies income lifecycle |
+| `tests/unit/test_charge_service.py` | in-memory repos, `ChargeService`, session fixture, date monkeypatching | charges, rules, next occurrences, exceptions | Verifies charge lifecycle |
+
+---
+
+## Detailed File Flows
+
+Data flow for the major runtime files.
+
+### `app/main.py`
+
+```mermaid
+flowchart LR
+    ARGS["argv / arguments"] --> RUN["ApplicationEntryPoint.run"]
+    RUN --> LOG["LoggerFactory.configure"]
+    RUN --> REPOS["bootstrap repositories"]
+    RUN --> SVCS["bootstrap services"]
+    REPOS --> CLI["CliApplication"]
+    SVCS --> CLI
+    CLI --> EXIT["exit code"]
+```
+
+### `app/cli.py`
+
+```mermaid
+flowchart LR
+    RAW["raw CLI args"] --> PARSE["parse command"]
+    PARSE --> DISPATCH["dispatch handler"]
+    DISPATCH --> SVC1["session/income/charge/balance services"]
+    SVC1 --> FORMAT["terminal output"]
+    FORMAT --> CODE["exit code"]
+```
+
+### `application/calculations.py`
+
+```mermaid
+flowchart LR
+    IN["numeric inputs"] --> FREE["calculate_free_money"] --> FM["free_money"]
+    IN --> MONTH["calculate_monthly_budget"] --> MB["monthly_budget / spent / left"]
+    MB --> TRACK["classify_on_track_state"] --> STATE1["on_track_state"]
+    FM --> BAL["classify_balance_state"] --> STATE2["balance_state"]
+    FM --> SNAP["build_snapshot"]
+    MB --> SNAP
+    STATE1 --> SNAP
+    STATE2 --> SNAP
+    SNAP --> OUT["BalanceSnapshot / MonthlyBudgetView"]
+```
+
+### `application/services/session_service.py`
+
+```mermaid
+flowchart LR
+    BAL["opening_balance"] --> INIT["init_session"]
+    INIT --> CHECK["get_active"]
+    CHECK --> CREATE["create AppSession"]
+    CREATE --> SAVE["SessionRepository.create"]
+    SAVE --> LOG["logger.info"]
+```
+
+### `application/services/income_service.py`
+
+```mermaid
+flowchart LR
+    AMT["amount"] --> ADD["add_income"]
+    TAG["source_tag"] --> ADD
+    DATE["entry_date"] --> ADD
+    ADD --> SESSION["get_active"]
+    SESSION --> ENTRY["IncomeEntry"]
+    ENTRY --> SAVE["IncomeRepository.add"]
+    SAVE --> OUT["return IncomeEntry"]
+```
+
+### `application/services/charge_service.py`
+
+```mermaid
+flowchart LR
+    ADD1["add_charge"] --> SAVE1["ChargeRepository.add"]
+    ADD2["add_recurring_charge"] --> RULE["RecurringRuleRepository.add"]
+    ADD2 --> DUE["_next_recurring_due_date"]
+    DUE --> SAVE2["ChargeRepository.add first occurrence"]
+    PAY["mark_paid"] --> LOOKUP["ChargeRepository.get_by_id"]
+    LOOKUP -->|recurring| RULELOOK["RecurringRuleRepository.get_by_id"]
+    RULELOOK --> NEXT["build next CommittedCharge"]
+    NEXT --> SAVE3["ChargeRepository.add next occurrence"]
+    PAY --> MARK["ChargeRepository.mark_paid"]
+```
+
+### `application/services/balance_service.py`
+
+```mermaid
+flowchart LR
+    TOTALS["pre-aggregated totals"] --> BUILD["build_snapshot"]
+    BUILD --> ENGINE["BalanceEngine.build_snapshot"]
+    ENGINE --> SNAP["BalanceSnapshot"]
+    SNAP --> LOG["logger.info"]
+    LOG --> OUT["return snapshot"]
+```
+
+### `domain/validators.py`
+
+```mermaid
+flowchart LR
+    RAW["raw string input"] --> DEC["parse_opening_balance / parse_amount"]
+    RAW --> TAG["parse_income_source_tag"]
+    RAW --> DATE["parse_due_date"]
+    RAW --> DAY["parse_day_of_month"]
+    RAW --> CAT["parse_transaction_category"]
+    DEC --> OUT1["Decimal"]
+    TAG --> OUT2["IncomeSourceTag"]
+    DATE --> OUT3["date"]
+    DAY --> OUT4["int"]
+    CAT --> OUT5["TransactionCategory | None"]
+    DEC -. invalid .-> ERR["ValidationError"]
+    TAG -. invalid .-> ERR
+    DATE -. invalid .-> ERR
+    DAY -. invalid .-> ERR
+    CAT -. invalid .-> ERR
+```
+
+### `shared/exceptions.py`
+
+```mermaid
+flowchart LR
+    FAIL["validation / application / infrastructure / logging failure"] --> BASE["ExpenseTrackerError"]
+    BASE --> V["ValidationError"]
+    BASE --> A["ApplicationError"]
+    BASE --> I["InfrastructureError"]
+    BASE --> L["LoggingConfigurationError"]
+```
+
+### `ports/repositories.py`
+
+```mermaid
+flowchart LR
+    SVC["application services"] --> PORT["repository protocols"]
+    PORT --> INF["infrastructure adapters"]
+    PORT --> TEST["in-memory test doubles"]
+```
+
+---
+
+## Reading Order
+
+For a new developer coming to this codebase cold:
+
+1. `Docs/Stage 1.md` — understand the build plan and phase goals
+2. `src/expense_tracker/app/main.py` — see how the app bootstraps
+3. `src/expense_tracker/app/cli.py` — see how commands are routed
+4. `src/expense_tracker/application/calculations.py` — understand the pure engine
+5. `src/expense_tracker/domain/models/` — learn the domain entities and enums
+6. `src/expense_tracker/domain/validators.py` — see how input is validated
+7. `src/expense_tracker/application/services/` — follow the use-case layer
+8. `src/expense_tracker/ports/repositories.py` — understand the storage contracts
+9. `src/expense_tracker/infrastructure/json/repositories/` — see the adapter stubs
+10. `tests/unit/` — read the tests alongside the files they cover
+
+---
+
 *Stage 1 — locked scope. Status as of April 2026.*
