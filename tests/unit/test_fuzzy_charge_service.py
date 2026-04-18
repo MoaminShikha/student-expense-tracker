@@ -55,6 +55,21 @@ class _InMemoryChargeRepository:
     def add(self, charge: CommittedCharge) -> None:
         self.charges.append(charge)
 
+    def list_upcoming(self, session_id: UUID) -> list[CommittedCharge]:
+        return [charge for charge in self.charges if charge.session_id == session_id and charge.status is ChargeStatus.UPCOMING]
+
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
+        return [charge for charge in self.charges if charge.session_id == session_id and charge.due_date.year == year and charge.due_date.month == month]
+
+    def mark_paid(self, charge_id: UUID) -> None:
+        self.charges = [CommittedCharge(charge_id=charge.charge_id, session_id=charge.session_id, name=charge.name, amount=charge.amount, due_date=charge.due_date, status=ChargeStatus.PAID, recurring_rule_id=charge.recurring_rule_id) if charge.charge_id == charge_id else charge for charge in self.charges]
+
+    def get_by_id(self, charge_id: UUID) -> CommittedCharge | None:
+        for charge in self.charges:
+            if charge.charge_id == charge_id:
+                return charge
+        return None
+
 
 class _InMemoryIncomeRepository:
 
@@ -63,6 +78,12 @@ class _InMemoryIncomeRepository:
 
     def add(self, entry: IncomeEntry) -> None:
         self.entries.append(entry)
+
+    def list_for_session(self, session_id: UUID) -> list[IncomeEntry]:
+        return [entry for entry in self.entries if entry.session_id == session_id]
+
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[IncomeEntry]:
+        return [entry for entry in self.entries if entry.session_id == session_id and entry.date.year == year and entry.date.month == month]
 
 
 def _build_service(active_session: AppSession | None = None) -> tuple[FuzzyChargeService, _InMemoryFuzzyChargeRepository, _InMemoryChargeRepository, _InMemoryIncomeRepository]:
@@ -163,4 +184,3 @@ class TestFuzzyChargeServiceDiscard:
 
         with pytest.raises(ApplicationError):
             service.discard(fuzzy_id=fuzzy_entry.fuzzy_id)
-
