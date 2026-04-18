@@ -9,3 +9,6 @@ venv/
 # IDE files
 .idea/
 
+# Local Copilot/Claude settings
+.claude/settings.local.json
+
