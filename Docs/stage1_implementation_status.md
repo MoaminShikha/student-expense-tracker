@@ -10,7 +10,15 @@
 ## Overall Position
 
 **Current phase:** Mid Phase C — core service lifecycles in progress.
-**Test suite:** 101 / 101 passing (unit suite).
+**Test suite:** 110 / 110 passing (unit suite).
+
+## Financial Conventions
+
+- Monetary values are stored as positive `Decimal` amounts (`> 0`) in domain entities.
+- Inflow/outflow is determined by entity semantics (`IncomeEntry` inflow, charge/transaction outflow), not numeric sign.
+- `FuzzyCharge` supports uncertain expense or income via `direction`.
+- `FuzzyCharge.estimated_amount` is optional and must be positive when provided.
+- `resolve(...)` always requires positive `resolved_amount` and it may differ from `estimated_amount`.
 
 ```mermaid
 gantt
@@ -202,7 +210,7 @@ graph LR
 | Unit tests — snapshot composition (2 cases) | `tests/unit/test_calculations.py` | ✅ |
 | Cross-cutting tests — exceptions + logging | `tests/unit/test_shared_cross_cutting.py` | ✅ |
 
-**Total: calculations remain fully green; full unit suite now passes 84 / 84.**
+**Total: calculations remain fully green; full unit suite now passes 110 / 110.**
 
 ---
 
@@ -223,7 +231,7 @@ graph TD
 
     subgraph missing["application/services/ — Remaining"]
         CS["ChargeService ⚠️\nremaining: fuzzy + spend"]
-        FS["FuzzyChargeService ❌\nadd_fuzzy_charge\nresolve\ndiscard"]
+        FS["FuzzyChargeService ✅\nadd_fuzzy_entry\nresolve\ndiscard"]
         SP["SpendService ❌\nadd_transaction"]
     end
 
@@ -242,9 +250,9 @@ graph TD
 | `ChargeService` | `add_charge(name, amount, due_date)` | ✅ Implemented — creates `CommittedCharge` with `status=UPCOMING` for active session |
 | `ChargeService` | `add_recurring_charge(name, amount, day_of_month)` | ✅ Implemented — creates `RecurringRule` and first `CommittedCharge` occurrence |
 | `ChargeService` | `mark_paid(charge_id)` | ✅ Implemented — marks paid and creates the next recurring occurrence when linked to a rule |
-| `FuzzyChargeService` | `add_fuzzy_charge(session_id, name, due_date, estimated_amount)` | Creates `FuzzyCharge` with `status=PENDING` — **no deduction** |
-| `FuzzyChargeService` | `resolve(fuzzy_id, confirmed_amount)` | Sets `status=RESOLVED`, converts to `CommittedCharge`, deducts free money at this moment |
-| `FuzzyChargeService` | `discard(fuzzy_id)` | Sets `status=DISCARDED` — no deduction ever |
+| `FuzzyChargeService` | `add_fuzzy_entry(name, direction, expected_date, estimated_amount)` | ✅ Implemented — creates pending uncertain entry for **expense or income** with optional date/estimate |
+| `FuzzyChargeService` | `resolve(fuzzy_id, resolved_amount, resolved_date, income_source_tag)` | ✅ Implemented — sets `status=RESOLVED`, amount may differ from estimate, creates committed charge (expense) or income entry (income) |
+| `FuzzyChargeService` | `discard(fuzzy_id)` | ✅ Implemented — sets `status=DISCARDED` without creating concrete records |
 | `SpendService` | `add_transaction(session_id, amount, description, category, date)` | Validates amount > 0, creates `Transaction`, persists |
 
 ### Charge lifecycles remaining
@@ -293,10 +301,8 @@ Still needed for remaining Phase C behavior:
 |---|---|
 | Recurring `mark_paid` creates next occurrence | Correct `due_date` generated from `day_of_month` |
 | Next occurrence deducts free money immediately | Balance decreases at generation time |
-| Fuzzy `add_fuzzy_charge` does not affect free money | Core invariant from design file |
-| Fuzzy `resolve` converts and deducts at that moment | `CommittedCharge` created, free money drops |
-| Fuzzy `discard` makes no deduction | Free money unchanged |
-| FuzzyCharge and CommittedCharge stay in separate stores | Never mixed across repos |
+| Spend `add_transaction` persists with positive amount and optional category | Core spend lifecycle behavior |
+| Spend service rejects invalid amount/category/date input | Service validation boundary |
 
 ---
 
@@ -416,7 +422,7 @@ graph TD
 
 | Item | Status |
 |---|---|
-| Full test suite green | ✅ 101/101 unit tests pass |
+| Full test suite green | ✅ 110/110 unit tests pass |
 | Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py` |
 | `tests/unit/test_repository.py` exists | ❌ |
 | `tests/unit/test_cli_flows.py` exists | ❌ |

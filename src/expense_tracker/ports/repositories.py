@@ -3,15 +3,7 @@ from __future__ import annotations
 from typing import Protocol
 from uuid import UUID
 
-from ..domain.models import (
-    AppSession,
-    CommittedCharge,
-    FuzzyCharge,
-    FuzzyChargeStatus,
-    IncomeEntry,
-    RecurringRule,
-    Transaction,
-)
+from ..domain.models import AppSession, CommittedCharge, FuzzyCharge, FuzzyChargeStatus, IncomeEntry, RecurringRule, Transaction
 
 
 class SessionRepository(Protocol):
@@ -151,32 +143,50 @@ class RecurringRuleRepository(Protocol):
 
 
 class FuzzyChargeRepository(Protocol):
-    """Defines storage operations for fuzzy charges."""
+    """Defines storage operations for fuzzy entries."""
 
     def add(self, charge: FuzzyCharge) -> None:
         """
-        Persist one fuzzy charge.
+        Persist one fuzzy entry.
 
-        :param charge: The fuzzy charge to persist.
+        :param charge: The fuzzy entry to persist.
         :return: None.
+        """
+        ...
+
+    def get_by_id(self, fuzzy_id: UUID) -> FuzzyCharge | None:
+        """
+        Fetch one fuzzy entry by identifier.
+
+        :param fuzzy_id: Identifier of the fuzzy entry.
+        :return: Matching fuzzy entry if found; otherwise None.
         """
         ...
 
     def list_pending(self, session_id: UUID) -> list[FuzzyCharge]:
         """
-        List pending fuzzy charges for a session.
+        List pending fuzzy entries for a session.
 
         :param session_id: The session identifier.
-        :return: Pending fuzzy charges for the session.
+        :return: Pending fuzzy entries for the session.
         """
         ...
 
     def update_status(self, fuzzy_id: UUID, status: FuzzyChargeStatus) -> None:
         """
-        Update the status of one fuzzy charge.
+        Update the status of one fuzzy entry.
 
-        :param fuzzy_id: Identifier of the fuzzy charge.
-        :param status: New fuzzy charge status.
+        :param fuzzy_id: Identifier of the fuzzy entry.
+        :param status: New fuzzy entry status.
+        :return: None.
+        """
+        ...
+
+    def update(self, charge: FuzzyCharge) -> None:
+        """
+        Persist full-state changes to one fuzzy entry.
+
+        :param charge: Updated fuzzy entry.
         :return: None.
         """
         ...
@@ -204,5 +214,4 @@ class TransactionRepository(Protocol):
         :return: Transactions for the month.
         """
         ...
-
 
