@@ -9,8 +9,8 @@
 
 ## Overall Position
 
-**Current phase:** Mid Phase C — core service lifecycles in progress.
-**Test suite:** 110 / 110 passing (unit suite).
+**Current phase:** Late Phase C — core service lifecycles nearly complete.
+**Test suite:** 117 / 117 passing (unit suite).
 
 ## Financial Conventions
 
@@ -210,13 +210,13 @@ graph LR
 | Unit tests — snapshot composition (2 cases) | `tests/unit/test_calculations.py` | ✅ |
 | Cross-cutting tests — exceptions + logging | `tests/unit/test_shared_cross_cutting.py` | ✅ |
 
-**Total: calculations remain fully green; full unit suite now passes 110 / 110.**
+**Total: calculations remain fully green; full unit suite now passes 117 / 117.**
 
 ---
 
 ## Phase C — Charge Lifecycles `IN PROGRESS`
 
-Core service wiring has started. Income and committed-charge base lifecycles are implemented; recurring, fuzzy, and spend lifecycles remain.
+Core service wiring is nearly complete. Income, committed-charge, fuzzy, and spend lifecycles are implemented.
 
 ### Services needed
 
@@ -230,18 +230,18 @@ graph TD
     end
 
     subgraph missing["application/services/ — Remaining"]
-        CS["ChargeService ⚠️\nremaining: fuzzy + spend"]
+        CS["ChargeService ✅\nadd_charge\nadd_recurring_charge\nmark_paid"]
         FS["FuzzyChargeService ✅\nadd_fuzzy_entry\nresolve\ndiscard"]
-        SP["SpendService ❌\nadd_transaction"]
+        SP["SpendService ✅\nadd_transaction"]
     end
 
     style SS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style BS fill:#fef3c7,stroke:#92400e,color:#451a03
     style IS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style CS1 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style CS fill:#fef3c7,stroke:#92400e,color:#451a03
-    style FS fill:#f2f2f0,stroke:#ccc,color:#999
-    style SP fill:#f2f2f0,stroke:#ccc,color:#999
+    style CS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style FS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style SP fill:#1a6b3c,color:#fff,stroke:#1a6b3c
 ```
 
 | Service | Method | Behaviour |
@@ -253,7 +253,7 @@ graph TD
 | `FuzzyChargeService` | `add_fuzzy_entry(name, direction, expected_date, estimated_amount)` | ✅ Implemented — creates pending uncertain entry for **expense or income** with optional date/estimate |
 | `FuzzyChargeService` | `resolve(fuzzy_id, resolved_amount, resolved_date, income_source_tag)` | ✅ Implemented — sets `status=RESOLVED`, amount may differ from estimate, creates committed charge (expense) or income entry (income) |
 | `FuzzyChargeService` | `discard(fuzzy_id)` | ✅ Implemented — sets `status=DISCARDED` without creating concrete records |
-| `SpendService` | `add_transaction(session_id, amount, description, category, date)` | Validates amount > 0, creates `Transaction`, persists |
+| `SpendService` | `add_transaction(amount, description, category, spent_on)` | ✅ Implemented — validates spend input, creates `Transaction`, persists for active session |
 
 ### Charge lifecycles remaining
 
@@ -294,15 +294,15 @@ stateDiagram-v2
 Implemented files:
 - `tests/unit/test_income_service.py`
 - `tests/unit/test_charge_service.py`
+- `tests/unit/test_fuzzy_charge_service.py`
+- `tests/unit/test_spend_service.py`
 
-Still needed for remaining Phase C behavior:
+Still needed before closing Phase C:
 
 | Test | What it verifies |
 |---|---|
-| Recurring `mark_paid` creates next occurrence | Correct `due_date` generated from `day_of_month` |
-| Next occurrence deducts free money immediately | Balance decreases at generation time |
-| Spend `add_transaction` persists with positive amount and optional category | Core spend lifecycle behavior |
-| Spend service rejects invalid amount/category/date input | Service validation boundary |
+| Charge mark-paid + recurring occurrence remains stable under calendar edge cases | Prevent month-end regressions in production adapters |
+| Fuzzy overdue automation policy is explicitly decided (service or scheduler) | Avoid hidden behavior drift in Phase D/E |
 
 ---
 
@@ -422,8 +422,8 @@ graph TD
 
 | Item | Status |
 |---|---|
-| Full test suite green | ✅ 110/110 unit tests pass |
-| Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py` |
+| Full test suite green | ✅ 117/117 unit tests pass |
+| Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py`, `test_fuzzy_charge_service.py`, `test_spend_service.py` |
 | `tests/unit/test_repository.py` exists | ❌ |
 | `tests/unit/test_cli_flows.py` exists | ❌ |
 | Stage 1 behaviour frozen in docs | ❌ |
@@ -446,7 +446,7 @@ graph TD
 
     subgraph layer_app["Application Layer"]
         C["calculations.py\n✅ Complete + tested"]
-        S["services/\n⚠️ In progress\nSession + Income + Charge(base + recurring) implemented"]
+        S["services/\n⚠️ In progress\nSession + Income + Charge + Fuzzy + Spend implemented"]
     end
 
     subgraph layer_infra["Infrastructure Layer"]
@@ -465,8 +465,9 @@ graph TD
         T3["test_validators.py\n✅ 50 tests"]
         T4["test_income_service.py\n✅ 4 tests"]
         T5["test_charge_service.py\n✅ 22 tests"]
-        T6["test_repository.py\n❌ Missing"]
-        T7["test_cli_flows.py\n❌ Missing"]
+        T6["test_spend_service.py\n✅ 7 tests"]
+        T7["test_repository.py\n❌ Missing"]
+        T8["test_cli_flows.py\n❌ Missing"]
     end
 
     style M fill:#1a6b3c,color:#fff,stroke:#1a6b3c
@@ -483,21 +484,22 @@ graph TD
     style T3 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T4 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T5 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style T6 fill:#f2f2f0,stroke:#ccc,color:#999
+    style T6 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T7 fill:#f2f2f0,stroke:#ccc,color:#999
+    style T8 fill:#f2f2f0,stroke:#ccc,color:#999
 ```
 
 ---
 
-## Recommended Next Steps — Phase C
+## Recommended Next Steps — Phase C to D Transition
 
 Build in this order. Each step unblocks the next.
 
 ```mermaid
 flowchart LR
-    S1["1. FuzzyChargeService\nadd / resolve / discard\nkeep no-deduction invariant"]
-    S2["2. SpendService\nadd_transaction"]
-    S3["3. Begin Phase D\nJSON repositories\nstart with session + income + charge"]
+    S1["1. Freeze Phase C service contracts\n(no new lifecycle semantics)"]
+    S2["2. Begin Phase D\nJSON repositories\nstart with session + income + charge"]
+    S3["3. Add JSON adapters for fuzzy + spend\nthen repository tests"]
     S4["4. CLI wiring\nmap implemented services\nto command handlers"]
     S5["5. Full unit + smoke gate\nthen freeze Stage 1 docs"]
     S6["6. Stage 2 handoff\nlock final scope"]
@@ -567,6 +569,7 @@ What each runtime file takes, what it passes on, and what it does.
 | `application/services/income_service.py` | amount, tag, date, session, income repo | `IncomeRepository.add(...)` | Logs income into current session |
 | `application/services/charge_service.py` | charge inputs, charge/rule repos, session | one-off charges, recurring rules, next occurrences | Creates and updates committed charges |
 | `application/services/balance_service.py` | pre-aggregated totals, `BalanceEngine`, logger | `BalanceSnapshot` | Builds dashboard snapshot |
+| `application/services/spend_service.py` | amount, description, category, date, session repo | `TransactionRepository.add(...)` | Logs spend transactions into current session |
 | `domain/validators.py` | raw strings from CLI | typed `Decimal`, `date`, enums, or `ValidationError` | Converts user input to domain-safe values |
 | `domain/models/session.py` | UUID, date, Decimal fields | `AppSession` | Session entity definition |
 | `domain/models/income.py` | amount, tag, date | `IncomeEntry`, `IncomeSourceTag` | Income entity definition |
@@ -589,6 +592,8 @@ What each runtime file takes, what it passes on, and what it does.
 | `tests/unit/test_shared_cross_cutting.py` | exception classes, logger factory | type and config assertions | Verifies shared errors and logging |
 | `tests/unit/test_income_service.py` | in-memory repos, `IncomeService`, session fixture | persisted entries or exceptions | Verifies income lifecycle |
 | `tests/unit/test_charge_service.py` | in-memory repos, `ChargeService`, session fixture, date monkeypatching | charges, rules, next occurrences, exceptions | Verifies charge lifecycle |
+| `tests/unit/test_fuzzy_charge_service.py` | in-memory repos, `FuzzyChargeService`, session fixture | fuzzy add/resolve/discard transitions | Verifies fuzzy lifecycle |
+| `tests/unit/test_spend_service.py` | in-memory repos, `SpendService`, session fixture | persisted spends and validation errors | Verifies spend lifecycle |
 
 ---
 
@@ -683,6 +688,20 @@ flowchart LR
     ENGINE --> SNAP["BalanceSnapshot"]
     SNAP --> LOG["logger.info"]
     LOG --> OUT["return snapshot"]
+```
+
+### `application/services/spend_service.py`
+
+```mermaid
+flowchart LR
+    AMT["amount"] --> ADD["add_transaction"]
+    DESC["description"] --> ADD
+    CAT["category"] --> ADD
+    DATE["spent_on"] --> ADD
+    ADD --> SESSION["get_active"]
+    SESSION --> TX["Transaction"]
+    TX --> SAVE["TransactionRepository.add"]
+    SAVE --> OUT["return Transaction"]
 ```
 
 ### `domain/validators.py`

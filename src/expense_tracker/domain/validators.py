@@ -110,3 +110,21 @@ def parse_transaction_category(raw_value: str | None) -> TransactionCategory | N
     except ValueError as exc:
         valid_categories = ", ".join([cat.value for cat in TransactionCategory])
         raise ValidationError(f"Invalid transaction category. Valid options are: {valid_categories}.") from exc
+
+
+def parse_transaction_description(raw_value: str) -> str:
+    """
+    Parse and validate a transaction description.
+
+    :param raw_value: Raw description text from user input.
+    :return: Normalized non-empty description.
+    """
+    if not isinstance(raw_value, str):
+        raise ValidationError("Transaction description is invalid.")
+
+    normalized_value = raw_value.strip()
+    if not normalized_value:
+        raise ValidationError("Transaction description cannot be empty.")
+
+    return normalized_value
+
