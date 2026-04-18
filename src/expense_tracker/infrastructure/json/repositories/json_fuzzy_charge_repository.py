@@ -8,9 +8,8 @@ from pathlib import Path
 from uuid import UUID
 
 from ....domain.models import FuzzyCharge, FuzzyChargeStatus, FuzzyEntryDirection
-from ....infrastructure.logging_config import LoggerFactory
 
-logger: logging.Logger = LoggerFactory.get_logger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class JsonFuzzyChargeRepository:
