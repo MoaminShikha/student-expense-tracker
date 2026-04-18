@@ -13,6 +13,7 @@ from expense_tracker.domain.validators import (
     parse_income_source_tag,
     parse_opening_balance,
     parse_transaction_category,
+    parse_transaction_description,
 )
 from expense_tracker.shared.exceptions import ValidationError
 
@@ -224,3 +225,33 @@ class TestParseTransactionCategory:
         # values outside the spec-defined five categories are rejected — no silent fallback
         with pytest.raises(ValidationError):
             parse_transaction_category("health")
+
+
+class TestParseTransactionDescription:
+
+    @pytest.mark.parametrize(
+        "raw_value,expected",
+        [
+            pytest.param("Lunch", "Lunch", id="plain text — accepted",),  # standard description passes through unchanged
+            pytest.param("  Bus fare  ", "Bus fare", id="trimmed text — normalized",),  # leading and trailing spaces are removed
+        ],
+    )
+    def test_valid_values(self, raw_value: str, expected: str) -> None:
+        assert parse_transaction_description(raw_value) == expected
+
+    @pytest.mark.parametrize(
+        "raw_value",
+        [
+            pytest.param("", id="empty string — validation error",),  # empty descriptions provide no usable transaction context
+            pytest.param("   ", id="whitespace only — validation error",),  # whitespace-only input collapses to empty after strip
+        ],
+    )
+    def test_rejects_blank_values(self, raw_value: str) -> None:
+        with pytest.raises(ValidationError):
+            parse_transaction_description(raw_value)
+
+    def test_rejects_non_string_value(self) -> None:
+        # description must be text so the CLI and future UI can display it consistently
+        with pytest.raises(ValidationError):
+            parse_transaction_description(123)  # type: ignore[arg-type]
+
