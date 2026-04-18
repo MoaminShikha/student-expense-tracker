@@ -29,6 +29,13 @@ class FuzzyChargeStatus(str, Enum):
     DISCARDED = "discarded"
 
 
+class FuzzyEntryDirection(str, Enum):
+    """Direction of one fuzzy entry."""
+
+    EXPENSE = "expense"
+    INCOME = "income"
+
+
 @dataclass(frozen=True)
 class CommittedCharge:
     """Represents one committed charge for a session."""
@@ -57,11 +64,14 @@ class RecurringRule:
 
 @dataclass(frozen=True)
 class FuzzyCharge:
-    """Represents a date-known, amount-unknown charge."""
+    """Represents one uncertain entry that may resolve to expense or income."""
 
     fuzzy_id: UUID
     session_id: UUID
     name: str
-    due_date: date
-    estimated_amount: Decimal | None
+    direction: FuzzyEntryDirection
     status: FuzzyChargeStatus
+    expected_date: date | None = None
+    estimated_amount: Decimal | None = None
+    resolved_amount: Decimal | None = None
+    resolved_date: date | None = None
