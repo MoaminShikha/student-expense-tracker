@@ -40,12 +40,11 @@ A command-line tool that:
 
 ```mermaid
 graph LR
-    S1[Stage 1\nCLI Core]:::done --> S2[Stage 2\nPersistence]:::out
-    S2 --> S3[Stage 3\nReminders]:::out
-    S3 --> S4[Stage 4\nSummaries]:::out
-    S4 --> S5[Stage 5\nInsights]:::out
-    S5 --> S6[Stage 6\nWeb UI]:::out
-    S6 --> S7[Stage 7+\nIntegrations]:::out
+    S1[Stage 1\nCLI Core]:::done --> S2[Stage 2\nCustomTkinter\nDashboard]:::out
+    S2 --> S3[Stage 3\nPostgreSQL]:::out
+    S3 --> S4[Stage 4\nReminders +\nPatterns]:::out
+    S4 --> S5[Stage 5\nWeb UI]:::out
+    S5 --> S6[Stage 6\nIntegrations]:::out
 
     classDef done fill:#1a6b3c,stroke:#1a6b3c,color:#fff
     classDef out fill:#f2f2f0,stroke:#ccc,color:#999

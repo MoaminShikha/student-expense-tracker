@@ -88,10 +88,11 @@ Students running out of money before the academic year ends is not a willpower p
 ## Context and Constraints
 
 ### Technical
-- Stage 1 is a CLI tool with CSV or JSON storage — no web framework yet
-- Stage 2 introduces SQLite as the persistence layer
-- Stage 3 introduces FastAPI backend and Streamlit or React frontend
-- No external API dependencies in Stages 1–2
+- Stage 1 is a CLI tool with JSON storage — no web framework yet
+- Stage 2 replaces the CLI with a **CustomTkinter desktop GUI dashboard** — the app opens directly to a live dashboard window; all input happens via buttons and modal forms; JSON storage remains
+- Stage 3 introduces PostgreSQL as the persistence layer — JSON adapters are swapped; domain and service layers are untouched
+- Stage 4 introduces FastAPI backend and a React or Streamlit web frontend
+- No external API dependencies in Stages 1–3
 - Pattern detection uses only the student's own logged data — no external benchmarks in Stage 1
 - All calculation logic must be testable in isolation from the UI
 
@@ -455,17 +456,17 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ## Rollout / Migration Notes
 
-1. **Stage 1 (CLI + CSV/JSON):** No deployment needed — runs locally. The student is the only user. Data lives in a single file. This stage is complete when all core calculations work correctly from the command line.
+1. **Stage 1 (CLI + JSON):** No deployment needed — runs locally. The student is the only user. Data lives in JSON files. This stage is complete when all core calculations, services, and JSON adapters work correctly and are fully tested.
 
-2. **Stage 1 → Stage 2 (introduce SQLite):** The CSV/JSON data model must be migrated to SQLite schema. A one-time migration script converts existing data. CLI commands remain unchanged — storage is swapped underneath. No backward compatibility issues as this is a single-user local tool.
+2. **Stage 1 → Stage 2 (CustomTkinter desktop dashboard):** `app/cli.py` is replaced by a **CustomTkinter** desktop GUI application. The app opens immediately to a live dashboard window — no commands to type. Buttons and modal input forms handle all input (add income, log charge, log spend, mark paid). The domain layer, services, and JSON repositories are completely untouched — only the interface layer changes. JSON storage remains. This stage is complete when the app opens to a working dashboard and every Stage 1 workflow is reachable from the UI.
 
-3. **Stage 2 → Stage 3 (introduce web UI):** FastAPI backend wraps the existing logic. No logic changes — only a new interface layer. The CLI continues to work. The web dashboard reads from and writes to the same SQLite database. Deployment is localhost only.
+3. **Stage 2 → Stage 3 (PostgreSQL persistence):** JSON adapters in `infrastructure/json/` are replaced by PostgreSQL adapters in `infrastructure/postgres/`. A one-time migration script converts existing JSON data. The GUI and all services are untouched — storage is swapped underneath. This stage is complete when all data survives app restarts correctly via PostgreSQL.
 
-4. **Stage 3 → Stage 4 (add pattern detection):** New PatternDetector component and InsightState table added to existing schema. Existing data automatically becomes input for pattern analysis. No migration needed — analysis runs on existing transaction history. Rollback is safe — removing the component does not affect core calculations.
+4. **Stage 3 → Stage 4 (reminders + pattern detection):** New `ReminderScheduler` and `PatternDetector` components added. New `InsightState` entity added to the schema. The TUI dashboard gains a notification area and an Occurrences screen. Existing transaction data automatically feeds the detector. Rollback is safe — removing these components does not affect core calculations.
 
-5. **Stage 4 → Stage 5 (polish features):** Multi-currency requires a new currency field on IncomeEntry and exchange rate lookup. This is an additive schema change — existing NIS-only records remain valid. Natural language input is a UI-layer addition only — no schema change required.
+5. **Stage 4 → Stage 5 (web UI):** FastAPI backend wraps the existing service layer. A React or Streamlit frontend replaces or supplements the TUI. The CLI and TUI continue to function independently. Deployment is localhost only at this stage.
 
-6. **Stage 5 → Stage 6 (optional: local bank connectivity):** Read-only connection to the student's local Israeli bank account to automatically import cleared transactions. Manual logging remains as the primary path — bank import supplements it. This is a very late stage and depends on available bank APIs or OFX/CSV export support from Israeli banks. No architectural changes to core logic required — bank-imported transactions feed into the existing TransactionLog.
+6. **Stage 5 → Stage 6 (optional: local bank connectivity):** Read-only connection to the student's local Israeli bank account to automatically import cleared transactions. Manual logging remains as the primary path. No architectural changes to core logic required — bank-imported transactions feed into the existing TransactionLog.
 
 **Rollback concern for all stages:** Because each stage is independently functional, rolling back means stopping at the previous stage. No stage destroys the functionality of the one before it.
 
