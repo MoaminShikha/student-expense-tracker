@@ -6,8 +6,8 @@ from typing import Sequence
 from uuid import UUID
 
 from ..application.calculations import BalanceEngine
-from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService
-from ..domain.models import AppSession, ChargeStatus, CommittedCharge, FuzzyCharge, FuzzyChargeStatus, IncomeEntry, RecurringRule
+from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
+from ..domain.models import AppSession, ChargeStatus, CommittedCharge, FuzzyCharge, FuzzyChargeStatus, IncomeEntry, RecurringRule, Transaction
 from ..infrastructure.logging_config import LoggerFactory
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
@@ -178,6 +178,33 @@ class _InMemoryFuzzyChargeRepository:
         """
         self._entries[charge.fuzzy_id] = charge
 
+
+class _InMemoryTransactionRepository:
+    """Simple in-process transaction repository used to bootstrap the Stage 1 CLI flow."""
+
+    def __init__(self) -> None:
+        self._transactions: list[Transaction] = []
+
+    def add(self, transaction: Transaction) -> None:
+        """
+        Persist one spend transaction.
+
+        :param transaction: Spend transaction to persist.
+        :return: None.
+        """
+        self._transactions.append(transaction)
+
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
+        """
+        List spend transactions for one calendar month.
+
+        :param session_id: Session identifier.
+        :param year: Calendar year filter.
+        :param month: Calendar month filter.
+        :return: Monthly spend transactions.
+        """
+        return [transaction for transaction in self._transactions if transaction.session_id == session_id and transaction.date.year == year and transaction.date.month == month]
+
     def get_by_id(self, fuzzy_id: UUID) -> FuzzyCharge | None:
         """
         Fetch one fuzzy entry by identifier.
@@ -241,13 +268,15 @@ class ApplicationEntryPoint:
             charge_repository = _InMemoryChargeRepository()
             recurring_rule_repository = _InMemoryRecurringRuleRepository()
             fuzzy_charge_repository = _InMemoryFuzzyChargeRepository()
+            transaction_repository = _InMemoryTransactionRepository()
             session_service = SessionService(session_repository, logger=logger)
             income_service = IncomeService(session_repository, income_repository, logger=logger)
             charge_service = ChargeService(session_repository, charge_repository, recurring_rule_repository, logger=logger)
             fuzzy_charge_service = FuzzyChargeService(session_repository, fuzzy_charge_repository, charge_repository, income_repository, logger=logger)
+            spend_service = SpendService(session_repository, transaction_repository, logger=logger)
             balance_engine = BalanceEngine()
             balance_service = BalanceService(balance_engine, logger=logger)
-            cli_application = CliApplication(session_service, balance_service, income_service, charge_service, fuzzy_charge_service)
+            cli_application = CliApplication(session_service, balance_service, income_service, charge_service, fuzzy_charge_service, spend_service)
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
             logging.getLogger(__name__).error("Application error: %s", exc)
