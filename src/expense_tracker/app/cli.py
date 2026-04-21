@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 import logging
+from datetime import date
 from typing import Sequence
 from uuid import UUID
 
-from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService
-from ..domain.validators import parse_amount, parse_day_of_month, parse_due_date, parse_income_source_tag, parse_opening_balance
+from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
+from ..domain.validators import parse_amount, parse_day_of_month, parse_due_date, parse_income_source_tag, parse_opening_balance, parse_transaction_category
 from ..shared.exceptions import ApplicationError, ValidationError
 
 
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService, spend_service: SpendService) -> None:
         """
         Initialize command routing dependencies.
 
@@ -21,6 +22,7 @@ class CliApplication:
         :param income_service: Service for income commands.
         :param charge_service: Service for charge commands.
         :param fuzzy_charge_service: Service for fuzzy-charge commands.
+        :param spend_service: Service for spend commands.
         :return: None.
         """
         self._session_service = session_service
@@ -28,6 +30,7 @@ class CliApplication:
         self._income_service = income_service
         self._charge_service = charge_service
         self._fuzzy_charge_service = fuzzy_charge_service
+        self._spend_service = spend_service
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -53,6 +56,9 @@ class CliApplication:
         if arguments[0] == "charge" and len(arguments) > 1 and arguments[1] == "add":
             return self.handle_charge_add(arguments[2:])
 
+        if arguments[0] == "charge" and len(arguments) > 1 and arguments[1] == "mark-paid":
+            return self.handle_charge_mark_paid(arguments[2:])
+
         if arguments[0] == "fuzzy-charge" and len(arguments) > 1 and arguments[1] == "add":
             return self.handle_fuzzy_charge_add(arguments[2:])
 
@@ -61,6 +67,9 @@ class CliApplication:
 
         if arguments[0] == "fuzzy-charge" and len(arguments) > 1 and arguments[1] == "discard":
             return self.handle_fuzzy_charge_discard(arguments[2:])
+
+        if arguments[0] == "spend" and len(arguments) > 1 and arguments[1] == "add":
+            return self.handle_spend_add(arguments[2:])
 
         self._logger.error("Unknown command: %s", " ".join(arguments))
         return 1
@@ -382,5 +391,98 @@ class CliApplication:
             return 1
 
         self._logger.info("Fuzzy charge discarded successfully.")
+        return 0
+
+    def handle_spend_add(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `spend add` command flow.
+
+        :param arguments: Arguments specific to adding a spend transaction.
+        :return: Process exit code.
+        """
+        raw_amount: str | None = None
+        raw_description: str | None = None
+        raw_category: str | None = None
+        raw_date: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--amount" and index + 1 < len(arguments):
+                raw_amount = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--description" and index + 1 < len(arguments):
+                raw_description = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--category" and index + 1 < len(arguments):
+                raw_category = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--date" and index + 1 < len(arguments):
+                raw_date = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_amount is None:
+            self._logger.error("Missing required argument: --amount")
+            return 1
+
+        if raw_description is None:
+            self._logger.error("Missing required argument: --description")
+            return 1
+
+        try:
+            amount = parse_amount(raw_amount)
+            category = parse_transaction_category(raw_category)
+            spent_on = parse_due_date(raw_date) if raw_date is not None else date.today()
+            self._spend_service.add_transaction(amount, raw_description, category, spent_on)
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Spend transaction added successfully.")
+        return 0
+
+    def handle_charge_mark_paid(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `charge mark-paid` command flow.
+
+        :param arguments: Arguments specific to marking a charge as paid.
+        :return: Process exit code.
+        """
+        raw_id: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--id" and index + 1 < len(arguments):
+                raw_id = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_id is None:
+            self._logger.error("Missing required argument: --id")
+            return 1
+
+        try:
+            charge_id = UUID(raw_id)
+            self._charge_service.mark_paid(charge_id)
+        except ValueError:
+            self._logger.error("Charge identifier must be a valid UUID.")
+            return 1
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Charge marked as paid successfully.")
         return 0
 

@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from expense_tracker.app.cli import CliApplication
-from expense_tracker.domain.models import IncomeSourceTag
+from expense_tracker.domain.models import IncomeSourceTag, TransactionCategory
 from expense_tracker.shared.exceptions import ApplicationError
 
 
@@ -40,6 +40,7 @@ class _FakeChargeService:
         self._error_to_raise = error_to_raise
         self.calls: list[tuple[str, Decimal, date]] = []
         self.recurring_calls: list[tuple[str, Decimal, int]] = []
+        self.mark_paid_calls: list[UUID] = []
 
     def add_charge(self, name: str, amount: Decimal, due_date: date) -> None:
         if self._error_to_raise is not None:
@@ -50,6 +51,11 @@ class _FakeChargeService:
         if self._error_to_raise is not None:
             raise self._error_to_raise
         self.recurring_calls.append((name, amount, day_of_month))
+
+    def mark_paid(self, charge_id: UUID) -> None:
+        if self._error_to_raise is not None:
+            raise self._error_to_raise
+        self.mark_paid_calls.append(charge_id)
 
 
 class _FakeFuzzyChargeService:
@@ -76,13 +82,26 @@ class _FakeFuzzyChargeService:
         self.discard_calls.append(fuzzy_id)
 
 
-def _build_cli(income_service: _FakeIncomeService | None = None, charge_service: _FakeChargeService | None = None, fuzzy_charge_service: _FakeFuzzyChargeService | None = None) -> CliApplication:
+class _FakeSpendService:
+
+    def __init__(self, error_to_raise: Exception | None = None) -> None:
+        self._error_to_raise = error_to_raise
+        self.calls: list[tuple[Decimal, str, TransactionCategory | None, date]] = []
+
+    def add_transaction(self, amount: Decimal, description: str, category: TransactionCategory | None, spent_on: date) -> None:
+        if self._error_to_raise is not None:
+            raise self._error_to_raise
+        self.calls.append((amount, description, category, spent_on))
+
+
+def _build_cli(income_service: _FakeIncomeService | None = None, charge_service: _FakeChargeService | None = None, fuzzy_charge_service: _FakeFuzzyChargeService | None = None, spend_service: _FakeSpendService | None = None) -> CliApplication:
     session_service: Any = _FakeSessionService()
     balance_service: Any = _FakeBalanceService()
     income_service_impl: Any = income_service or _FakeIncomeService()
     charge_service_impl: Any = charge_service or _FakeChargeService()
     fuzzy_charge_service_impl: Any = fuzzy_charge_service or _FakeFuzzyChargeService()
-    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl, fuzzy_charge_service=fuzzy_charge_service_impl)
+    spend_service_impl: Any = spend_service or _FakeSpendService()
+    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl, fuzzy_charge_service=fuzzy_charge_service_impl, spend_service=spend_service_impl)
 
 
 class TestCliIncomeAdd:
@@ -461,5 +480,133 @@ class TestCliFuzzyChargeDiscard:
 
         assert exit_code == 1
         assert fuzzy_charge_service.discard_calls == []
+
+
+class TestCliSpendAdd:
+
+    def test_run_spend_add_calls_spend_service_with_parsed_values(self) -> None:
+        # valid spend args are parsed in CLI and forwarded to spend service as typed values
+        spend_service = _FakeSpendService()
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(["spend", "add", "--amount", "25.50", "--description", "Coffee", "--category", "food", "--date", "2026-04-22"])
+
+        assert exit_code == 0
+        assert spend_service.calls == [(Decimal("25.50"), "Coffee", TransactionCategory.FOOD, date(2026, 4, 22))]
+
+    def test_run_spend_add_calls_spend_service_with_optional_values_omitted(self) -> None:
+        # optional category/date may be omitted; category stays None and date defaults to today
+        spend_service = _FakeSpendService()
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(["spend", "add", "--amount", "15.00", "--description", "Snack"])
+
+        assert exit_code == 0
+        assert len(spend_service.calls) == 1
+        assert spend_service.calls[0][0] == Decimal("15.00")
+        assert spend_service.calls[0][1] == "Snack"
+        assert spend_service.calls[0][2] is None
+        assert isinstance(spend_service.calls[0][3], date)
+
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            pytest.param(["spend", "add", "--description", "Coffee"], id="missing amount"),
+            pytest.param(["spend", "add", "--amount", "25.50"], id="missing description"),
+        ],
+    )
+    def test_run_spend_add_requires_amount_and_description(self, arguments: list[str]) -> None:
+        # CLI must fail fast when required spend input is missing before it reaches the service layer
+        spend_service = _FakeSpendService()
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(arguments)
+
+        assert exit_code == 1
+        assert spend_service.calls == []
+
+    def test_run_spend_add_rejects_unknown_argument(self) -> None:
+        # unsupported flags must be rejected to keep CLI input contract strict and explicit
+        spend_service = _FakeSpendService()
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(["spend", "add", "--amount", "25.50", "--description", "Coffee", "--extra", "x"])
+
+        assert exit_code == 1
+        assert spend_service.calls == []
+
+    def test_run_spend_add_returns_error_on_invalid_input(self) -> None:
+        # validator failures at CLI boundary should return a non-zero exit code without service invocation
+        spend_service = _FakeSpendService()
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(["spend", "add", "--amount", "bad-amount", "--description", "Coffee", "--category", "bad-category", "--date", "bad-date"])
+
+        assert exit_code == 1
+        assert spend_service.calls == []
+
+    def test_run_spend_add_returns_error_when_service_fails(self) -> None:
+        # application-level service failures must be surfaced as CLI command failures
+        spend_service = _FakeSpendService(error_to_raise=ApplicationError("No active session."))
+        cli = _build_cli(spend_service=spend_service)
+
+        exit_code = cli.run(["spend", "add", "--amount", "25.50", "--description", "Coffee"])
+
+        assert exit_code == 1
+        assert spend_service.calls == []
+
+
+class TestCliChargeMarkPaid:
+
+    def test_run_charge_mark_paid_calls_charge_service_with_parsed_values(self) -> None:
+        # valid mark-paid args are parsed in CLI and forwarded to charge service as typed values
+        charge_service = _FakeChargeService()
+        cli = _build_cli(charge_service=charge_service)
+        charge_id = uuid4()
+
+        exit_code = cli.run(["charge", "mark-paid", "--id", str(charge_id)])
+
+        assert exit_code == 0
+        assert charge_service.mark_paid_calls == [charge_id]
+
+    def test_run_charge_mark_paid_requires_id(self) -> None:
+        # CLI must fail fast when required mark-paid input is missing before it reaches the service layer
+        charge_service = _FakeChargeService()
+        cli = _build_cli(charge_service=charge_service)
+
+        exit_code = cli.run(["charge", "mark-paid"])
+
+        assert exit_code == 1
+        assert charge_service.mark_paid_calls == []
+
+    def test_run_charge_mark_paid_rejects_unknown_argument(self) -> None:
+        # unsupported flags must be rejected to keep CLI input contract strict and explicit
+        charge_service = _FakeChargeService()
+        cli = _build_cli(charge_service=charge_service)
+
+        exit_code = cli.run(["charge", "mark-paid", "--id", str(uuid4()), "--extra", "x"])
+
+        assert exit_code == 1
+        assert charge_service.mark_paid_calls == []
+
+    def test_run_charge_mark_paid_returns_error_on_invalid_uuid(self) -> None:
+        # invalid UUID at CLI boundary should return a non-zero exit code without service invocation
+        charge_service = _FakeChargeService()
+        cli = _build_cli(charge_service=charge_service)
+
+        exit_code = cli.run(["charge", "mark-paid", "--id", "not-a-uuid"])
+
+        assert exit_code == 1
+        assert charge_service.mark_paid_calls == []
+
+    def test_run_charge_mark_paid_returns_error_when_service_fails(self) -> None:
+        # application-level service failures must be surfaced as CLI command failures
+        charge_service = _FakeChargeService(error_to_raise=ApplicationError("Charge not found."))
+        cli = _build_cli(charge_service=charge_service)
+
+        exit_code = cli.run(["charge", "mark-paid", "--id", str(uuid4())])
+
+        assert exit_code == 1
+        assert charge_service.mark_paid_calls == []
 
 
