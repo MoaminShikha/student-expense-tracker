@@ -3,26 +3,28 @@ from __future__ import annotations
 import logging
 from typing import Sequence
 
-from ..application.services import BalanceService, IncomeService, SessionService
-from ..domain.validators import parse_amount, parse_due_date, parse_income_source_tag, parse_opening_balance
+from ..application.services import BalanceService, ChargeService, IncomeService, SessionService
+from ..domain.validators import parse_amount, parse_day_of_month, parse_due_date, parse_income_source_tag, parse_opening_balance
 from ..shared.exceptions import ApplicationError, ValidationError
 
 
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService) -> None:
         """
         Initialize command routing dependencies.
 
         :param session_service: Service for session-related commands.
         :param balance_service: Service for dashboard balance commands.
         :param income_service: Service for income commands.
+        :param charge_service: Service for charge commands.
         :return: None.
         """
         self._session_service = session_service
         self._balance_service = balance_service
         self._income_service = income_service
+        self._charge_service = charge_service
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -44,6 +46,9 @@ class CliApplication:
 
         if arguments[0] == "income" and len(arguments) > 1 and arguments[1] == "add":
             return self.handle_income_add(arguments[2:])
+
+        if arguments[0] == "charge" and len(arguments) > 1 and arguments[1] == "add":
+            return self.handle_charge_add(arguments[2:])
 
         self._logger.error("Unknown command: %s", " ".join(arguments))
         return 1
@@ -157,5 +162,80 @@ class CliApplication:
             return 1
 
         self._logger.info("Income entry added successfully.")
+        return 0
+
+    def handle_charge_add(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `charge add` command flow.
+
+        :param arguments: Arguments specific to adding a committed charge.
+        :return: Process exit code.
+        """
+        raw_name: str | None = None
+        raw_amount: str | None = None
+        raw_due_date: str | None = None
+        raw_day_of_month: str | None = None
+        recurring = False
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--recurring":
+                recurring = True
+                index += 1
+                continue
+
+            if arguments[index] == "--name" and index + 1 < len(arguments):
+                raw_name = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--amount" and index + 1 < len(arguments):
+                raw_amount = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--due-date" and index + 1 < len(arguments):
+                raw_due_date = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--day-of-month" and index + 1 < len(arguments):
+                raw_day_of_month = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_name is None:
+            self._logger.error("Missing required argument: --name")
+            return 1
+
+        if raw_amount is None:
+            self._logger.error("Missing required argument: --amount")
+            return 1
+
+        if not recurring and raw_due_date is None:
+            self._logger.error("Missing required argument: --due-date")
+            return 1
+
+        if recurring and raw_day_of_month is None:
+            self._logger.error("Missing required argument: --day-of-month")
+            return 1
+
+        try:
+            amount = parse_amount(raw_amount)
+            if recurring:
+                day_of_month = parse_day_of_month(raw_day_of_month or "")
+                self._charge_service.add_recurring_charge(raw_name, amount, day_of_month)
+            else:
+                assert raw_due_date is not None
+                due_date = parse_due_date(raw_due_date)
+                self._charge_service.add_charge(raw_name, amount, due_date)
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Recurring charge added successfully." if recurring else "Charge entry added successfully.")
         return 0
 

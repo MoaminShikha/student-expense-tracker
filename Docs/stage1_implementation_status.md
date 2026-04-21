@@ -62,7 +62,7 @@ graph LR
     B["Phase B\nCalculations\n✅ COMPLETE"]:::done
     C["Phase C\nLifecycles\n✅ COMPLETE"]:::done
     D["Phase D\nStorage\n✅ COMPLETE"]:::done
-    E["Phase E\nCLI Wiring\n⚠️ 1 of 10 commands"]:::partial
+    E["Phase E\nCLI Wiring\n⚠️ 4 of 10 commands"]:::partial
     F["Phase F\nQuality Gate\n❌ NOT STARTED"]:::todo
 
     A --> B --> C --> D --> E --> F
@@ -363,16 +363,16 @@ graph TD
 
 ---
 
-## Phase E — CLI Wiring `1 of 10 commands`
+## Phase E — CLI Wiring `4 of 10 commands`
 
 ```mermaid
 graph TD
     CLI[CliApplication]
 
     CLI --> SI["session init\n✅ WIRED"]
-    CLI --> IA["income add\n❌ Missing"]
-    CLI --> CA["charge add\n❌ Missing"]
-    CLI --> CAR["charge add --recurring\n❌ Missing"]
+    CLI --> IA["income add\n✅ WIRED"]
+    CLI --> CA["charge add\n✅ WIRED"]
+    CLI --> CAR["charge add --recurring\n✅ WIRED"]
     CLI --> FCA["fuzzy-charge add\n❌ Missing"]
     CLI --> FCR["fuzzy-charge resolve\n❌ Missing"]
     CLI --> FCD["fuzzy-charge discard\n❌ Missing"]
@@ -382,9 +382,9 @@ graph TD
 
     style SI fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style DS fill:#fef3c7,stroke:#92400e,color:#451a03
-    style IA fill:#f2f2f0,stroke:#ccc,color:#999
-    style CA fill:#f2f2f0,stroke:#ccc,color:#999
-    style CAR fill:#f2f2f0,stroke:#ccc,color:#999
+    style IA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style CA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style CAR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style FCA fill:#f2f2f0,stroke:#ccc,color:#999
     style FCR fill:#f2f2f0,stroke:#ccc,color:#999
     style FCD fill:#f2f2f0,stroke:#ccc,color:#999
@@ -395,9 +395,9 @@ graph TD
 | Command | Arguments | Handler | Status |
 |---|---|---|---|
 | `session init` | `--balance` | `handle_session_init` | ✅ |
-| `income add` | `--amount --source --date` | — | ❌ |
-| `charge add` | `--name --amount --due-date` | — | ❌ |
-| `charge add --recurring` | `--name --amount --day-of-month` | — | ❌ |
+| `income add` | `--amount --source --date` | `handle_income_add` | ✅ |
+| `charge add` | `--name --amount --due-date` | `handle_charge_add` | ✅ |
+| `charge add --recurring` | `--name --amount --day-of-month` | `handle_charge_add` | ✅ |
 | `fuzzy-charge add` | `--name --due-date [--estimate]` | — | ❌ |
 | `fuzzy-charge resolve` | `--id --amount` | — | ❌ |
 | `fuzzy-charge discard` | `--id` | — | ❌ |
@@ -409,7 +409,7 @@ graph TD
 > passed. It returns a Phase D not-yet-implemented error until the repository layer is wired and
 > a `DashboardService` aggregates totals from all repositories.
 
-**CLI smoke tests** (`tests/unit/test_cli_flows.py`) — file does not exist yet.
+**CLI smoke tests** (`tests/unit/test_cli_flows.py`) — exists and covers the wired command paths.
 
 ---
 
@@ -420,7 +420,7 @@ graph TD
 | Full test suite green | ✅ 156/156 unit tests pass |
 | Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py`, `test_fuzzy_charge_service.py`, `test_spend_service.py` |
 | `tests/unit/test_repositories.py` exists | ✅ |
-| `tests/unit/test_cli_flows.py` exists | ❌ |
+| `tests/unit/test_cli_flows.py` exists | ✅ |
 | Stage 1 behaviour frozen in docs | ❌ |
 | Stage 2 handoff note written | ❌ |
 
@@ -451,7 +451,7 @@ graph TD
 
     subgraph layer_cli["CLI Layer"]
         Main["main.py\n✅ Bootstraps correctly"]
-        Cli["cli.py\n⚠️ 1 of 10 commands"]
+        Cli["cli.py\n⚠️ 4 of 10 commands"]
     end
 
     subgraph layer_tests["Tests"]
@@ -463,7 +463,7 @@ graph TD
         T6["test_fuzzy_charge_service.py\n✅ 7 tests"]
         T7["test_spend_service.py\n✅ 7 tests"]
         T8["test_repositories.py\n✅ 34 tests"]
-        T9["test_cli_flows.py\n❌ Missing"]
+        T9["test_cli_flows.py\n✅ 21 tests"]
     end
 
     style M fill:#1a6b3c,color:#fff,stroke:#1a6b3c
