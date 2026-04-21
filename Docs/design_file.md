@@ -106,8 +106,8 @@ Students running out of money before the academic year ends is not a willpower p
 ### Operational
 - Initially a personal tool — no multi-user, no accounts, no authentication in Stage 1
 - Data lives locally — no cloud storage in Stage 1
-- Stage 3 introduces a web dashboard, but the CLI must continue to work independently
-- No deployment infrastructure needed until Stage 3
+- Stage 5 introduces a web dashboard, but the CustomTkinter dashboard must continue to work independently
+- No deployment infrastructure needed until Stage 5
 
 ### Organizational
 - Solo developer project
@@ -292,7 +292,7 @@ Students running out of money before the academic year ends is not a willpower p
 - Inputs: CommittedChargeRegister entries; today's date
 - Outputs: Reminder message for any charge due in exactly 3 days; null otherwise
 - Ownership: Read-only on charges; writes reminder-sent state to avoid duplicate reminders
-- Notes: In Stage 1 (CLI), this runs when the app is opened. In Stage 3 (web), this can be a scheduled check.
+- Notes: In Stage 1–2 (CLI/CustomTkinter), this runs when the app is opened. In Stage 5 (web), this can be a scheduled check.
 
 ### Interaction Summary
 
@@ -305,7 +305,7 @@ All write operations — logging income, logging a charge, logging a transaction
 ## Data Ownership and State Model
 
 **AcademicYear**
-- Source of truth: Local storage (CSV in Stage 1, SQLite in Stage 2)
+- Source of truth: Local storage (JSON in Stage 1–2, PostgreSQL from Stage 3 onwards)
 - Mutated by: Student at setup; immutable after creation except explicit edit of end date
 - Read by: BalanceEngine (days remaining); all components (academic year scoping)
 - Derived state: Days remaining (computed from end date and today)
@@ -352,12 +352,12 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ### Trust Entry Points
 - All input comes from the student via CLI or web form — no external data sources in Stages 1–2
-- In Stage 3, the web interface introduces a local network trust boundary (localhost or LAN)
+- In Stage 5, the web interface introduces a local network trust boundary (localhost or LAN)
 - No authentication exists in Stage 1 — the tool is single-user and local only
 
 ### Authorization Enforcement
 - No multi-user access in Stage 1 — authorization is not relevant
-- In Stage 3, if the dashboard is exposed beyond localhost, basic auth should be added
+- In Stage 5, if the web dashboard is exposed beyond localhost, basic auth should be added
 - The BalanceEngine must not be callable with fabricated inputs from the UI layer — inputs must pass through the data components
 
 ### Tenant Isolation
@@ -375,7 +375,7 @@ All write operations — logging income, logging a charge, logging a transaction
 
 | Workflow / State | Risk | What Can Go Wrong | Control Note |
 |---|---|---|---|
-| Log income while BalanceEngine is reading | Stale read | Daily number computed before new income is counted | In Stage 1 (single-user CLI), this is sequential — not a real risk. In Stage 3, writes must complete before reads for balance calculation |
+| Log income while BalanceEngine is reading | Stale read | Daily number computed before new income is counted | In Stages 1–2 (single-user local app), this is sequential — not a real risk. In Stage 5 (web), writes must complete before reads for balance calculation |
 | Log a committed charge | Double-deduction | Recurring charge auto-generates next academic year period entry while student manually adds same charge | Unique constraint on (charge name + due date) within a semester to prevent duplicates |
 | Pattern detection threshold | Premature firing | Insight fires before data is statistically meaningful | Enforce minimum data threshold (14 days) as a hard gate before any insight is evaluated |
 | Insight state | Re-firing | Same insight fires multiple times because state was not persisted correctly | InsightState must be written to storage immediately when an insight fires — not held in memory |
@@ -393,14 +393,14 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ### Likely First Bottlenecks
 - None at expected single-student scale in Stages 1–2
-- In Stage 3, if the dashboard runs pattern detection on every page load, performance could degrade with large transaction histories — pattern detection should run on a schedule, not on every request
+- In Stage 5, if the web dashboard runs pattern detection on every page load, performance could degrade with large transaction histories — pattern detection should run on a schedule, not on every request
 
 ### Current Sufficiency
-- SQLite handles single-student volumes comfortably through Stage 3
+- PostgreSQL handles single-student volumes comfortably through Stage 5
 - Local storage requires no infrastructure management
 
 ### Future Redesign Triggers
-- Multi-user support would require migrating from local SQLite to a server database with user scoping
+- Multi-user support would require migrating from local PostgreSQL to a multi-tenant server database with user scoping
 - Push notifications would require a backend service beyond the current architecture
 - Multi-currency support would require an exchange rate API integration and currency conversion layer
 
@@ -413,12 +413,12 @@ All write operations — logging income, logging a charge, logging a transaction
 
 | Risk | Failure Shape | Cause | Note |
 |---|---|---|---|
-| Student does not log transactions consistently | Daily number becomes inaccurate; pattern detection cannot fire | Manual logging friction; forgetting during busy periods (exams) | Mitigate with frictionless logging UX — minimum required fields; consider a quick-log shortcut in Stage 3 |
+| Student does not log transactions consistently | Daily number becomes inaccurate; pattern detection cannot fire | Manual logging friction; forgetting during busy periods (exams) | Mitigate with frictionless logging UX — minimum required fields; quick-log shortcut is a Stage 2 CustomTkinter priority |
 | Student logs a charge with wrong due date | Reminder fires at wrong time; charge deducted from wrong period | Human error at input | Allow charge editing; surface upcoming charges list prominently so errors are visible |
 | Academic year end date set incorrectly | Daily number denominator wrong for entire academic yearter | Human error at setup | Allow end date editing; warn clearly if end date seems unusually short or long |
 | Free money goes negative silently | Student believes they have more than they do; app fails its core purpose | More committed charges logged than income | This must be an explicit warning state — the most important failure mode to handle visually |
 | Pattern detection fires too early | Insight is statistically meaningless; student loses trust in the feature | Threshold set too low; minimum data gate not enforced | Enforce 14-day minimum strictly; prefer false negatives over false positives for insights |
-| Data loss from storage corruption | All academic year data lost | SQLite file corruption; accidental deletion | Document how to back up the data file; consider automatic backup on semester close in Stage 2 |
+| Data loss from storage corruption | All data lost | JSON or PostgreSQL corruption; accidental deletion | Document how to back up data; consider automatic backup on session close from Stage 3 onwards |
 
 ---
 
@@ -462,9 +462,9 @@ All write operations — logging income, logging a charge, logging a transaction
 
 3. **Stage 2 → Stage 3 (PostgreSQL persistence):** JSON adapters in `infrastructure/json/` are replaced by PostgreSQL adapters in `infrastructure/postgres/`. A one-time migration script converts existing JSON data. The GUI and all services are untouched — storage is swapped underneath. This stage is complete when all data survives app restarts correctly via PostgreSQL.
 
-4. **Stage 3 → Stage 4 (reminders + pattern detection):** New `ReminderScheduler` and `PatternDetector` components added. New `InsightState` entity added to the schema. The TUI dashboard gains a notification area and an Occurrences screen. Existing transaction data automatically feeds the detector. Rollback is safe — removing these components does not affect core calculations.
+4. **Stage 3 → Stage 4 (reminders + pattern detection):** New `ReminderScheduler` and `PatternDetector` components added. New `InsightState` entity added to the schema. The CustomTkinter dashboard gains a notification area and an Occurrences screen. Existing transaction data automatically feeds the detector. Rollback is safe — removing these components does not affect core calculations.
 
-5. **Stage 4 → Stage 5 (web UI):** FastAPI backend wraps the existing service layer. A React or Streamlit frontend replaces or supplements the TUI. The CLI and TUI continue to function independently. Deployment is localhost only at this stage.
+5. **Stage 4 → Stage 5 (web UI):** FastAPI backend wraps the existing service layer. A React or Streamlit frontend replaces or supplements the CustomTkinter dashboard. The CustomTkinter dashboard continues to function independently. Deployment is localhost only at this stage.
 
 6. **Stage 5 → Stage 6 (optional: local bank connectivity):** Read-only connection to the student's local Israeli bank account to automatically import cleared transactions. Manual logging remains as the primary path. No architectural changes to core logic required — bank-imported transactions feed into the existing TransactionLog.
 
@@ -686,7 +686,7 @@ FuzzyCharge gains two new fields:
 
 ### Design deferred to Stage 3
 
-The exact visual treatment of the gray pending state, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 3. What is locked now: the behaviour, the states, the two-button interaction model, and the ✕ dismiss option.
+The exact visual treatment of the gray pending state, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 2 (CustomTkinter dashboard). What is locked now: the behaviour, the states, the two-button interaction model, and the ✕ dismiss option.
 
 
 ---
@@ -714,7 +714,7 @@ The home screen shows a visual progress bar:
 
     ₪[monthly_spent] of ₪[monthly_budget] used this month
 
-The bar fills as the student spends. The colour of the bar reflects the on-track state. Exact visual treatment deferred to Stage 3.
+The bar fills as the student spends. The colour of the bar reflects the on-track state. Exact visual treatment deferred to Stage 2 (CustomTkinter dashboard).
 
 ### Three-state on-track signal — percentage-based
 
@@ -840,7 +840,7 @@ This reuses existing TransactionLog category data via a new trigger context on t
 
 ### Crisis state — persistence behaviour
 
-The red highlight persists on the balance display area for as long as free money is zero or negative. It is not a modal or banner — it cannot be dismissed. It disappears automatically when free money returns to positive. The precise visual treatment (exact colours, border, animation) is deferred to Stage 3.
+The red highlight persists on the balance display area for as long as free money is zero or negative. It is not a modal or banner — it cannot be dismissed. It disappears automatically when free money returns to positive. The precise visual treatment (exact colours, border, animation) is deferred to Stage 2 (CustomTkinter dashboard).
 
 ### BalanceEngine output update
 

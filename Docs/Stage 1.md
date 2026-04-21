@@ -463,7 +463,7 @@ mindmap
 
 ## Repository Interfaces
 
-Defined as `typing.Protocol`. The Stage 1 adapter writes to local JSON files. Stage 2 replaces the adapter with SQLite — **service code does not change**.
+Defined as `typing.Protocol`. The Stage 1 adapter writes to local JSON files. Stage 3 replaces the adapter with PostgreSQL — **service code does not change**.
 
 ```mermaid
 graph TD
@@ -476,7 +476,7 @@ graph TD
     SVC --> TR[TransactionRepository\nProtocol]
 
     SR & IR & CR & FR & TR --> A1[JSON File Adapter\nStage 1]
-    A1 -.->|replaced in Stage 2| A2[SQLite Adapter\nStage 2]
+    A1 -.->|replaced in Stage 3| A2[PostgreSQL Adapter\nStage 3]
     A1 --> FS[(local .json files)]
 
     style SVC fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
@@ -614,10 +614,11 @@ Run the full test suite. Fix any failures. Freeze Stage 1 behaviour in docs. Wri
 
 ## Stage 2 Handoff Note
 
-Stage 2 replaces the local JSON adapter with SQLite. To prepare for a clean handoff:
-- All repository interactions must go through the Protocol interfaces — no direct file I/O in service code
-- The JSON schema used in Stage 1 storage must be documented so the migration script knows what to expect
-- No Stage 2 logic (summaries, history queries) may be added to Stage 1 modules, even as stubs
+Stage 2 replaces `app/cli.py` with a CustomTkinter desktop GUI. To prepare for a clean handoff:
+- All service calls must go through the existing service interfaces — the GUI calls services, never repositories directly
+- All business logic stays in the service layer — no calculation or validation logic may move into the GUI layer
+- The JSON storage layer remains unchanged in Stage 2 — persistence migration happens in Stage 3 (PostgreSQL)
+- No Stage 3+ logic (pattern detection, reminders, history queries) may be added to Stage 1 modules, even as stubs
 
 ---
 
