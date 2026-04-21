@@ -4,10 +4,10 @@
 > Stage 1 delivers a complete, fully-usable CLI tool. Every decision made here must survive untouched through Stages 2–7.
 > No reminders, no summaries, no web UI, no insights. Just the data model, the calculations, and the commands.
 
-### Current checkpoint (2026-04-21)
+### Current checkpoint (2026-04-22)
 - Phase A through Phase D are complete.
-- Phase E is in progress: `session init`, `income add`, `charge add`, and `charge add --recurring` are wired with unit tests.
-- Full `tests/unit` status at this checkpoint: `156 passed`.
+- Phase E is in progress: `session init`, `income add`, `charge add`, `charge add --recurring`, `fuzzy-charge add`, `fuzzy-charge resolve`, and `fuzzy-charge discard` are wired with unit tests.
+- Full `tests/unit` status at this checkpoint: `196 passed`.
 - Live implementation tracking is maintained in `Docs/stage1_implementation_status.md`.
 
 ---

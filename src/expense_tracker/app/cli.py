@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import logging
 from typing import Sequence
+from uuid import UUID
 
-from ..application.services import BalanceService, ChargeService, IncomeService, SessionService
+from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService
 from ..domain.validators import parse_amount, parse_day_of_month, parse_due_date, parse_income_source_tag, parse_opening_balance
 from ..shared.exceptions import ApplicationError, ValidationError
 
@@ -11,7 +12,7 @@ from ..shared.exceptions import ApplicationError, ValidationError
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService) -> None:
         """
         Initialize command routing dependencies.
 
@@ -19,12 +20,14 @@ class CliApplication:
         :param balance_service: Service for dashboard balance commands.
         :param income_service: Service for income commands.
         :param charge_service: Service for charge commands.
+        :param fuzzy_charge_service: Service for fuzzy-charge commands.
         :return: None.
         """
         self._session_service = session_service
         self._balance_service = balance_service
         self._income_service = income_service
         self._charge_service = charge_service
+        self._fuzzy_charge_service = fuzzy_charge_service
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -49,6 +52,15 @@ class CliApplication:
 
         if arguments[0] == "charge" and len(arguments) > 1 and arguments[1] == "add":
             return self.handle_charge_add(arguments[2:])
+
+        if arguments[0] == "fuzzy-charge" and len(arguments) > 1 and arguments[1] == "add":
+            return self.handle_fuzzy_charge_add(arguments[2:])
+
+        if arguments[0] == "fuzzy-charge" and len(arguments) > 1 and arguments[1] == "resolve":
+            return self.handle_fuzzy_charge_resolve(arguments[2:])
+
+        if arguments[0] == "fuzzy-charge" and len(arguments) > 1 and arguments[1] == "discard":
+            return self.handle_fuzzy_charge_discard(arguments[2:])
 
         self._logger.error("Unknown command: %s", " ".join(arguments))
         return 1
@@ -237,5 +249,138 @@ class CliApplication:
             return 1
 
         self._logger.info("Recurring charge added successfully." if recurring else "Charge entry added successfully.")
+        return 0
+
+    def handle_fuzzy_charge_add(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `fuzzy-charge add` command flow.
+
+        :param arguments: Arguments specific to adding a fuzzy charge.
+        :return: Process exit code.
+        """
+        raw_name: str | None = None
+        raw_due_date: str | None = None
+        raw_estimate: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--name" and index + 1 < len(arguments):
+                raw_name = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--due-date" and index + 1 < len(arguments):
+                raw_due_date = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--estimate" and index + 1 < len(arguments):
+                raw_estimate = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_name is None:
+            self._logger.error("Missing required argument: --name")
+            return 1
+
+        if raw_due_date is None:
+            self._logger.error("Missing required argument: --due-date")
+            return 1
+
+        try:
+            expected_date = parse_due_date(raw_due_date)
+            estimated_amount = parse_amount(raw_estimate) if raw_estimate is not None else None
+            self._fuzzy_charge_service.add_fuzzy_charge(raw_name, expected_date, estimated_amount)
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Fuzzy charge added successfully.")
+        return 0
+
+    def handle_fuzzy_charge_resolve(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `fuzzy-charge resolve` command flow.
+
+        :param arguments: Arguments specific to resolving a fuzzy charge.
+        :return: Process exit code.
+        """
+        raw_id: str | None = None
+        raw_amount: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--id" and index + 1 < len(arguments):
+                raw_id = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--amount" and index + 1 < len(arguments):
+                raw_amount = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_id is None:
+            self._logger.error("Missing required argument: --id")
+            return 1
+
+        if raw_amount is None:
+            self._logger.error("Missing required argument: --amount")
+            return 1
+
+        try:
+            fuzzy_id = UUID(raw_id)
+            resolved_amount = parse_amount(raw_amount)
+            self._fuzzy_charge_service.resolve(fuzzy_id, resolved_amount)
+        except ValueError:
+            self._logger.error("Fuzzy entry identifier must be a valid UUID.")
+            return 1
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Fuzzy charge resolved successfully.")
+        return 0
+
+    def handle_fuzzy_charge_discard(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `fuzzy-charge discard` command flow.
+
+        :param arguments: Arguments specific to discarding a fuzzy charge.
+        :return: Process exit code.
+        """
+        raw_id: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--id" and index + 1 < len(arguments):
+                raw_id = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_id is None:
+            self._logger.error("Missing required argument: --id")
+            return 1
+
+        try:
+            fuzzy_id = UUID(raw_id)
+            self._fuzzy_charge_service.discard(fuzzy_id)
+        except ValueError:
+            self._logger.error("Fuzzy entry identifier must be a valid UUID.")
+            return 1
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Fuzzy charge discarded successfully.")
         return 0
 
