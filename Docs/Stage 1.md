@@ -4,10 +4,10 @@
 > Stage 1 delivers a complete, fully-usable CLI tool. Every decision made here must survive untouched through Stages 2–7.
 > No reminders, no summaries, no web UI, no insights. Just the data model, the calculations, and the commands.
 
-### Current checkpoint (2026-04-15)
-- Phase A and Phase B are complete.
-- Phase C is in progress: `IncomeService.add_income`, `ChargeService.add_charge`, `ChargeService.add_recurring_charge`, and recurring `ChargeService.mark_paid` behavior are implemented with unit tests.
-- Full `tests/unit` status at this checkpoint: `101 passed`.
+### Current checkpoint (2026-04-21)
+- Phase A through Phase D are complete.
+- Phase E is in progress: `session init`, `income add`, `charge add`, and `charge add --recurring` are wired with unit tests.
+- Full `tests/unit` status at this checkpoint: `156 passed`.
 - Live implementation tracking is maintained in `Docs/stage1_implementation_status.md`.
 
 ---

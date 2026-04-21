@@ -6,8 +6,8 @@ from typing import Sequence
 from uuid import UUID
 
 from ..application.calculations import BalanceEngine
-from ..application.services import BalanceService, IncomeService, SessionService
-from ..domain.models import AppSession, IncomeEntry
+from ..application.services import BalanceService, ChargeService, IncomeService, SessionService
+from ..domain.models import AppSession, ChargeStatus, CommittedCharge, IncomeEntry, RecurringRule
 from ..infrastructure.logging_config import LoggerFactory
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
@@ -73,6 +73,96 @@ class _InMemoryIncomeRepository:
         return [entry for entry in self._entries if entry.session_id == session_id and entry.date.year == year and entry.date.month == month]
 
 
+class _InMemoryChargeRepository:
+    """Simple in-process charge repository used to bootstrap the Stage 1 CLI flow."""
+
+    def __init__(self) -> None:
+        self._charges: dict[UUID, CommittedCharge] = {}
+
+    def add(self, charge: CommittedCharge) -> None:
+        """
+        Persist one committed charge.
+
+        :param charge: Charge to persist.
+        :return: None.
+        """
+        self._charges[charge.charge_id] = charge
+
+    def list_upcoming(self, session_id: UUID) -> list[CommittedCharge]:
+        """
+        List upcoming charges for one session.
+
+        :param session_id: Session identifier.
+        :return: Upcoming committed charges.
+        """
+        return [charge for charge in self._charges.values() if charge.session_id == session_id and charge.status == ChargeStatus.UPCOMING]
+
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
+        """
+        List committed charges for one calendar month.
+
+        :param session_id: Session identifier.
+        :param year: Calendar year filter.
+        :param month: Calendar month filter.
+        :return: Monthly committed charges.
+        """
+        return [charge for charge in self._charges.values() if charge.session_id == session_id and charge.due_date.year == year and charge.due_date.month == month]
+
+    def mark_paid(self, charge_id: UUID) -> None:
+        """
+        Mark one committed charge as paid.
+
+        :param charge_id: Charge identifier.
+        :return: None.
+        """
+        charge = self._charges.get(charge_id)
+        if charge is not None:
+            self._charges[charge_id] = CommittedCharge(charge_id=charge.charge_id, session_id=charge.session_id, name=charge.name, amount=charge.amount, due_date=charge.due_date, status=ChargeStatus.PAID, recurring_rule_id=charge.recurring_rule_id)
+
+    def get_by_id(self, charge_id: UUID) -> CommittedCharge | None:
+        """
+        Fetch one committed charge by identifier.
+
+        :param charge_id: Charge identifier.
+        :return: Matching committed charge if present; otherwise None.
+        """
+        return self._charges.get(charge_id)
+
+
+class _InMemoryRecurringRuleRepository:
+    """Simple in-process recurring-rule repository used to bootstrap the Stage 1 CLI flow."""
+
+    def __init__(self) -> None:
+        self._rules: dict[UUID, RecurringRule] = {}
+
+    def add(self, rule: RecurringRule) -> None:
+        """
+        Persist one recurring rule.
+
+        :param rule: Rule to persist.
+        :return: None.
+        """
+        self._rules[rule.rule_id] = rule
+
+    def get_by_id(self, rule_id: UUID) -> RecurringRule | None:
+        """
+        Fetch one recurring rule by identifier.
+
+        :param rule_id: Rule identifier.
+        :return: Matching recurring rule if present; otherwise None.
+        """
+        return self._rules.get(rule_id)
+
+    def list_for_session(self, session_id: UUID) -> list[RecurringRule]:
+        """
+        List recurring rules for one session.
+
+        :param session_id: Session identifier.
+        :return: Recurring rules for the session.
+        """
+        return [rule for rule in self._rules.values() if rule.session_id == session_id]
+
+
 class ApplicationEntryPoint:
     """Bootstraps the command-line application."""
 
@@ -93,11 +183,14 @@ class ApplicationEntryPoint:
 
             session_repository = _InMemorySessionRepository()
             income_repository = _InMemoryIncomeRepository()
+            charge_repository = _InMemoryChargeRepository()
+            recurring_rule_repository = _InMemoryRecurringRuleRepository()
             session_service = SessionService(session_repository, logger=logger)
             income_service = IncomeService(session_repository, income_repository, logger=logger)
+            charge_service = ChargeService(session_repository, charge_repository, recurring_rule_repository, logger=logger)
             balance_engine = BalanceEngine()
             balance_service = BalanceService(balance_engine, logger=logger)
-            cli_application = CliApplication(session_service, balance_service, income_service)
+            cli_application = CliApplication(session_service, balance_service, income_service, charge_service)
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
             logging.getLogger(__name__).error("Application error: %s", exc)
