@@ -1,6 +1,6 @@
 # Stage 1 — Implementation Status
 **Student Expense Tracker — CLI Core**
-*Audited: 2026-04-15*
+*Audited: 2026-04-19*
 
 > This document is a point-in-time snapshot of what has been built, what is working,
 > and what remains before Stage 1 is complete. It maps directly against the Stage 1 Implementation Plan.
@@ -9,8 +9,8 @@
 
 ## Overall Position
 
-**Current phase:** Late Phase C — core service lifecycles nearly complete.
-**Test suite:** 117 / 117 passing (unit suite).
+**Current phase:** Phase E — CLI wiring in progress (Phase D storage complete).
+**Test suite:** 156 / 156 passing (unit suite).
 
 ## Financial Conventions
 
@@ -33,13 +33,13 @@ gantt
     BalanceEngine · Unit Tests      :done, b1, 1, 2
 
     section Phase C — Lifecycles
-    Services · Validators · Service Tests :active, c1, 2, 3
+    Services · Validators · Service Tests :done, c1, 2, 3
 
     section Phase D — Storage
-    JSON Adapters · Repo Tests      :c1, 3, 4
+    JSON Adapters · Repo Tests      :done, d1, 3, 4
 
     section Phase E — CLI Wiring
-    Command Handlers · Smoke Tests  :c1, 4, 5
+    Command Handlers · Smoke Tests  :active, e1, 4, 5
 
     section Phase F — Quality Gate
     Full Suite · Freeze Docs        :c1, 5, 6
@@ -51,17 +51,17 @@ gantt
 
 ```mermaid
 pie title Phases Complete vs Remaining
-    "Complete (A + B)" : 2
-    "In Progress (C)" : 1
-    "Not Started (D + E + F)" : 3
+    "Complete (A + B + C + D)" : 4
+    "In Progress (E)" : 1
+    "Not Started (F)" : 1
 ```
 
 ```mermaid
 graph LR
     A["Phase A\nContracts\n✅ COMPLETE"]:::done
     B["Phase B\nCalculations\n✅ COMPLETE"]:::done
-    C["Phase C\nLifecycles\n⚙️ IN PROGRESS"]:::partial
-    D["Phase D\nStorage\n❌ NOT STARTED"]:::todo
+    C["Phase C\nLifecycles\n✅ COMPLETE"]:::done
+    D["Phase D\nStorage\n✅ COMPLETE"]:::done
     E["Phase E\nCLI Wiring\n⚠️ 1 of 10 commands"]:::partial
     F["Phase F\nQuality Gate\n❌ NOT STARTED"]:::todo
 
@@ -210,13 +210,13 @@ graph LR
 | Unit tests — snapshot composition (2 cases) | `tests/unit/test_calculations.py` | ✅ |
 | Cross-cutting tests — exceptions + logging | `tests/unit/test_shared_cross_cutting.py` | ✅ |
 
-**Total: calculations remain fully green; full unit suite now passes 117 / 117.**
+**Total: calculations remain fully green; full unit suite now passes 156 / 156.**
 
 ---
 
-## Phase C — Charge Lifecycles `IN PROGRESS`
+## Phase C — Charge Lifecycles `COMPLETE`
 
-Core service wiring is nearly complete. Income, committed-charge, fuzzy, and spend lifecycles are implemented.
+All service lifecycles are implemented and covered by unit tests.
 
 ### Services needed
 
@@ -306,19 +306,19 @@ Still needed before closing Phase C:
 
 ---
 
-## Phase D — Storage `NOT STARTED`
+## Phase D — Storage `COMPLETE`
 
-The JSON adapter file exists but every method body is `pass` — nothing is implemented.
+All JSON repository adapters are implemented and covered by repository tests.
 
 ```mermaid
 graph TD
-    subgraph adapters["infrastructure/json/repositories.py"]
-        JSR["JsonSessionRepository\n⚠️ Stub — pass bodies"]
-        JIR["JsonIncomeRepository\n❌ Missing"]
-        JCR["JsonChargeRepository\n❌ Missing"]
-        JRR["JsonRecurringRuleRepository\n❌ Missing"]
-        JFR["JsonFuzzyChargeRepository\n❌ Missing"]
-        JTR["JsonTransactionRepository\n❌ Missing"]
+    subgraph adapters["infrastructure/json/repositories/"]
+        JSR["JsonSessionRepository\n✅ Implemented"]
+        JIR["JsonIncomeRepository\n✅ Implemented"]
+        JCR["JsonChargeRepository\n✅ Implemented"]
+        JRR["JsonRecurringRuleRepository\n✅ Implemented"]
+        JFR["JsonFuzzyChargeRepository\n✅ Implemented"]
+        JTR["JsonTransactionRepository\n✅ Implemented"]
     end
 
     subgraph protocols["ports/repositories.py ✅"]
@@ -337,34 +337,29 @@ graph TD
     JFR -.->|implements| FR
     JTR -.->|implements| TR
 
-    style JSR fill:#fef3c7,stroke:#92400e,color:#451a03
-    style JIR fill:#f2f2f0,stroke:#ccc,color:#999
-    style JCR fill:#f2f2f0,stroke:#ccc,color:#999
-    style JRR fill:#f2f2f0,stroke:#ccc,color:#999
-    style JFR fill:#f2f2f0,stroke:#ccc,color:#999
-    style JTR fill:#f2f2f0,stroke:#ccc,color:#999
+    style JSR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style JIR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style JCR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style JRR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style JFR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style JTR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
 ```
 
 | Adapter | Status | Notes |
 |---|---|---|
-| `JsonSessionRepository` | ⚠️ Stub | Class exists, all methods are `pass` |
-| `JsonIncomeRepository` | ❌ Missing | Class does not exist |
-| `JsonChargeRepository` | ❌ Missing | Class does not exist |
-| `JsonRecurringRuleRepository` | ❌ Missing | Class does not exist |
-| `JsonFuzzyChargeRepository` | ❌ Missing | Class does not exist |
-| `JsonTransactionRepository` | ❌ Missing | Class does not exist |
-| Repository tests | ❌ Missing | `tests/unit/test_repository.py` does not exist |
+| `JsonSessionRepository` | ✅ Complete | `create`, `get_active` implemented |
+| `JsonIncomeRepository` | ✅ Complete | `add`, `list_for_session`, `list_for_month` implemented |
+| `JsonChargeRepository` | ✅ Complete | `add`, `list_upcoming`, `list_for_month`, `mark_paid`, `get_by_id` implemented |
+| `JsonRecurringRuleRepository` | ✅ Complete | `add`, `get_by_id`, `list_for_session` implemented |
+| `JsonFuzzyChargeRepository` | ✅ Complete | `add`, `get_by_id`, `list_pending`, `update_status`, `update` implemented |
+| `JsonTransactionRepository` | ✅ Complete | `add`, `list_for_month` implemented |
+| Repository tests | ✅ Complete | `tests/unit/test_repositories.py` (34 tests passing) |
 
-**Serialisation rules** that each adapter must follow (per design contracts):
-- `Decimal` → stored as `str` (never `float`)
-- `date` → stored as ISO 8601 string (`YYYY-MM-DD`)
-- `UUID` → stored as `str`
-- `Enum` → stored as `.value`
-
-**Repository test requirements** (per spec):
-- CRUD operations for all five entity types
-- `list_for_month` returns only entries in the correct calendar month
-- Data persists correctly across a simulated restart (write → re-instantiate adapter → read back)
+**Serialisation rules implemented:**
+- `Decimal` persisted as `str`
+- `date` persisted as ISO 8601 (`YYYY-MM-DD`)
+- `UUID` persisted as `str`
+- `Enum` persisted as `.value`
 
 ---
 
@@ -422,9 +417,9 @@ graph TD
 
 | Item | Status |
 |---|---|
-| Full test suite green | ✅ 117/117 unit tests pass |
+| Full test suite green | ✅ 156/156 unit tests pass |
 | Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py`, `test_fuzzy_charge_service.py`, `test_spend_service.py` |
-| `tests/unit/test_repository.py` exists | ❌ |
+| `tests/unit/test_repositories.py` exists | ✅ |
 | `tests/unit/test_cli_flows.py` exists | ❌ |
 | Stage 1 behaviour frozen in docs | ❌ |
 | Stage 2 handoff note written | ❌ |
@@ -446,11 +441,11 @@ graph TD
 
     subgraph layer_app["Application Layer"]
         C["calculations.py\n✅ Complete + tested"]
-        S["services/\n⚠️ In progress\nSession + Income + Charge + Fuzzy + Spend implemented"]
+        S["services/\n✅ Complete\nAll 5 lifecycles implemented"]
     end
 
     subgraph layer_infra["Infrastructure Layer"]
-        J["json/repositories.py\n⚠️ 1 stub, 5 missing\n0 methods implemented"]
+        J["json/repositories/*.py\n✅ 6 adapters implemented + tested"]
         L["logging_config.py\n✅ Complete"]
     end
 
@@ -462,36 +457,40 @@ graph TD
     subgraph layer_tests["Tests"]
         T1["test_calculations.py\n✅ 22 tests"]
         T2["test_shared_cross_cutting.py\n✅ 8 tests"]
-        T3["test_validators.py\n✅ 50 tests"]
+        T3["test_validators.py\n✅ 47 tests"]
         T4["test_income_service.py\n✅ 4 tests"]
-        T5["test_charge_service.py\n✅ 22 tests"]
-        T6["test_spend_service.py\n✅ 7 tests"]
-        T7["test_repository.py\n❌ Missing"]
-        T8["test_cli_flows.py\n❌ Missing"]
+        T5["test_charge_service.py\n✅ 27 tests"]
+        T6["test_fuzzy_charge_service.py\n✅ 7 tests"]
+        T7["test_spend_service.py\n✅ 7 tests"]
+        T8["test_repositories.py\n✅ 34 tests"]
+        T9["test_cli_flows.py\n❌ Missing"]
     end
 
     style M fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style R fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style C fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style J fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style L fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style Main fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T1 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T2 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style V fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style S fill:#fef3c7,stroke:#92400e,color:#451a03
-    style J fill:#fef3c7,stroke:#92400e,color:#451a03
-    style Cli fill:#fef3c7,stroke:#92400e,color:#451a03
     style T3 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T4 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T5 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T6 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style T7 fill:#f2f2f0,stroke:#ccc,color:#999
-    style T8 fill:#f2f2f0,stroke:#ccc,color:#999
+    style T7 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style V fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style S fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T6 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T7 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T8 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style Cli fill:#fef3c7,stroke:#92400e,color:#451a03
+    style T9 fill:#f2f2f0,stroke:#ccc,color:#999
 ```
 
 ---
 
-## Recommended Next Steps — Phase C to D Transition
+## Recommended Next Steps — Phase E
 
 Build in this order. Each step unblocks the next.
 
@@ -578,7 +577,7 @@ What each runtime file takes, what it passes on, and what it does.
 | `domain/models/transaction.py` | spend fields | `Transaction`, `TransactionCategory` | Spending entity definition |
 | `ports/repositories.py` | domain entities and UUIDs | `Protocol` contracts for storage | Boundary between application and infrastructure |
 | `infrastructure/logging_config.py` | level, logger name | configured logger | Application logging setup |
-| `infrastructure/json/repositories/session_repository.py` | `AppSession`, JSON storage state | active session read/write | JSON-backed session adapter (stub) |
+| `infrastructure/json/repositories/session_repository.py` | `AppSession`, JSON storage state | active session read/write | JSON-backed session adapter |
 | `shared/exceptions.py` | failure conditions | typed exception hierarchy | Project-wide error boundary |
 
 ### Test files

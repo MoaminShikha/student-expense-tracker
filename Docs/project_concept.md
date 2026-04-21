@@ -142,50 +142,42 @@ That is the problem statement. The app is the answer.
 - Free money calculation
 - Monthly safe-to-spend number and on-track signal
 
-*Delivers: a complete CLI tool a real student could use daily.*
+*Delivers: a complete CLI tool with all core logic, services, and JSON persistence tested.*
 
-### Stage 2 — Persistence
-- Save and reload everything across restarts
-- Move from CSV/JSON to SQLite
-- Stable local storage — FuzzyChargeLog as its own table
+### Stage 2 — CustomTkinter Dashboard
+- Replace CLI with a CustomTkinter desktop GUI application
+- App opens directly to a live dashboard window — no commands to type
+- Buttons and modal forms for all input (income, charges, spend, mark paid)
+- Domain, services, and JSON repositories untouched — interface layer only
+
+*Delivers: a real app feel — opens to a dashboard, usable without knowing terminal commands.*
+
+### Stage 3 — PostgreSQL Persistence
+- Replace JSON file adapters with PostgreSQL adapters
+- One-time migration script converts existing JSON data
+- CustomTkinter dashboard and all services untouched — storage swapped underneath
 - No feature logic changes
 
-*Delivers: nothing lost between sessions.*
+*Delivers: nothing lost between sessions, production-grade storage.*
 
-### Stage 3 — Reminders
+### Stage 4 — Reminders and Pattern Detection
 - Upcoming charge reminders (T-3 days)
-- Fuzzy charge date alerts and follow-up prompts
-- Auto-generation of next recurring charge on mark-as-paid
-- Occurrences screen — all unresolved items in one place
-
-*Delivers: the core promise — notified before a charge hits, not after.*
-
-### Stage 4 — Summaries and history
-- Monthly totals and spend breakdowns
-- History view — all calendar months since first use
-- Activity views — recent transactions, what's been spent vs what's left
-- Three-state balance display (normal / caution / crisis)
-- Crisis ranked spending breakdown
-
-*Delivers: a complete, fully-functional CLI product.*
-
-### Stage 5 — Insights
+- Fuzzy charge date alerts and follow-up prompts in the Occurrences screen
 - Pattern detection with hard gates (14 days AND 20 transactions)
 - One surfaced observation per category per calendar month
-- Threshold rules and insight persistence
 - False negative preference — no premature insights
 
-*Delivers: the app notices things the student hasn't noticed.*
+*Delivers: the core promise — notified before a charge hits, the app notices things the student hasn't noticed.*
 
-### Stage 6 — Web UI
-- Move from CLI to browser interface
-- FastAPI backend wrapping existing logic — unchanged
-- Streamlit frontend: progress bar, monthly number, Occurrences, history
-- CLI continues to work independently
+### Stage 5 — Web UI
+- FastAPI backend wrapping existing service layer — unchanged
+- React or Streamlit frontend: progress bar, monthly number, Occurrences, history
+- CustomTkinter dashboard continues to work independently
+- Deployment is localhost only
 
 *Delivers: the shareable portfolio piece.*
 
-### Stage 7 — Advanced integrations
+### Stage 6 — Advanced Integrations
 - Local bank connectivity (read-only OFX/CSV import)
 - Multi-currency support (NIS + USD/EUR via exchange rate API)
 - Natural language transaction entry

@@ -3,24 +3,26 @@ from __future__ import annotations
 import logging
 from typing import Sequence
 
-from ..application.services import BalanceService, SessionService
-from ..domain.validators import parse_opening_balance
+from ..application.services import BalanceService, IncomeService, SessionService
+from ..domain.validators import parse_amount, parse_due_date, parse_income_source_tag, parse_opening_balance
 from ..shared.exceptions import ApplicationError, ValidationError
 
 
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService) -> None:
         """
         Initialize command routing dependencies.
 
         :param session_service: Service for session-related commands.
         :param balance_service: Service for dashboard balance commands.
+        :param income_service: Service for income commands.
         :return: None.
         """
         self._session_service = session_service
         self._balance_service = balance_service
+        self._income_service = income_service
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -39,6 +41,9 @@ class CliApplication:
 
         if arguments[0] == "dashboard" and len(arguments) > 1 and arguments[1] == "show":
             return self.handle_dashboard_show(arguments[2:])
+
+        if arguments[0] == "income" and len(arguments) > 1 and arguments[1] == "add":
+            return self.handle_income_add(arguments[2:])
 
         self._logger.error("Unknown command: %s", " ".join(arguments))
         return 1
@@ -98,3 +103,59 @@ class CliApplication:
 
         self._logger.error("dashboard show is not yet available — repository layer not wired (Phase D).")
         return 1
+
+    def handle_income_add(self, arguments: Sequence[str]) -> int:
+        """
+        Handle the `income add` command flow.
+
+        :param arguments: Arguments specific to adding income.
+        :return: Process exit code.
+        """
+        raw_amount: str | None = None
+        raw_source: str | None = None
+        raw_date: str | None = None
+        index = 0
+
+        while index < len(arguments):
+            if arguments[index] == "--amount" and index + 1 < len(arguments):
+                raw_amount = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--source" and index + 1 < len(arguments):
+                raw_source = arguments[index + 1]
+                index += 2
+                continue
+
+            if arguments[index] == "--date" and index + 1 < len(arguments):
+                raw_date = arguments[index + 1]
+                index += 2
+                continue
+
+            self._logger.error("Unsupported argument: %s", arguments[index])
+            return 1
+
+        if raw_amount is None:
+            self._logger.error("Missing required argument: --amount")
+            return 1
+
+        if raw_source is None:
+            self._logger.error("Missing required argument: --source")
+            return 1
+
+        if raw_date is None:
+            self._logger.error("Missing required argument: --date")
+            return 1
+
+        try:
+            amount = parse_amount(raw_amount)
+            source_tag = parse_income_source_tag(raw_source)
+            entry_date = parse_due_date(raw_date)
+            self._income_service.add_income(amount, source_tag, entry_date)
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
+
+        self._logger.info("Income entry added successfully.")
+        return 0
+
