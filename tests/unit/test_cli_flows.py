@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 from typing import Any
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -51,12 +52,37 @@ class _FakeChargeService:
         self.recurring_calls.append((name, amount, day_of_month))
 
 
-def _build_cli(income_service: _FakeIncomeService | None = None, charge_service: _FakeChargeService | None = None) -> CliApplication:
+class _FakeFuzzyChargeService:
+
+    def __init__(self, error_to_raise: Exception | None = None) -> None:
+        self._error_to_raise = error_to_raise
+        self.calls: list[tuple[str, date, Decimal | None]] = []
+        self.resolve_calls: list[tuple[UUID, Decimal]] = []
+        self.discard_calls: list[UUID] = []
+
+    def add_fuzzy_charge(self, name: str, expected_date: date, estimated_amount: Decimal | None = None) -> None:
+        if self._error_to_raise is not None:
+            raise self._error_to_raise
+        self.calls.append((name, expected_date, estimated_amount))
+
+    def resolve(self, fuzzy_id: UUID, resolved_amount: Decimal) -> None:
+        if self._error_to_raise is not None:
+            raise self._error_to_raise
+        self.resolve_calls.append((fuzzy_id, resolved_amount))
+
+    def discard(self, fuzzy_id: UUID) -> None:
+        if self._error_to_raise is not None:
+            raise self._error_to_raise
+        self.discard_calls.append(fuzzy_id)
+
+
+def _build_cli(income_service: _FakeIncomeService | None = None, charge_service: _FakeChargeService | None = None, fuzzy_charge_service: _FakeFuzzyChargeService | None = None) -> CliApplication:
     session_service: Any = _FakeSessionService()
     balance_service: Any = _FakeBalanceService()
     income_service_impl: Any = income_service or _FakeIncomeService()
     charge_service_impl: Any = charge_service or _FakeChargeService()
-    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl)
+    fuzzy_charge_service_impl: Any = fuzzy_charge_service or _FakeFuzzyChargeService()
+    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl, fuzzy_charge_service=fuzzy_charge_service_impl)
 
 
 class TestCliIncomeAdd:
@@ -240,5 +266,200 @@ class TestCliRecurringChargeAdd:
 
         assert exit_code == 1
         assert charge_service.recurring_calls == []
+
+
+class TestCliFuzzyChargeAdd:
+
+    def test_run_fuzzy_charge_add_calls_fuzzy_service_with_required_values(self) -> None:
+        # valid fuzzy charge args are parsed in CLI and forwarded to the fuzzy service as typed values
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "add", "--name", "Electric", "--due-date", "2026-04-28"])
+
+        assert exit_code == 0
+        assert fuzzy_charge_service.calls == [("Electric", date(2026, 4, 28), None)]
+
+    def test_run_fuzzy_charge_add_calls_fuzzy_service_with_estimate(self) -> None:
+        # optional estimate should be parsed and forwarded when provided
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "add", "--name", "Electric", "--due-date", "2026-04-28", "--estimate", "250.00"])
+
+        assert exit_code == 0
+        assert fuzzy_charge_service.calls == [("Electric", date(2026, 4, 28), Decimal("250.00"))]
+
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            pytest.param(["fuzzy-charge", "add", "--due-date", "2026-04-28"], id="missing name"),
+            pytest.param(["fuzzy-charge", "add", "--name", "Electric"], id="missing due date"),
+        ],
+    )
+    def test_run_fuzzy_charge_add_requires_name_and_due_date(self, arguments: list[str]) -> None:
+        # CLI must fail fast when one required fuzzy input is missing before it reaches the service layer
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(arguments)
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.calls == []
+
+    def test_run_fuzzy_charge_add_rejects_unknown_argument(self) -> None:
+        # unsupported flags must be rejected to keep CLI input contract strict and explicit
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "add", "--name", "Electric", "--due-date", "2026-04-28", "--extra", "x"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.calls == []
+
+    def test_run_fuzzy_charge_add_returns_error_on_invalid_input(self) -> None:
+        # validator failures at CLI boundary should return a non-zero exit code without service invocation
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "add", "--name", "Electric", "--due-date", "bad-date", "--estimate", "bad-amount"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.calls == []
+
+    def test_run_fuzzy_charge_add_returns_error_when_service_fails(self) -> None:
+        # application-level service failures must be surfaced as CLI command failures
+        fuzzy_charge_service = _FakeFuzzyChargeService(error_to_raise=ApplicationError("No active session."))
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "add", "--name", "Electric", "--due-date", "2026-04-28"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.calls == []
+
+
+class TestCliFuzzyChargeResolve:
+
+    def test_run_fuzzy_charge_resolve_calls_fuzzy_service_with_parsed_values(self) -> None:
+        # valid resolve args are parsed in CLI and forwarded to the fuzzy service as typed values
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+        fuzzy_id = uuid4()
+
+        exit_code = cli.run(["fuzzy-charge", "resolve", "--id", str(fuzzy_id), "--amount", "185.50"])
+
+        assert exit_code == 0
+        assert fuzzy_charge_service.resolve_calls == [(fuzzy_id, Decimal("185.50"))]
+
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            pytest.param(["fuzzy-charge", "resolve", "--amount", "185.50"], id="missing id"),
+            pytest.param(["fuzzy-charge", "resolve", "--id", str(uuid4())], id="missing amount"),
+        ],
+    )
+    def test_run_fuzzy_charge_resolve_requires_id_and_amount(self, arguments: list[str]) -> None:
+        # CLI must fail fast when one required resolve input is missing before it reaches the service layer
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(arguments)
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.resolve_calls == []
+
+    def test_run_fuzzy_charge_resolve_rejects_unknown_argument(self) -> None:
+        # unsupported flags must be rejected to keep CLI input contract strict and explicit
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "resolve", "--id", str(uuid4()), "--amount", "185.50", "--extra", "x"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.resolve_calls == []
+
+    def test_run_fuzzy_charge_resolve_returns_error_on_invalid_uuid(self) -> None:
+        # invalid UUID at CLI boundary should return a non-zero exit code without service invocation
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "resolve", "--id", "not-a-uuid", "--amount", "185.50"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.resolve_calls == []
+
+    def test_run_fuzzy_charge_resolve_returns_error_on_invalid_input(self) -> None:
+        # validator failures at CLI boundary should return a non-zero exit code without service invocation
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "resolve", "--id", str(uuid4()), "--amount", "bad-amount"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.resolve_calls == []
+
+    def test_run_fuzzy_charge_resolve_returns_error_when_service_fails(self) -> None:
+        # application-level service failures must be surfaced as CLI command failures
+        fuzzy_charge_service = _FakeFuzzyChargeService(error_to_raise=ApplicationError("Fuzzy entry not found."))
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "resolve", "--id", str(uuid4()), "--amount", "185.50"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.resolve_calls == []
+
+
+class TestCliFuzzyChargeDiscard:
+
+    def test_run_fuzzy_charge_discard_calls_fuzzy_service_with_parsed_values(self) -> None:
+        # valid discard args are parsed in CLI and forwarded to the fuzzy service as typed values
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+        fuzzy_id = uuid4()
+
+        exit_code = cli.run(["fuzzy-charge", "discard", "--id", str(fuzzy_id)])
+
+        assert exit_code == 0
+        assert fuzzy_charge_service.discard_calls == [fuzzy_id]
+
+    def test_run_fuzzy_charge_discard_requires_id(self) -> None:
+        # CLI must fail fast when required discard input is missing before it reaches the service layer
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "discard"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.discard_calls == []
+
+    def test_run_fuzzy_charge_discard_rejects_unknown_argument(self) -> None:
+        # unsupported flags must be rejected to keep CLI input contract strict and explicit
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "discard", "--id", str(uuid4()), "--extra", "x"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.discard_calls == []
+
+    def test_run_fuzzy_charge_discard_returns_error_on_invalid_uuid(self) -> None:
+        # invalid UUID at CLI boundary should return a non-zero exit code without service invocation
+        fuzzy_charge_service = _FakeFuzzyChargeService()
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "discard", "--id", "not-a-uuid"])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.discard_calls == []
+
+    def test_run_fuzzy_charge_discard_returns_error_when_service_fails(self) -> None:
+        # application-level service failures must be surfaced as CLI command failures
+        fuzzy_charge_service = _FakeFuzzyChargeService(error_to_raise=ApplicationError("Fuzzy entry not found."))
+        cli = _build_cli(fuzzy_charge_service=fuzzy_charge_service)
+
+        exit_code = cli.run(["fuzzy-charge", "discard", "--id", str(uuid4())])
+
+        assert exit_code == 1
+        assert fuzzy_charge_service.discard_calls == []
 
 

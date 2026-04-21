@@ -6,8 +6,8 @@ from typing import Sequence
 from uuid import UUID
 
 from ..application.calculations import BalanceEngine
-from ..application.services import BalanceService, ChargeService, IncomeService, SessionService
-from ..domain.models import AppSession, ChargeStatus, CommittedCharge, IncomeEntry, RecurringRule
+from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService
+from ..domain.models import AppSession, ChargeStatus, CommittedCharge, FuzzyCharge, FuzzyChargeStatus, IncomeEntry, RecurringRule
 from ..infrastructure.logging_config import LoggerFactory
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
@@ -163,6 +163,61 @@ class _InMemoryRecurringRuleRepository:
         return [rule for rule in self._rules.values() if rule.session_id == session_id]
 
 
+class _InMemoryFuzzyChargeRepository:
+    """Simple in-process fuzzy repository used to bootstrap the Stage 1 CLI flow."""
+
+    def __init__(self) -> None:
+        self._entries: dict[UUID, FuzzyCharge] = {}
+
+    def add(self, charge: FuzzyCharge) -> None:
+        """
+        Persist one fuzzy entry.
+
+        :param charge: Fuzzy entry to persist.
+        :return: None.
+        """
+        self._entries[charge.fuzzy_id] = charge
+
+    def get_by_id(self, fuzzy_id: UUID) -> FuzzyCharge | None:
+        """
+        Fetch one fuzzy entry by identifier.
+
+        :param fuzzy_id: Fuzzy entry identifier.
+        :return: Matching fuzzy entry if present; otherwise None.
+        """
+        return self._entries.get(fuzzy_id)
+
+    def list_pending(self, session_id: UUID) -> list[FuzzyCharge]:
+        """
+        List pending fuzzy entries for one session.
+
+        :param session_id: Session identifier.
+        :return: Pending fuzzy entries for the session.
+        """
+        return [entry for entry in self._entries.values() if entry.session_id == session_id and entry.status == FuzzyChargeStatus.PENDING]
+
+    def update_status(self, fuzzy_id: UUID, status: FuzzyChargeStatus) -> None:
+        """
+        Update one fuzzy entry status.
+
+        :param fuzzy_id: Fuzzy entry identifier.
+        :param status: New status value.
+        :return: None.
+        """
+        existing = self._entries.get(fuzzy_id)
+        if existing is not None:
+            self._entries[fuzzy_id] = FuzzyCharge(fuzzy_id=existing.fuzzy_id, session_id=existing.session_id, name=existing.name, direction=existing.direction, status=status, expected_date=existing.expected_date, estimated_amount=existing.estimated_amount, resolved_amount=existing.resolved_amount, resolved_date=existing.resolved_date)
+
+    def update(self, charge: FuzzyCharge) -> None:
+        """
+        Persist a full fuzzy entry replacement.
+
+        :param charge: Updated fuzzy entry.
+        :return: None.
+        """
+        self._entries[charge.fuzzy_id] = charge
+
+
 class ApplicationEntryPoint:
     """Bootstraps the command-line application."""
 
@@ -185,12 +240,14 @@ class ApplicationEntryPoint:
             income_repository = _InMemoryIncomeRepository()
             charge_repository = _InMemoryChargeRepository()
             recurring_rule_repository = _InMemoryRecurringRuleRepository()
+            fuzzy_charge_repository = _InMemoryFuzzyChargeRepository()
             session_service = SessionService(session_repository, logger=logger)
             income_service = IncomeService(session_repository, income_repository, logger=logger)
             charge_service = ChargeService(session_repository, charge_repository, recurring_rule_repository, logger=logger)
+            fuzzy_charge_service = FuzzyChargeService(session_repository, fuzzy_charge_repository, charge_repository, income_repository, logger=logger)
             balance_engine = BalanceEngine()
             balance_service = BalanceService(balance_engine, logger=logger)
-            cli_application = CliApplication(session_service, balance_service, income_service, charge_service)
+            cli_application = CliApplication(session_service, balance_service, income_service, charge_service, fuzzy_charge_service)
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
             logging.getLogger(__name__).error("Application error: %s", exc)
