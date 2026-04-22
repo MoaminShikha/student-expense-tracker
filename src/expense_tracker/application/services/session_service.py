@@ -41,3 +41,12 @@ class SessionService:
         session = AppSession(session_id=uuid4(), start_date=date.today(), opening_balance=opening_balance)
         self._session_repository.create(session)
         self._logger.info("Created session with opening balance %s.", opening_balance)
+
+    def get_active(self) -> AppSession | None:
+        """
+        Fetch the currently active session.
+
+        :return: Active session if present; otherwise None.
+        """
+        return self._session_repository.get_active()
+
