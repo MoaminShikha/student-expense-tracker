@@ -276,7 +276,7 @@ class ApplicationEntryPoint:
             spend_service = SpendService(session_repository, transaction_repository, logger=logger)
             balance_engine = BalanceEngine()
             balance_service = BalanceService(balance_engine, logger=logger)
-            cli_application = CliApplication(session_service, balance_service, income_service, charge_service, fuzzy_charge_service, spend_service)
+            cli_application = CliApplication(session_service, balance_service, income_service, charge_service, fuzzy_charge_service, spend_service, session_repository, income_repository, charge_repository, transaction_repository)
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
             logging.getLogger(__name__).error("Application error: %s", exc)

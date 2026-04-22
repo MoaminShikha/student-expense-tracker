@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 from datetime import date
-from typing import Sequence
+from decimal import Decimal
+from typing import Protocol, Sequence
 from uuid import UUID
 
 from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
@@ -13,7 +14,7 @@ from ..shared.exceptions import ApplicationError, ValidationError
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService, spend_service: SpendService) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService, spend_service: SpendService, session_repository: Protocol, income_repository: Protocol, charge_repository: Protocol, transaction_repository: Protocol) -> None:
         """
         Initialize command routing dependencies.
 
@@ -23,6 +24,10 @@ class CliApplication:
         :param charge_service: Service for charge commands.
         :param fuzzy_charge_service: Service for fuzzy-charge commands.
         :param spend_service: Service for spend commands.
+        :param session_repository: Session persistence adapter.
+        :param income_repository: Income persistence adapter.
+        :param charge_repository: Charge persistence adapter.
+        :param transaction_repository: Transaction persistence adapter.
         :return: None.
         """
         self._session_service = session_service
@@ -31,6 +36,10 @@ class CliApplication:
         self._charge_service = charge_service
         self._fuzzy_charge_service = fuzzy_charge_service
         self._spend_service = spend_service
+        self._session_repository = session_repository
+        self._income_repository = income_repository
+        self._charge_repository = charge_repository
+        self._transaction_repository = transaction_repository
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -112,13 +121,7 @@ class CliApplication:
         Handle the `dashboard show` command flow.
 
         `dashboard show` accepts no arguments — all data is fetched from the
-        repository layer through the service layer. Manual argument passing is
-        not permitted; it would bypass the data layer entirely.
-
-        # TODO Phase D: inject income, charge, and transaction repositories into
-        # CliApplication; delegate aggregation to a DashboardService (or extend
-        # SessionService) that queries the repos, sums the totals, and calls
-        # BalanceService.build_snapshot. Print the returned BalanceSnapshot here.
+        repository layer through the service layer via aggregation.
 
         :param arguments: Arguments passed after `dashboard show` (must be empty).
         :return: Process exit code.
@@ -127,8 +130,20 @@ class CliApplication:
             self._logger.error("dashboard show accepts no arguments. Data is fetched from the repository layer.")
             return 1
 
-        self._logger.error("dashboard show is not yet available — repository layer not wired (Phase D).")
-        return 1
+        try:
+            active_session = self._session_service.get_active()
+            if active_session is None:
+                self._logger.error("No active session. Initialize one with: session init --balance <amount>")
+                return 1
+
+            caution_threshold = Decimal("100")
+            snapshot = self._balance_service.aggregate_and_build_snapshot(active_session.session_id, self._income_repository, self._charge_repository, self._transaction_repository, caution_threshold, active_session.opening_balance)
+
+            self._logger.info("Dashboard snapshot: free_money=%s monthly_budget=%s monthly_spent=%s monthly_left=%s on_track_state=%s balance_state=%s", snapshot.free_money, snapshot.monthly_budget, snapshot.monthly_spent, snapshot.monthly_left, snapshot.on_track_state.value, snapshot.balance_state.value)
+            return 0
+        except (ValidationError, ApplicationError) as exc:
+            self._logger.error(str(exc))
+            return 1
 
     def handle_income_add(self, arguments: Sequence[str]) -> int:
         """

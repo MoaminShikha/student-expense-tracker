@@ -94,6 +94,19 @@ class _FakeSpendService:
         self.calls.append((amount, description, category, spent_on))
 
 
+class _FakeDummyRepository:
+    """Dummy repository for CLI testing — not exercised."""
+
+    def list_for_session(self, session_id: UUID) -> list:
+        return []
+
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list:
+        return []
+
+    def list_upcoming(self, session_id: UUID) -> list:
+        return []
+
+
 def _build_cli(income_service: _FakeIncomeService | None = None, charge_service: _FakeChargeService | None = None, fuzzy_charge_service: _FakeFuzzyChargeService | None = None, spend_service: _FakeSpendService | None = None) -> CliApplication:
     session_service: Any = _FakeSessionService()
     balance_service: Any = _FakeBalanceService()
@@ -101,7 +114,11 @@ def _build_cli(income_service: _FakeIncomeService | None = None, charge_service:
     charge_service_impl: Any = charge_service or _FakeChargeService()
     fuzzy_charge_service_impl: Any = fuzzy_charge_service or _FakeFuzzyChargeService()
     spend_service_impl: Any = spend_service or _FakeSpendService()
-    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl, fuzzy_charge_service=fuzzy_charge_service_impl, spend_service=spend_service_impl)
+    session_repository: Any = _FakeDummyRepository()
+    income_repository: Any = _FakeDummyRepository()
+    charge_repository: Any = _FakeDummyRepository()
+    transaction_repository: Any = _FakeDummyRepository()
+    return CliApplication(session_service=session_service, balance_service=balance_service, income_service=income_service_impl, charge_service=charge_service_impl, fuzzy_charge_service=fuzzy_charge_service_impl, spend_service=spend_service_impl, session_repository=session_repository, income_repository=income_repository, charge_repository=charge_repository, transaction_repository=transaction_repository)
 
 
 class TestCliIncomeAdd:

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import logging
+from datetime import date
 from decimal import Decimal
+from typing import Protocol
+from uuid import UUID
 
 from ...domain.models import BalanceSnapshot
 from ..calculations import BalanceEngine
@@ -60,3 +63,35 @@ class BalanceService:
         )
         self._logger.info("Built balance snapshot with free money %s.", snapshot.free_money)
         return snapshot
+
+    def aggregate_and_build_snapshot(self, session_id: UUID, income_repository: Protocol, charge_repository: Protocol, transaction_repository: Protocol, caution_threshold: Decimal, session_opening_balance: Decimal, red_threshold: Decimal = Decimal("130")) -> BalanceSnapshot:
+        """
+        Fetch all repository data for a session, aggregate totals, and build snapshot.
+
+        :param session_id: Active session identifier.
+        :param income_repository: Income persistence adapter.
+        :param charge_repository: Charge persistence adapter.
+        :param transaction_repository: Transaction persistence adapter.
+        :param caution_threshold: Threshold for caution balance state.
+        :param session_opening_balance: Session opening balance.
+        :param red_threshold: Threshold percentage for red on-track state.
+        :return: Computed balance snapshot.
+        """
+        today = date.today()
+        year, month = today.year, today.month
+
+        income_entries = income_repository.list_for_session(session_id)
+        all_income = sum((entry.amount for entry in income_entries), Decimal("0"))
+        income_this_month = sum((entry.amount for entry in income_repository.list_for_month(session_id, year, month)), Decimal("0"))
+
+        charges = charge_repository.list_upcoming(session_id)
+        total_committed = sum((charge.amount for charge in charges), Decimal("0"))
+        charges_this_month = sum((charge.amount for charge in charge_repository.list_for_month(session_id, year, month)), Decimal("0"))
+
+        transactions = transaction_repository.list_for_month(session_id, year, month)
+        total_spent = sum((tx.amount for tx in transactions), Decimal("0"))
+        spent_this_month = total_spent
+
+        snapshot = self.build_snapshot(session_opening_balance, all_income, total_committed, total_spent, income_this_month, charges_this_month, spent_this_month, caution_threshold, red_threshold)
+        return snapshot
+
