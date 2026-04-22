@@ -9,8 +9,8 @@
 
 ## Overall Position
 
-**Current phase:** Phase E — CLI wiring in progress (Phase D storage complete).
-**Test suite:** 196 / 196 passing (unit suite).
+**Current phase:** Phase F — Quality Gate complete (Stage 1 frozen and handoff-ready).
+**Test suite:** 208 / 208 passing (unit suite).
 
 ## Financial Conventions
 
@@ -39,10 +39,10 @@ gantt
     JSON Adapters · Repo Tests      :done, d1, 3, 4
 
     section Phase E — CLI Wiring
-    Command Handlers · Smoke Tests  :active, e1, 4, 5
+    Command Handlers · Smoke Tests  :done, e1, 4, 5
 
     section Phase F — Quality Gate
-    Full Suite · Freeze Docs        :c1, 5, 6
+    Full Suite · Freeze Docs        :done, c1, 5, 6
 ```
 
 ---
@@ -51,9 +51,7 @@ gantt
 
 ```mermaid
 pie title Phases Complete vs Remaining
-    "Complete (A + B + C + D)" : 4
-    "In Progress (E)" : 1
-    "Not Started (F)" : 1
+    "Complete (A + B + C + D + E + F)" : 6
 ```
 
 ```mermaid
@@ -62,8 +60,8 @@ graph LR
     B["Phase B\nCalculations\n✅ COMPLETE"]:::done
     C["Phase C\nLifecycles\n✅ COMPLETE"]:::done
     D["Phase D\nStorage\n✅ COMPLETE"]:::done
-    E["Phase E\nCLI Wiring\n⚠️ 7 of 10 commands"]:::partial
-    F["Phase F\nQuality Gate\n❌ NOT STARTED"]:::todo
+    E["Phase E\nCLI Wiring\n✅ COMPLETE"]:::done
+    F["Phase F\nQuality Gate\n✅ COMPLETE"]:::done
 
     A --> B --> C --> D --> E --> F
 
@@ -210,7 +208,7 @@ graph LR
 | Unit tests — snapshot composition (2 cases) | `tests/unit/test_calculations.py` | ✅ |
 | Cross-cutting tests — exceptions + logging | `tests/unit/test_shared_cross_cutting.py` | ✅ |
 
-**Total: calculations remain fully green; full unit suite now passes 196 / 196.**
+**Total: calculations remain fully green; full unit suite now passes 208 / 208.**
 
 ---
 
@@ -224,19 +222,13 @@ All service lifecycles are implemented and covered by unit tests.
 graph TD
     subgraph existing["application/services/ — Implemented"]
         SS["SessionService\ninit_session ✅"]
-        BS["BalanceService\nbuild_snapshot ⚠️\n(pass-through — Phase D wires it)"]
+        BS["BalanceService\nbuild_snapshot + aggregate_and_build_snapshot ✅"]
         IS["IncomeService\nadd_income ✅"]
         CS1["ChargeService\nadd_charge ✅\nadd_recurring_charge ✅\nmark_paid recurring ✅"]
     end
 
-    subgraph missing["application/services/ — Remaining"]
-        CS["ChargeService ✅\nadd_charge\nadd_recurring_charge\nmark_paid"]
-        FS["FuzzyChargeService ✅\nadd_fuzzy_entry\nresolve\ndiscard"]
-        SP["SpendService ✅\nadd_transaction"]
-    end
-
     style SS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style BS fill:#fef3c7,stroke:#92400e,color:#451a03
+    style BS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style IS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style CS1 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style CS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
@@ -297,12 +289,7 @@ Implemented files:
 - `tests/unit/test_fuzzy_charge_service.py`
 - `tests/unit/test_spend_service.py`
 
-Still needed before closing Phase C:
-
-| Test | What it verifies |
-|---|---|
-| Charge mark-paid + recurring occurrence remains stable under calendar edge cases | Prevent month-end regressions in production adapters |
-| Fuzzy overdue automation policy is explicitly decided (service or scheduler) | Avoid hidden behavior drift in Phase D/E |
+No remaining Phase C lifecycle gaps.
 
 ---
 
@@ -363,7 +350,7 @@ graph TD
 
 ---
 
-## Phase E — CLI Wiring `7 of 10 commands`
+## Phase E — CLI Wiring `10 of 10 commands`
 
 ```mermaid
 graph TD
@@ -376,20 +363,20 @@ graph TD
     CLI --> FCA["fuzzy-charge add\n✅ WIRED"]
     CLI --> FCR["fuzzy-charge resolve\n✅ WIRED"]
     CLI --> FCD["fuzzy-charge discard\n✅ WIRED"]
-    CLI --> SA["spend add\n❌ Missing"]
-    CLI --> CMP["charge mark-paid\n❌ Missing"]
-    CLI --> DS["dashboard show\n⚠️ Scaffold only\nPhase D dependency"]
+    CLI --> SA["spend add\n✅ WIRED"]
+    CLI --> CMP["charge mark-paid\n✅ WIRED"]
+    CLI --> DS["dashboard show\n✅ WIRED"]
 
     style SI fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style DS fill:#fef3c7,stroke:#92400e,color:#451a03
+    style DS fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style IA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style CA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style CAR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style FCA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style FCR fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style FCD fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style SA fill:#f2f2f0,stroke:#ccc,color:#999
-    style CMP fill:#f2f2f0,stroke:#ccc,color:#999
+    style SA fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style CMP fill:#1a6b3c,color:#fff,stroke:#1a6b3c
 ```
 
 | Command | Arguments | Handler | Status |
@@ -401,28 +388,24 @@ graph TD
 | `fuzzy-charge add` | `--name --due-date [--estimate]` | `handle_fuzzy_charge_add` | ✅ |
 | `fuzzy-charge resolve` | `--id --amount` | `handle_fuzzy_charge_resolve` | ✅ |
 | `fuzzy-charge discard` | `--id` | `handle_fuzzy_charge_discard` | ✅ |
-| `spend add` | `--amount --description [--category] [--date]` | — | ❌ |
-| `charge mark-paid` | `--id` | — | ❌ |
-| `dashboard show` | *(no arguments)* | `handle_dashboard_show` | ⚠️ Scaffold |
+| `spend add` | `--amount --description [--category] [--date]` | `handle_spend_add` | ✅ |
+| `charge mark-paid` | `--id` | `handle_charge_mark_paid` | ✅ |
+| `dashboard show` | *(no arguments)* | `handle_dashboard_show` | ✅ |
 
-> **`dashboard show` note:** The handler correctly accepts no arguments and rejects any that are
-> passed. It returns a Phase D not-yet-implemented error until the repository layer is wired and
-> a `DashboardService` aggregates totals from all repositories.
-
-**CLI smoke tests** (`tests/unit/test_cli_flows.py`) — exists and covers the wired command paths.
+**CLI smoke tests** (`tests/unit/test_cli_flows.py`) — exists and covers all 10 wired command paths.
 
 ---
 
-## Phase F — Quality Gate `NOT STARTED`
+## Phase F — Quality Gate `COMPLETE`
 
 | Item | Status |
 |---|---|
-| Full test suite green | ✅ 196/196 unit tests pass |
+| Full test suite green | ✅ 208/208 unit tests pass |
 | Service tests for implemented methods | ✅ `test_income_service.py`, `test_charge_service.py`, `test_fuzzy_charge_service.py`, `test_spend_service.py` |
 | `tests/unit/test_repositories.py` exists | ✅ |
 | `tests/unit/test_cli_flows.py` exists | ✅ |
-| Stage 1 behaviour frozen in docs | ❌ |
-| Stage 2 handoff note written | ❌ |
+| Stage 1 behaviour frozen in docs | ✅ |
+| Stage 2 handoff note written | ✅ |
 
 ---
 
@@ -451,7 +434,7 @@ graph TD
 
     subgraph layer_cli["CLI Layer"]
         Main["main.py\n✅ Bootstraps correctly"]
-        Cli["cli.py\n⚠️ 7 of 10 commands"]
+        Cli["cli.py\n✅ 10 of 10 commands"]
     end
 
     subgraph layer_tests["Tests"]
@@ -463,7 +446,7 @@ graph TD
         T6["test_fuzzy_charge_service.py\n✅ 7 tests"]
         T7["test_spend_service.py\n✅ 7 tests"]
         T8["test_repositories.py\n✅ 34 tests"]
-        T9["test_cli_flows.py\n✅ 40 tests"]
+        T9["test_cli_flows.py\n✅ 52 tests"]
     end
 
     style M fill:#1a6b3c,color:#fff,stroke:#1a6b3c
@@ -484,37 +467,30 @@ graph TD
     style T6 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T7 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
     style T8 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
-    style Cli fill:#fef3c7,stroke:#92400e,color:#451a03
-    style T9 fill:#f2f2f0,stroke:#ccc,color:#999
+    style Cli fill:#1a6b3c,color:#fff,stroke:#1a6b3c
+    style T9 fill:#1a6b3c,color:#fff,stroke:#1a6b3c
 ```
 
 ---
 
-## Recommended Next Steps — Phase E
+## Recommended Next Steps — Stage 1 Complete
 
-Build in this order. Each step unblocks the next.
+Preserve the frozen Stage 1 snapshot and begin the next stage only if scope changes.
 
 ```mermaid
 flowchart LR
-    S1["1. Wire spend add\nwith strict CLI validation"]
-    S2["2. Wire charge mark-paid\nUUID parse + service delegation"]
-    S3["3. Wire dashboard show\naggregate repos via service"]
-    S4["4. Expand CLI flow tests\nfor remaining commands"]
-    S5["5. Run full quality gate\npytest + docs freeze"]
-    S6["6. Stage 2 handoff\nlock final Stage 1 scope"]
+    S1["1. Keep Stage 1 frozen"]
+    S2["2. Use the handoff notes for Stage 2 planning"]
+    S3["3. Start new work only against a new stage plan"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    S1 --> S2 --> S3
 
     style S1 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
-    style S2 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
-    style S3 fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
-    style S4 fill:#fef3c7,stroke:#92400e,color:#451a03
-    style S5 fill:#fcebeb,color:#a32d2d,stroke:#a32d2d
-    style S6 fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    style S2 fill:#fef3c7,stroke:#92400e,color:#451a03
+    style S3 fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
 ```
 
-> Phase E now has three commands remaining: `spend add`, `charge mark-paid`, and a fully wired
-> `dashboard show` read path. After these are complete, Stage 1 moves directly to the final quality gate.
+> Stage 1 is complete: all 10 commands are wired, all tests pass, and the documentation is frozen.
 
 ---
 
