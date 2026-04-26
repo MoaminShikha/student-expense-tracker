@@ -16,6 +16,7 @@ from ..infrastructure.json.repositories import (
     JsonTransactionRepository,
 )
 from ..infrastructure.logging_config import LoggerFactory
+from ..ports.repositories import ChargeRepository, FuzzyChargeRepository, IncomeRepository, RecurringRuleRepository, SessionRepository, TransactionRepository
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
 
@@ -40,12 +41,12 @@ class ApplicationEntryPoint:
             logger = logger_factory.get_logger(__name__)
             logger.info("Application started.")
 
-            session_repository = JsonSessionRepository(_DATA_DIR / "session.json")
-            income_repository = JsonIncomeRepository(_DATA_DIR / "income.json")
-            charge_repository = JsonChargeRepository(_DATA_DIR / "charges.json")
-            recurring_rule_repository = JsonRecurringRuleRepository(_DATA_DIR / "recurring_rules.json")
-            fuzzy_charge_repository = JsonFuzzyChargeRepository(_DATA_DIR / "fuzzy_charges.json")
-            transaction_repository = JsonTransactionRepository(_DATA_DIR / "transactions.json")
+            session_repository: SessionRepository = JsonSessionRepository(_DATA_DIR / "session.json")
+            income_repository: IncomeRepository = JsonIncomeRepository(_DATA_DIR / "income.json")
+            charge_repository: ChargeRepository = JsonChargeRepository(_DATA_DIR / "charges.json")
+            recurring_rule_repository: RecurringRuleRepository = JsonRecurringRuleRepository(_DATA_DIR / "recurring_rules.json")
+            fuzzy_charge_repository: FuzzyChargeRepository = JsonFuzzyChargeRepository(_DATA_DIR / "fuzzy_charges.json")
+            transaction_repository: TransactionRepository = JsonTransactionRepository(_DATA_DIR / "transactions.json")
 
             session_service = SessionService(session_repository, logger=logger)
             income_service = IncomeService(session_repository, income_repository, logger=logger)
