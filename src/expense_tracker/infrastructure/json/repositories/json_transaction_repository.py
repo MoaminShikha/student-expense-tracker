@@ -44,6 +44,18 @@ class JsonTransactionRepository:
         self._save_all(data)
         logger.info("Transaction added: %s", transaction.transaction_id)
 
+    def list_for_session(self, session_id: UUID) -> list[Transaction]:
+        """
+        List all spend transactions for one session.
+
+        :param session_id: Session identifier.
+        :return: All transactions for the session.
+        """
+        data = self._load_all()
+        transactions = [self._deserialize(r) for r in data if r["session_id"] == str(session_id)]
+        logger.info("Retrieved %d transactions for session %s", len(transactions), session_id)
+        return transactions
+
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
         """
         List spend transactions for one calendar month.

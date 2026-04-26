@@ -204,6 +204,15 @@ class TransactionRepository(Protocol):
         """
         ...
 
+    def list_for_session(self, session_id: UUID) -> list[Transaction]:
+        """
+        List all spend transactions for a session.
+
+        :param session_id: The session identifier.
+        :return: All transactions for the session.
+        """
+        ...
+
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
         """
         List spend transactions for one calendar month.

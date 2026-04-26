@@ -6,7 +6,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 from ...domain.models import Transaction, TransactionCategory
-from ...domain.validators import parse_amount, parse_due_date, parse_transaction_category, parse_transaction_description
 from ...ports.repositories import SessionRepository, TransactionRepository
 from ...shared.exceptions import ApplicationError, ValidationError
 
@@ -39,26 +38,25 @@ class SpendService:
         :param spent_on: Calendar date of the transaction.
         :return: Persisted transaction.
         """
-        parsed_amount = parse_amount(str(amount))
-        if parsed_amount <= 0:
+        if amount <= 0:
             raise ValidationError("Transaction amount must be greater than zero.")
 
-        normalized_description = parse_transaction_description(description)
+        normalized_description = description.strip()
+        if not normalized_description:
+            raise ValidationError("Transaction description cannot be empty.")
+
         if category is not None and not isinstance(category, TransactionCategory):
             raise ValidationError("Transaction category is invalid.")
-        category_value = category.value if isinstance(category, TransactionCategory) else category
-        parsed_category = parse_transaction_category(category_value)
 
         if not isinstance(spent_on, date):
             raise ValidationError("Transaction date is invalid.")
-        parsed_spent_on = parse_due_date(spent_on.isoformat())
 
         active_session = self._session_repository.get_active()
         if active_session is None:
             raise ApplicationError("No active session. Start a session before adding transactions.")
 
-        transaction = Transaction(transaction_id=uuid4(), session_id=active_session.session_id, amount=parsed_amount,
-                                  description=normalized_description, category=parsed_category, date=parsed_spent_on)
+        transaction = Transaction(transaction_id=uuid4(), session_id=active_session.session_id, amount=amount,
+                                  description=normalized_description, category=category, date=spent_on)
         self._transaction_repository.add(transaction)
         self._logger.info("Added transaction %s for session %s.", transaction.transaction_id, active_session.session_id)
         return transaction
