@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 from decimal import Decimal
-from typing import Protocol, Sequence
+from typing import Sequence
 from uuid import UUID
 
 from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
@@ -14,7 +14,7 @@ from ..shared.exceptions import ApplicationError, ValidationError
 class CliApplication:
     """Routes supported Stage 1 CLI commands."""
 
-    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService, spend_service: SpendService, session_repository: Protocol, income_repository: Protocol, charge_repository: Protocol, transaction_repository: Protocol) -> None:
+    def __init__(self, session_service: SessionService, balance_service: BalanceService, income_service: IncomeService, charge_service: ChargeService, fuzzy_charge_service: FuzzyChargeService, spend_service: SpendService, caution_threshold: Decimal) -> None:
         """
         Initialize command routing dependencies.
 
@@ -24,10 +24,7 @@ class CliApplication:
         :param charge_service: Service for charge commands.
         :param fuzzy_charge_service: Service for fuzzy-charge commands.
         :param spend_service: Service for spend commands.
-        :param session_repository: Session persistence adapter.
-        :param income_repository: Income persistence adapter.
-        :param charge_repository: Charge persistence adapter.
-        :param transaction_repository: Transaction persistence adapter.
+        :param caution_threshold: Free-money threshold for caution balance state.
         :return: None.
         """
         self._session_service = session_service
@@ -36,10 +33,7 @@ class CliApplication:
         self._charge_service = charge_service
         self._fuzzy_charge_service = fuzzy_charge_service
         self._spend_service = spend_service
-        self._session_repository = session_repository
-        self._income_repository = income_repository
-        self._charge_repository = charge_repository
-        self._transaction_repository = transaction_repository
+        self._caution_threshold = caution_threshold
         self._logger = logging.getLogger(__name__)
 
     def run(self, arguments: Sequence[str]) -> int:
@@ -136,8 +130,7 @@ class CliApplication:
                 self._logger.error("No active session. Initialize one with: session init --balance <amount>")
                 return 1
 
-            caution_threshold = Decimal("100")
-            snapshot = self._balance_service.aggregate_and_build_snapshot(active_session.session_id, self._income_repository, self._charge_repository, self._transaction_repository, caution_threshold, active_session.opening_balance)
+            snapshot = self._balance_service.aggregate_and_build_snapshot(active_session.session_id, self._caution_threshold, active_session.opening_balance)
 
             self._logger.info("Dashboard snapshot: free_money=%s monthly_budget=%s monthly_spent=%s monthly_left=%s on_track_state=%s balance_state=%s", snapshot.free_money, snapshot.monthly_budget, snapshot.monthly_spent, snapshot.monthly_left, snapshot.on_track_state.value, snapshot.balance_state.value)
             return 0
@@ -265,7 +258,9 @@ class CliApplication:
                 day_of_month = parse_day_of_month(raw_day_of_month or "")
                 self._charge_service.add_recurring_charge(raw_name, amount, day_of_month)
             else:
-                assert raw_due_date is not None
+                if raw_due_date is None:
+                    self._logger.error("Missing required argument: --due-date")
+                    return 1
                 due_date = parse_due_date(raw_due_date)
                 self._charge_service.add_charge(raw_name, amount, due_date)
         except (ValidationError, ApplicationError) as exc:

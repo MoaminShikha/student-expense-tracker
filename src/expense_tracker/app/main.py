@@ -21,6 +21,7 @@ from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
 
 _DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
+_CAUTION_THRESHOLD = Decimal("100")
 
 
 class ApplicationEntryPoint:
@@ -54,7 +55,7 @@ class ApplicationEntryPoint:
             fuzzy_charge_service = FuzzyChargeService(session_repository, fuzzy_charge_repository, charge_repository, income_repository, logger=logger)
             spend_service = SpendService(session_repository, transaction_repository, logger=logger)
             balance_engine = BalanceEngine()
-            balance_service = BalanceService(balance_engine, logger=logger)
+            balance_service = BalanceService(balance_engine, income_repository, charge_repository, transaction_repository, logger=logger)
 
             cli_application = CliApplication(
                 session_service,
@@ -63,10 +64,7 @@ class ApplicationEntryPoint:
                 charge_service,
                 fuzzy_charge_service,
                 spend_service,
-                session_repository,
-                income_repository,
-                charge_repository,
-                transaction_repository,
+                caution_threshold=_CAUTION_THRESHOLD,
             )
             return cli_application.run(cli_arguments)
         except ExpenseTrackerError as exc:
