@@ -15,3 +15,6 @@ venv/
 # Generated design export
 Docs/design_file_2.html
 
+# Runtime data (JSON storage)
+data/
+
