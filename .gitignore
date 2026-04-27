@@ -14,7 +14,7 @@ venv/
 CLAUDE.md
 
 # Generated design export
-Docs/design_file_2.html
+Docs/visuals/design_file_2.html
 
 # Runtime data (JSON storage)
 data/
