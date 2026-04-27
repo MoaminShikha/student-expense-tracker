@@ -19,7 +19,7 @@
 
 ## Step 2 — Raw Feature Brief *(working note only — not copied to design file)*
 
-What it is: A academic year budget tracker for Israeli university students that separates committed money from free money and tells the student one honest number — what they can safely spend today.
+What it is: An academic-year-first budget tracker for Israeli university students that separates committed money from free money and tells the student one honest number — what they can safely spend today.
 
 Who needs it: Israeli university students during the academic year, managing irregular income from multiple sources (family transfers, scholarships, part-time shifts), sharing living costs, and doing financial planning via rough mental calculation.
 
@@ -61,19 +61,19 @@ Students running out of money before the academic year ends is not a willpower p
 
 ## Goals
 
-- Show a single honest daily safe-to-spend number derived from free money (income minus all committed upcoming charges) divided by days remaining in the academic year
+- Show a single honest safe-to-spend number derived from free money (income minus all committed upcoming charges) using the active period rule
 - Separate committed money from free money as the core financial mechanic
 - Allow students to log income from multiple sources (family, scholarship, part-time work) with source tags
 - Allow students to log upcoming charges as either recurring or one-off, with a due date
 - Remind students 3 days before a committed charge lands
 - Detect and surface one spend pattern observation automatically when the data justifies it
-- Work entirely within the academic year time horizon — no longer, no shorter
+- Keep period-aware budgeting clear while allowing continuous use across multiple periods
 - Be usable by someone with no financial background in under 5 minutes of setup
 
 ## Non-Goals
 
 - No bank or payment API integration in this version (local bank connectivity reserved for Stage 6)
-- No break mode, holiday mode, or non-academic-year budget profiles
+- No break mode or holiday automation in Stage 1
 - No investment, savings, or wealth-building features
 - No manual savings tip lists or generic financial advice
 - No roommate cost-splitting feature in Stage 1
@@ -91,14 +91,15 @@ Students running out of money before the academic year ends is not a willpower p
 - Stage 1 is a CLI tool with JSON storage — no web framework yet
 - Stage 2 replaces the CLI with a **CustomTkinter desktop GUI dashboard** — the app opens directly to a live dashboard window; all input happens via buttons and modal forms; JSON storage remains
 - Stage 3 introduces PostgreSQL as the persistence layer — JSON adapters are swapped; domain and service layers are untouched
-- Stage 4 introduces FastAPI backend and a React or Streamlit web frontend
+- Stage 4 introduces reminders and pattern detection on top of the existing app layers
+- Stage 5 introduces FastAPI backend and a React or Streamlit web frontend
 - No external API dependencies in Stages 1–3
 - Pattern detection uses only the student's own logged data — no external benchmarks in Stage 1
 - All calculation logic must be testable in isolation from the UI
 
 ### Product
 - The primary user is a CS student building this as a portfolio project — they are also the target user
-- The app is academic year-scoped by design; a new academic year requires a new setup flow
+- The app runs continuously; students can optionally mark new periods without resetting the full app session
 - The daily number is the product's core identity — no feature should obscure or compete with it
 - Automatic insights must feel earned by data, not forced — if data is insufficient, no insight is surfaced
 - The app must work without internet access for core functionality
@@ -130,17 +131,17 @@ Students running out of money before the academic year ends is not a willpower p
 - The primary user wants one number when opening the app: am I on track today?
 
 ### Assumptions
-- An academic year comprises two semesters, approximately 28–36 weeks total, with a single setup at the start of the academic year
+- Students may still think in academic-year periods, but period markers are optional rather than mandatory resets
 - The student knows their major upcoming charges in advance (rent day, tuition date, phone bill)
 - Income is logged manually — no automatic bank feed
 - The student will log transactions manually, at least daily during active use
 - Pattern detection becomes meaningful after approximately 2–3 weeks of data
 - A daily safe-to-spend number is more useful than a weekly or monthly number for this user
-- The student's academic year budget does not account for emergency expenses — this is a known limitation
+- The student's budgeting model does not account for emergency expenses — this is a known limitation
 - NIS is the primary currency for Stage 1
 
 ### Open Questions
-- **How is the academic year end date handled if a student has exams after the official end?** Matters because it affects the daily number calculation — wrong end date means wrong daily number.
+- **How should optional period markers be suggested without forcing resets?** Matters because reminders should help planning without breaking continuous history.
 - **What happens when income arrives mid-year and changes the daily number significantly?** Matters because a large mid-year family transfer could make the number look artificially safe.
 - **How many days of data are needed before the pattern detection fires?** Matters because firing too early produces unreliable insights that erode trust.
 - **Is the daily number recalculated in real time as transactions are logged, or once per day?** Matters for UX accuracy and implementation complexity.
@@ -152,34 +153,34 @@ Students running out of money before the academic year ends is not a willpower p
 ## Actors and Workflows
 
 ### Actors
-- **Student (primary)** — sets up the academic year, logs income, logs upcoming charges, logs daily transactions, reads the daily number
+- **Student (primary)** — sets up the app session, logs income, logs upcoming charges, logs daily transactions, reads the budget signal
 - **The app (system)** — calculates free money, computes daily safe-to-spend, triggers reminders, detects spend patterns, surfaces insights
 
 ### Workflows
 
-**Workflow 1 — Academic year setup**
-- Trigger: Student opens app for the first time, or starts a new academic year
-- Steps: Enter academic year start date → enter academic year end date → enter opening balance → optionally pre-load known recurring charges (rent, phone bill, transport pass)
-- State changes: Academic year record created; committed charges registered; free money calculated from opening balance minus all committed charges; first daily number computed
+**Workflow 1 — Initial setup / optional period setup**
+- Trigger: Student opens app for the first time, or chooses to mark a new planning period
+- Steps: Enter opening balance → optionally set a period label and target end date → optionally pre-load known recurring charges (rent, phone bill, transport pass)
+- State changes: App session exists; optional period metadata is saved; committed charges registered; free money calculated from opening balance minus all committed charges; first budget signal computed
 - Dependencies: None — this is the root workflow
 
 **Workflow 2 — Log income**
 - Trigger: Student receives money (scholarship drop, family transfer, shift payment)
 - Steps: Enter amount → tag source type (scholarship / family / work / other) → confirm date
 - State changes: Free money increases; daily number recalculates; if increase is large, a contextual note may surface ("your daily budget has increased to ₪X")
-- Dependencies: Active academic year must exist
+- Dependencies: Active app session must exist
 
 **Workflow 3 — Log upcoming charge**
 - Trigger: Student remembers or discovers a future payment obligation
 - Steps: Enter charge name → enter amount → enter due date → tag as recurring or one-off → if recurring, set frequency
 - State changes: Committed money increases by charge amount immediately; free money decreases by same amount; daily number recalculates; reminder scheduled for 3 days before due date
-- Dependencies: Active academic year must exist
+- Dependencies: Active app session must exist
 
 **Workflow 4 — Log daily transaction**
 - Trigger: Student spends money
 - Steps: Enter amount → enter description → optionally tag category (food / transport / entertainment / education / other)
 - State changes: Free money decreases; today's spend accumulates; daily spend compared to daily safe-to-spend number; on-track status updates
-- Dependencies: Active academic year must exist; free money must be positive
+- Dependencies: Active app session must exist; free money can be positive or negative, with state-aware display
 
 **Workflow 5 — Pre-charge reminder**
 - Trigger: System detects a committed charge is due in 3 days
@@ -191,7 +192,7 @@ Students running out of money before the academic year ends is not a willpower p
 - Trigger: Student logs a payment they know is coming on a specific date but whose exact amount is unknown (e.g. variable electricity bill, unconfirmed tuition adjustment)
 - Steps: Enter charge name → enter due date → mark as amount-unknown → no amount deducted
 - State changes: No deduction from free money; date-only reminder scheduled for 3 days before the due date
-- Dependencies: Active academic year must exist
+- Dependencies: Active app session must exist
 
 **Workflow 6 — Spend pattern insight**
 - Trigger: System detects that a spend category has exceeded its rolling average by a threshold, after sufficient data exists
@@ -203,7 +204,7 @@ Students running out of money before the academic year ends is not a willpower p
 - Trigger: Student opens the app
 - Steps: App displays daily safe-to-spend number; today's spend so far; on-track / over indicator; next upcoming charge with days until it lands
 - State changes: None — read-only display
-- Dependencies: Active academic year; at least one income source logged
+- Dependencies: Active app session; at least one income source logged
 
 ---
 
@@ -215,8 +216,8 @@ Students running out of money before the academic year ends is not a willpower p
 - Trigger: Total committed charges exceed total logged income
 - Protection note: When committed charges would push free money below zero, the app must surface an explicit warning state — not silently show a negative number
 
-**Invariant 2 — Daily number is always derived from free money, never from bank balance**
-- Statement: The daily safe-to-spend number is computed as (free money) ÷ (days remaining in academic year) — committed charges are always pre-deducted
+**Invariant 2 — Budget signal is always derived from free money, never from bank balance**
+- Statement: The displayed safe-to-spend/budget signal is always computed from free money with committed charges pre-deducted
 - Break scenario: A code change accidentally uses total balance instead of free money in the calculation
 - Trigger: Developer error or refactor that bypasses the committed charge deduction
 - Protection note: Unit tests must assert this calculation explicitly with known inputs
@@ -233,11 +234,11 @@ Students running out of money before the academic year ends is not a willpower p
 - Trigger: Missing state tracking for whether an insight has already been surfaced
 - Protection note: Insight state must be persisted — not computed fresh on every open
 
-**Invariant 5 — Academic year end date cannot be in the past**
-- Statement: The daily number denominator (days remaining) must always be at least 1
-- Break scenario: Student is past academic year end date and daily number becomes ÷0 or negative
-- Trigger: Time passes; academic year end date is not updated
-- Protection note: Enforce at setup and flag clearly when academic year end is within 7 days
+**Invariant 5 — App session must exist before financial writes**
+- Statement: Income, charge, and transaction writes require an active app session context
+- Break scenario: A write occurs before setup, causing orphan records and invalid aggregates
+- Trigger: Missing setup guard in input flow
+- Protection note: All write workflows gate on active session presence before persistence
 
 ---
 
@@ -245,17 +246,17 @@ Students running out of money before the academic year ends is not a willpower p
 
 ### Components
 
-**AcademicYearContext**
-- Responsibility: Holds the definition of the active academic year — start date, end date, and opening balance. The root object from which all calculations derive.
-- Inputs: Setup form values (start date, end date, opening balance)
-- Outputs: Academic year duration in days; days remaining; academic year ID for scoping all other records
-- Ownership: Created once per academic year; immutable after creation except for explicit edit
-- Notes: If no active academic year exists, the app cannot function — all other components depend on this
+**AppSessionContext**
+- Responsibility: Holds the active app session identity and opening balance, with optional period metadata for planning views.
+- Inputs: Setup values (opening balance, optional period label/end target)
+- Outputs: Session ID, opening balance, optional period framing for dashboards and history filters
+- Ownership: Created once at first setup; period markers can be added later without resetting core history
+- Notes: If no active app session exists, the app cannot function — all other components depend on this
 
 **IncomeLog**
 - Responsibility: Records all income entries with source type, amount, and date. Provides total income to the balance engine.
 - Inputs: Amount, source tag, date
-- Outputs: Total income for current academic year; income by source type; income timeline
+- Outputs: Total income for active session/date range; income by source type; income timeline
 - Ownership: Append-only — entries are not edited or deleted after logging
 - Notes: Source tags (scholarship / family / work / other) are for pattern analysis and display only — they do not affect the calculation
 
@@ -275,7 +276,7 @@ Students running out of money before the academic year ends is not a willpower p
 
 **BalanceEngine**
 - Responsibility: The calculation core. Takes total income, total committed charges, and total transactions to produce free money and the daily safe-to-spend number.
-- Inputs: Total income (from IncomeLog); total committed charges (from CommittedChargeRegister); total transactions spent (from TransactionLog); days remaining (from AcademicYearContext)
+- Inputs: Total income (from IncomeLog); total committed charges (from CommittedChargeRegister); total transactions spent (from TransactionLog); active period context (from AppSessionContext)
 - Outputs: Free money; daily safe-to-spend number; on-track boolean; over/under amount for today
 - Ownership: Pure calculation — no state of its own; always computed fresh from inputs
 - Notes: Must be independently testable with no dependencies on storage or UI
@@ -296,7 +297,7 @@ Students running out of money before the academic year ends is not a willpower p
 
 ### Interaction Summary
 
-When a student opens the app, AcademicYearContext provides the time frame, IncomeLog and CommittedChargeRegister provide the financial inputs, and BalanceEngine computes the daily safe-to-spend number in real time. TransactionLog provides today's spend so the on-track indicator can be shown. ReminderScheduler checks for any charges due in 3 days and surfaces them if present. PatternDetector checks whether a category insight is due and surfaces it if thresholds are met and it has not fired before.
+When a student opens the app, AppSessionContext provides the active context, IncomeLog and CommittedChargeRegister provide the financial inputs, and BalanceEngine computes the current budget signal in real time. TransactionLog provides today's and monthly spend so the on-track indicator can be shown. ReminderScheduler checks for any charges due in 3 days and surfaces them if present. PatternDetector checks whether a category insight is due and surfaces it if thresholds are met and it has not fired before.
 
 All write operations — logging income, logging a charge, logging a transaction — update their respective components and trigger a BalanceEngine recalculation. The daily number is always fresh, never cached.
 
@@ -304,19 +305,19 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ## Data Ownership and State Model
 
-**AcademicYear**
+**AppSession**
 - Source of truth: Local storage (JSON in Stage 1–2, PostgreSQL from Stage 3 onwards)
-- Mutated by: Student at setup; immutable after creation except explicit edit of end date
-- Read by: BalanceEngine (days remaining); all components (academic year scoping)
-- Derived state: Days remaining (computed from end date and today)
-- Lifecycle: Created at academic year setup; archived when a new academic year is created
+- Mutated by: Student at first setup; optional period metadata may be updated later
+- Read by: BalanceEngine and all components for session scoping
+- Derived state: Optional period framing when labels/end targets are set
+- Lifecycle: Created at first setup; persists continuously unless explicitly archived
 
 **IncomeEntry**
 - Source of truth: IncomeLog store
 - Mutated by: Student (append only — no edits, no deletes)
 - Read by: BalanceEngine (total income)
-- Derived state: Total income (sum of all entries for active academic year)
-- Lifecycle: Created when student logs income; never modified; scoped to academic year
+- Derived state: Total income (sum of entries in active session and selected date range)
+- Lifecycle: Created when student logs income; never modified; scoped to app session
 
 **CommittedCharge**
 - Source of truth: CommittedChargeRegister store
@@ -330,7 +331,7 @@ All write operations — logging income, logging a charge, logging a transaction
 - Mutated by: Student (append only)
 - Read by: BalanceEngine (total spent); PatternDetector (category history); UI (today's spend)
 - Derived state: Today's total spend; rolling 14-day average per category
-- Lifecycle: Created when student logs a spend; never modified; scoped to academic year
+- Lifecycle: Created when student logs a spend; never modified; scoped to app session
 
 **InsightState**
 - Source of truth: PatternDetector store
@@ -376,10 +377,10 @@ All write operations — logging income, logging a charge, logging a transaction
 | Workflow / State | Risk | What Can Go Wrong | Control Note |
 |---|---|---|---|
 | Log income while BalanceEngine is reading | Stale read | Daily number computed before new income is counted | In Stages 1–2 (single-user local app), this is sequential — not a real risk. In Stage 5 (web), writes must complete before reads for balance calculation |
-| Log a committed charge | Double-deduction | Recurring charge auto-generates next academic year period entry while student manually adds same charge | Unique constraint on (charge name + due date) within a semester to prevent duplicates |
+| Log a committed charge | Double-deduction | Recurring charge auto-generates next cycle while student manually adds the same due date | Unique constraint on (charge name + due date) within active scope to prevent duplicates |
 | Pattern detection threshold | Premature firing | Insight fires before data is statistically meaningful | Enforce minimum data threshold (14 days) as a hard gate before any insight is evaluated |
 | Insight state | Re-firing | Same insight fires multiple times because state was not persisted correctly | InsightState must be written to storage immediately when an insight fires — not held in memory |
-| Academic year end date passes | Division by zero | Days remaining hits zero; daily number becomes undefined | Clamp days remaining to minimum 1; surface explicit "semester ending" warning when ≤ 7 days remain |
+| Period marker changes | Scope confusion | Student mistakes a planning marker for a hard reset and expects data deletion | Keep period markers optional and non-destructive; history stays continuous by default |
 | Committed charge marked paid | Balance inconsistency | Charge marked paid but not removed from committed total | Paid charges must be explicitly removed from the committed sum in BalanceEngine inputs |
 
 ---
@@ -387,9 +388,9 @@ All write operations — logging income, logging a charge, logging a transaction
 ## Scalability and Multi-Tenancy Notes
 
 ### Growth Axes
-- Transaction volume per student per semester (expected: 5–15 entries/day over 36 weeks ≈ 1,500–2,700 records max per academic year)
-- Number of committed charges (expected: 5–15 per academic year)
-- Number of academic years stored historically
+- Transaction volume per student over continuous use (expected: 5–15 entries/day; monthly archives used for analysis)
+- Number of committed charges active at a given time (expected: 5–15)
+- Number of optional period markers stored historically
 
 ### Likely First Bottlenecks
 - None at expected single-student scale in Stages 1–2
@@ -415,7 +416,7 @@ All write operations — logging income, logging a charge, logging a transaction
 |---|---|---|---|
 | Student does not log transactions consistently | Daily number becomes inaccurate; pattern detection cannot fire | Manual logging friction; forgetting during busy periods (exams) | Mitigate with frictionless logging UX — minimum required fields; quick-log shortcut is a Stage 2 CustomTkinter priority |
 | Student logs a charge with wrong due date | Reminder fires at wrong time; charge deducted from wrong period | Human error at input | Allow charge editing; surface upcoming charges list prominently so errors are visible |
-| Academic year end date set incorrectly | Daily number denominator wrong for entire academic yearter | Human error at setup | Allow end date editing; warn clearly if end date seems unusually short or long |
+| Optional period marker set incorrectly | Student reads the wrong planning window | Human error at period setup | Allow marker edits and keep all calculations reproducible from raw records |
 | Free money goes negative silently | Student believes they have more than they do; app fails its core purpose | More committed charges logged than income | This must be an explicit warning state — the most important failure mode to handle visually |
 | Pattern detection fires too early | Insight is statistically meaningless; student loses trust in the feature | Threshold set too low; minimum data gate not enforced | Enforce 14-day minimum strictly; prefer false negatives over false positives for insights |
 | Data loss from storage corruption | All data lost | JSON or PostgreSQL corruption; accidental deletion | Document how to back up data; consider automatic backup on session close from Stage 3 onwards |
@@ -447,7 +448,7 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ### Explicit Tradeoffs in the Chosen Design
 - Manual logging in exchange for: no external dependencies, works offline, student controls all data
-- Academic year scope in exchange for: does not handle break periods, needs re-setup each academic year
+- Continuous session scope in exchange for: needs clear period markers to preserve planning context
 - Local storage in exchange for: no sync across devices, no cloud backup
 - No bank integration in exchange for: future committed charges visible (which bank feeds cannot show)
 - Pattern detection with high threshold in exchange for: fewer false positives, more trustworthy insights
@@ -496,7 +497,7 @@ All write operations — logging income, logging a charge, logging a transaction
 
 ## Future Features — Contextual Discovery
 
-*Planned beyond Stage 7. Noted here to prevent premature building and to preserve the idea clearly.*
+*Planned beyond the current core stages. Noted here to prevent premature building and to preserve the idea clearly.*
 
 ### What it is
 
@@ -520,7 +521,7 @@ When rent is flagged as the dominant budget pressure (>40% of monthly budget), s
 | External data dependency | Requires supermarket price APIs, location services, housing listing APIs — none in the current architecture |
 | Location permissions | A new trust boundary — student must explicitly grant location access |
 | Israeli-specific data | Supermarket chains, dorm availability, and student discount programmes require local data partnerships |
-| Premature complexity | Building this before Stages 1–7 are stable would distract from the core product |
+| Premature complexity | Building this before the core stages are stable would distract from the core product |
 
 ### Design principle when built
 
@@ -636,34 +637,30 @@ INV-5 (academic year end date cannot be in the past) is now retired. It no longe
 
 ## Weakness 4 Resolution — Fuzzy Charge Resolution Flow
 
-*Resolved April 2026. Replaces the placeholder in the pre-review weakness check.*
+*Resolved April 2026. Locks the Stage 1 CLI behaviour; the Occurrences screen remains a Stage 2 presentation layer.*
 
-### The Occurrences Screen — new named screen
+### Stage 1 CLI resolution flow
 
-A dedicated screen in the app listing all events waiting for student action. Accessible from the home screen. Contains:
-- Unresolved fuzzy charges (past and upcoming due dates)
-- Any other pending confirmations the app needs from the student
-
-This is not the home screen. The student navigates here intentionally. It is the single place to resolve all ambiguity.
+Fuzzy charges are created with a known date and an optional estimate, then stay pending until the student confirms or discards them. Stage 1 exposes that behaviour through the CLI; Stage 2 may later present the same states in an Occurrences screen.
 
 ### Scenario A — Normal resolution (alert fires, amount known)
 
 1. Alert fires 3 days before fuzzy charge due date
-2. Student taps notification → two-button prompt appears: **Confirm** or **Delete**
-3. The estimated amount logged at creation is pre-filled and shown — student does not re-enter from scratch
-4. **Confirm:** Fuzzy charge converts to a committed charge. Amount deducts from free money immediately (INV-3). Removed from Occurrences screen.
-5. **Delete:** Fuzzy charge discarded entirely. No deduction. Removed from Occurrences screen.
-6. **✕ (dismiss):** Notification dismissed. Student is not sure yet — has not checked their bank. Fuzzy charge remains in Occurrences screen in gray pending state. No decision made.
+2. Student confirms the amount with `fuzzy-charge resolve` or removes the entry with `fuzzy-charge discard`
+3. The estimated amount logged at creation is pre-filled as context — the student confirms the final amount explicitly
+4. **Resolve:** Fuzzy charge converts to a committed charge or income entry, depending on direction. The confirmed amount is applied immediately and the pending record is removed.
+5. **Discard:** Fuzzy charge is removed entirely. No deduction or credit happens.
+6. **Dismiss:** The reminder can be ignored for now; the fuzzy charge stays pending until the student acts later.
 
 If the estimated amount was wrong, the student deletes and re-logs the charge as a new entry with the correct amount.
 
 ### Scenario B — Late resolution (due date passes, charge unresolved)
 
-The fuzzy charge remains in the Occurrences screen displayed in a **gray / muted style** to indicate it is overdue and unresolved. It is never auto-discarded. The student resolves it in the Occurrences screen using the same Confirm / Delete options. No time limit. No automatic action by the system.
+The fuzzy charge remains pending after the due date. It is never auto-discarded. The student can still resolve or discard it later, and Stage 2 can present overdue items in a muted style once the GUI exists.
 
 ### Scenario C — Charge never arrives
 
-Student opens Occurrences screen or receives the notification and realises the charge did not happen. They tap **Delete**. The fuzzy charge is discarded with no deduction. If confirmation is needed, a brief confirmation prompt asks: "Remove this charge? It will not affect your balance."
+The student realises the charge will not happen and discards it. The fuzzy charge is removed with no deduction or credit. If confirmation is needed later in the GUI, a brief prompt can ask: "Remove this charge? It will not affect your balance."
 
 ### FuzzyCharge states
 
@@ -684,16 +681,16 @@ FuzzyCharge gains two new fields:
 | estimated_amount | decimal, nullable | Optional rough estimate entered at creation. Pre-filled in confirmation prompt. Never used in calculations. |
 | status | enum | pending / overdue / resolved / discarded |
 
-### Design deferred to Stage 3
+### Design deferred to Stage 2
 
-The exact visual treatment of the gray pending state, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 2 (CustomTkinter dashboard). What is locked now: the behaviour, the states, the two-button interaction model, and the ✕ dismiss option.
+The exact visual treatment of pending and overdue fuzzy charges, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 2 (CustomTkinter dashboard). What is locked now: the behaviour, the states, the resolve/discard flow, and the ability to leave a fuzzy charge pending until later.
 
 
 ---
 
 ## Weakness 3 Resolution — On-Track Threshold Definition
 
-*Resolved April 2026. Replaces the placeholder in the pre-review weakness check.*
+*Resolved April 2026. Defines the monthly balance signal used by the dashboard and lock-step calculations.*
 
 ### Monthly model — not daily
 
@@ -708,9 +705,9 @@ The core budget signal is monthly, not daily. Students do not spend uniformly ev
     monthly_left       = monthly_budget − monthly_spent
     on_track_pct       = monthly_spent ÷ monthly_budget × 100
 
-### Home screen — progress bar (Option A)
+### Dashboard view — progress bar (Option A)
 
-The home screen shows a visual progress bar:
+The dashboard shows a visual progress bar:
 
     ₪[monthly_spent] of ₪[monthly_budget] used this month
 
@@ -732,27 +729,27 @@ App estimates these defaults based on historical spend variance once sufficient 
 
 ### Months remaining — calendar months by default
 
-Months remaining is calculated as the number of remaining calendar months in the academic year (including the current partial month). Default setting. Student can switch to 30-day blocks in settings if preferred.
+Months remaining is calculated from the active planning window (including the current partial month when a period marker exists). Students can switch to 30-day blocks in settings if preferred.
 
 ### Two views — monthly and period history
 
 **Primary view (home screen):** This month only. Monthly budget, monthly spend, progress bar, on-track state. This is what the student sees every time they open the app.
 
-**Secondary view (period history):** An optional screen showing a month-by-month summary of every completed month in the academic year. Student navigates here intentionally. Shows monthly budget vs actual spend per month, and cumulative academic year totals.
+**Secondary view (period history):** An optional screen showing a month-by-month summary of completed months in the selected date range. Student navigates here intentionally. Shows monthly budget vs actual spend per month, and cumulative totals for the selected range.
 
 ### Two types of negative — treated differently
 
 **Type 1 — Monthly deficit** (charges due this month exceed income this month):
 Shown on the home screen. The student is tight this month specifically. Common when a scholarship arrives next month but charges are due now. Yellow or red state on the progress bar for this month. The student can see next month's expected income in the period history view to understand why it resolves.
 
-**Type 2 — Overall academic year deficit** (total committed charges exceed total income across the full year):
+**Type 2 — Overall selected-range deficit** (total committed charges exceed total income across the selected range):
 Surfaced in the period history view, not forced onto the home screen every session. This is the crisis state from Weakness 1 — red balance display, full ranked spending breakdown. The student accesses this when they choose to look at the full picture.
 
 ### BalanceEngine output — updated
 
 BalanceEngine now produces six output values:
 
-1. Free money (total academic year — ₪ amount)
+1. Free money (selected range — ₪ amount)
 2. Monthly budget (this calendar month — ₪ amount)
 3. Monthly spent (this calendar month — ₪ amount)
 4. Monthly left (monthly_budget − monthly_spent)
@@ -764,7 +761,7 @@ BalanceEngine now produces six output values:
 
 ## Weakness 2 Resolution — Recurring Charge Auto-Generation Behaviour
 
-*Resolved April 2026. Replaces the placeholder in the pre-review weakness check.*
+*Resolved April 2026. Matches the Stage 1 command flow and persists the next charge immediately on payment.*
 
 ### When the next occurrence is created
 
@@ -823,7 +820,7 @@ The student is never blocked from using the app in any state. The app shows real
 
 ### Threshold — app suggests, student overrides
 
-At academic year setup, the app calculates a suggested caution threshold as **7 × estimated average daily spend** (one week buffer). The student can:
+At first setup, the app calculates a suggested caution threshold as **7 × estimated average daily spend** (one week buffer). The student can:
 - Accept the suggested threshold
 - Override it with a custom amount
 - Set it to zero to disable the yellow caution state entirely
@@ -859,10 +856,10 @@ INV-1 is now fully specified: free money is never displayed without a correspond
 Sections that need strengthening before formal review:
 
 - **Pattern detection threshold** — "approximately 14 days" is still a working assumption. The actual threshold (number of transactions, number of categories, percentage deviation) needs to be made concrete before implementation.
-- **Recurring charge behaviour** — what happens when a recurring charge auto-generates is described but not fully specified. Does it auto-deduct immediately? Does it ask the student to confirm? The invariant depends on the answer.
-- **Free money goes negative** — identified as the most important failure mode, but the response behaviour is described only as "an explicit warning state." The exact UI and data behaviour in this state needs a dedicated design decision.
-- **Semester end transition** — the lifecycle of data when an academic year ends and a new one starts is mentioned but not fully designed. Does old data archive? Can the student view it? Does it affect pattern detection seeding?
-- **On-track definition** — "on track" is described as spending under the daily number, but the exact threshold for yellow vs red (e.g. 10% over = yellow, 30% over = red) is not defined.
+- **Recurring charge behaviour** — resolved in Weakness 2; tracked here only for implementation verification.
+- **Free money goes negative** — resolved in Weakness 1; tracked here only for implementation verification.
+- **Period marker UX** — optional period labels are defined, but the exact UI guidance for when to create one still needs user-tested wording.
+- **Pattern threshold calibration** — hard gates are set, but the final over-average trigger still needs empirical tuning in Stage 4.
 
 ---
 
