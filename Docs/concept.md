@@ -114,7 +114,7 @@ PatternDetector will not fire until BOTH conditions are met: at least 14 calenda
 | Stage | Delivers |
 |---|---|
 | 1 — CLI + JSON | Complete CLI tool with all core logic, services, and JSON persistence tested |
-| 2 — CustomTkinter Dashboard | Real app feel — opens to a dashboard, usable without terminal commands |
+| 2 — PyQt6 Dashboard | Real app feel — opens to a dashboard, usable without terminal commands |
 | 3 — PostgreSQL Persistence | Nothing lost between sessions, production-grade storage |
 | 4 — Reminders + Pattern Detection | Notified before a charge hits; app notices things the student hasn't noticed |
 | 5 — Web UI | Shareable portfolio piece — FastAPI backend, React or Streamlit frontend |

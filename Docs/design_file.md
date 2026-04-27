@@ -89,7 +89,7 @@ Students running out of money before the academic year ends is not a willpower p
 
 ### Technical
 - Stage 1 is a CLI tool with JSON storage — no web framework yet
-- Stage 2 replaces the CLI with a **CustomTkinter desktop GUI dashboard** — the app opens directly to a live dashboard window; all input happens via buttons and modal forms; JSON storage remains
+- Stage 2 adds a **PyQt6 desktop GUI dashboard** under `app/gui/`; `app/cli.py` is kept dormant; the app opens directly to a live dashboard window; all input happens via buttons and modal forms; JSON storage remains
 - Stage 3 introduces PostgreSQL as the persistence layer — JSON adapters are swapped; domain and service layers are untouched
 - Stage 4 introduces reminders and pattern detection on top of the existing app layers
 - Stage 5 introduces FastAPI backend and a React or Streamlit web frontend
@@ -107,7 +107,7 @@ Students running out of money before the academic year ends is not a willpower p
 ### Operational
 - Initially a personal tool — no multi-user, no accounts, no authentication in Stage 1
 - Data lives locally — no cloud storage in Stage 1
-- Stage 5 introduces a web dashboard, but the CustomTkinter dashboard must continue to work independently
+- Stage 5 introduces a web dashboard, but the PyQt6 dashboard must continue to work independently
 - No deployment infrastructure needed until Stage 5
 
 ### Organizational
@@ -293,7 +293,7 @@ Students running out of money before the academic year ends is not a willpower p
 - Inputs: CommittedChargeRegister entries; today's date
 - Outputs: Reminder message for any charge due in exactly 3 days; null otherwise
 - Ownership: Read-only on charges; writes reminder-sent state to avoid duplicate reminders
-- Notes: In Stage 1–2 (CLI/CustomTkinter), this runs when the app is opened. In Stage 5 (web), this can be a scheduled check.
+- Notes: In Stage 1–2 (CLI/PyQt6), this runs when the app is opened. In Stage 5 (web), this can be a scheduled check.
 
 ### Interaction Summary
 
@@ -414,7 +414,7 @@ All write operations — logging income, logging a charge, logging a transaction
 
 | Risk | Failure Shape | Cause | Note |
 |---|---|---|---|
-| Student does not log transactions consistently | Daily number becomes inaccurate; pattern detection cannot fire | Manual logging friction; forgetting during busy periods (exams) | Mitigate with frictionless logging UX — minimum required fields; quick-log shortcut is a Stage 2 CustomTkinter priority |
+| Student does not log transactions consistently | Daily number becomes inaccurate; pattern detection cannot fire | Manual logging friction; forgetting during busy periods (exams) | Mitigate with frictionless logging UX — minimum required fields; quick-log shortcut is a Stage 2 PyQt6 priority |
 | Student logs a charge with wrong due date | Reminder fires at wrong time; charge deducted from wrong period | Human error at input | Allow charge editing; surface upcoming charges list prominently so errors are visible |
 | Optional period marker set incorrectly | Student reads the wrong planning window | Human error at period setup | Allow marker edits and keep all calculations reproducible from raw records |
 | Free money goes negative silently | Student believes they have more than they do; app fails its core purpose | More committed charges logged than income | This must be an explicit warning state — the most important failure mode to handle visually |
@@ -459,13 +459,13 @@ All write operations — logging income, logging a charge, logging a transaction
 
 1. **Stage 1 (CLI + JSON):** No deployment needed — runs locally. The student is the only user. Data lives in JSON files. This stage is complete when all core calculations, services, and JSON adapters work correctly and are fully tested.
 
-2. **Stage 1 → Stage 2 (CustomTkinter desktop dashboard):** `app/cli.py` is replaced by a **CustomTkinter** desktop GUI application. The app opens immediately to a live dashboard window — no commands to type. Buttons and modal input forms handle all input (add income, log charge, log spend, mark paid). The domain layer, services, and JSON repositories are completely untouched — only the interface layer changes. JSON storage remains. This stage is complete when the app opens to a working dashboard and every Stage 1 workflow is reachable from the UI.
+2. **Stage 1 → Stage 2 (PyQt6 desktop dashboard):** A **PyQt6** desktop GUI application is added under `app/gui/`. `app/cli.py` is kept dormant but not removed. The app opens immediately to a live dashboard window — no commands to type. Buttons and modal input forms handle all input (add income, log charge, log spend, mark paid). The domain layer, services, and JSON repositories are completely untouched — only the interface layer changes. JSON storage remains. This stage is complete when the app opens to a working dashboard and every Stage 1 workflow is reachable from the UI.
 
 3. **Stage 2 → Stage 3 (PostgreSQL persistence):** JSON adapters in `infrastructure/json/` are replaced by PostgreSQL adapters in `infrastructure/postgres/`. A one-time migration script converts existing JSON data. The GUI and all services are untouched — storage is swapped underneath. This stage is complete when all data survives app restarts correctly via PostgreSQL.
 
-4. **Stage 3 → Stage 4 (reminders + pattern detection):** New `ReminderScheduler` and `PatternDetector` components added. New `InsightState` entity added to the schema. The CustomTkinter dashboard gains a notification area and an Occurrences screen. Existing transaction data automatically feeds the detector. Rollback is safe — removing these components does not affect core calculations.
+4. **Stage 3 → Stage 4 (reminders + pattern detection):** New `ReminderScheduler` and `PatternDetector` components added. New `InsightState` entity added to the schema. The PyQt6 dashboard gains a notification area and an Occurrences screen. Existing transaction data automatically feeds the detector. Rollback is safe — removing these components does not affect core calculations.
 
-5. **Stage 4 → Stage 5 (web UI):** FastAPI backend wraps the existing service layer. A React or Streamlit frontend replaces or supplements the CustomTkinter dashboard. The CustomTkinter dashboard continues to function independently. Deployment is localhost only at this stage.
+5. **Stage 4 → Stage 5 (web UI):** FastAPI backend wraps the existing service layer. A React or Streamlit frontend replaces or supplements the PyQt6 dashboard. The PyQt6 dashboard continues to function independently. Deployment is localhost only at this stage.
 
 6. **Stage 5 → Stage 6 (optional: local bank connectivity):** Read-only connection to the student's local Israeli bank account to automatically import cleared transactions. Manual logging remains as the primary path. No architectural changes to core logic required — bank-imported transactions feed into the existing TransactionLog.
 
@@ -683,7 +683,7 @@ FuzzyCharge gains two new fields:
 
 ### Design deferred to Stage 2
 
-The exact visual treatment of pending and overdue fuzzy charges, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 2 (CustomTkinter dashboard). What is locked now: the behaviour, the states, the resolve/discard flow, and the ability to leave a fuzzy charge pending until later.
+The exact visual treatment of pending and overdue fuzzy charges, the Occurrences screen layout, and the notification prompt UI are deferred to Stage 2 (PyQt6 dashboard). What is locked now: the behaviour, the states, the resolve/discard flow, and the ability to leave a fuzzy charge pending until later.
 
 
 ---
@@ -711,7 +711,7 @@ The dashboard shows a visual progress bar:
 
     ₪[monthly_spent] of ₪[monthly_budget] used this month
 
-The bar fills as the student spends. The colour of the bar reflects the on-track state. Exact visual treatment deferred to Stage 2 (CustomTkinter dashboard).
+The bar fills as the student spends. The colour of the bar reflects the on-track state. Exact visual treatment deferred to Stage 2 (PyQt6 dashboard).
 
 ### Three-state on-track signal — percentage-based
 
@@ -837,7 +837,7 @@ This reuses existing TransactionLog category data via a new trigger context on t
 
 ### Crisis state — persistence behaviour
 
-The red highlight persists on the balance display area for as long as free money is zero or negative. It is not a modal or banner — it cannot be dismissed. It disappears automatically when free money returns to positive. The precise visual treatment (exact colours, border, animation) is deferred to Stage 2 (CustomTkinter dashboard).
+The red highlight persists on the balance display area for as long as free money is zero or negative. It is not a modal or banner — it cannot be dismissed. It disappears automatically when free money returns to positive. The precise visual treatment (exact colours, border, animation) is deferred to Stage 2 (PyQt6 dashboard).
 
 ### BalanceEngine output update
 
