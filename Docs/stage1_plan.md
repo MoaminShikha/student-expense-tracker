@@ -40,7 +40,7 @@ A command-line tool that:
 
 ```mermaid
 graph LR
-    S1[Stage 1\nCLI Core]:::done --> S2[Stage 2\nCustomTkinter\nDashboard]:::out
+    S1[Stage 1\nCLI Core]:::done --> S2[Stage 2\nPyQt6\nDashboard]:::out
     S2 --> S3[Stage 3\nPostgreSQL]:::out
     S3 --> S4[Stage 4\nReminders +\nPatterns]:::out
     S4 --> S5[Stage 5\nWeb UI]:::out
@@ -614,7 +614,7 @@ Run the full test suite. Fix any failures. Freeze Stage 1 behaviour in docs. Wri
 
 ## Stage 2 Handoff Note
 
-Stage 2 replaces `app/cli.py` with a CustomTkinter desktop GUI. To prepare for a clean handoff:
+Stage 2 adds a PyQt6 desktop GUI under `app/gui/`. `app/cli.py` is kept dormant — not removed. To prepare for a clean handoff:
 - All service calls must go through the existing service interfaces — the GUI calls services, never repositories directly
 - All business logic stays in the service layer — no calculation or validation logic may move into the GUI layer
 - The JSON storage layer remains unchanged in Stage 2 — persistence migration happens in Stage 3 (PostgreSQL)
