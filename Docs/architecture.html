@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Expense Tracker — Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 48px;
+    }
+
+    /* ── layout ── */
+    .diagram {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── layer row ── */
+    .layer {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .layer-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #475569;
+      padding: 12px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      background: #0f1117;
+    }
+
+    .layer-body {
+      flex: 1;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 4px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* ── layer colours ── */
+    .layer-app    .layer-body { background: #1e2030; border: 1px solid #3b4a6b; }
+    .layer-svc    .layer-body { background: #1a2035; border: 1px solid #2d4a7a; }
+    .layer-domain .layer-body { background: #1a2828; border: 1px solid #2d5a4a; }
+    .layer-port   .layer-body { background: #1e1e2e; border: 1px solid #4a3a6b; }
+    .layer-infra  .layer-body { background: #221e1e; border: 1px solid #6b3a3a; }
+    .layer-shared .layer-body { background: #1e1e1a; border: 1px solid #5a5a2d; }
+    .layer-tests  .layer-body { background: #1a1e18; border: 1px solid #3a5a2d; }
+
+    /* ── arrow between layers ── */
+    .arrow-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 28px;
+      color: #334155;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      user-select: none;
+    }
+
+    /* ── boxes ── */
+    .box {
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.3;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: default;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .box .path {
+      font-size: 0.63rem;
+      font-weight: 400;
+      opacity: 0.55;
+    }
+
+    /* box colours by role */
+    .b-entry   { background: #2d3a5a; border: 1px solid #4a6aaa; color: #93c5fd; }
+    .b-cli     { background: #263050; border: 1px solid #3a5090; color: #7dd3fc; }
+    .b-service { background: #1e3048; border: 1px solid #2a5080; color: #67c6ea; }
+    .b-engine  { background: #1a3040; border: 1px solid #2a6070; color: #5eead4; }
+    .b-model   { background: #1a3028; border: 1px solid #2a6040; color: #6ee7b7; }
+    .b-validator { background: #1e2e1e; border: 1px solid #3a5a3a; color: #86efac; }
+    .b-port    { background: #2a1e3a; border: 1px solid #5a3a7a; color: #c4b5fd; }
+    .b-inmem   { background: #2a1e2a; border: 1px solid #6a3a6a; color: #f0abfc; }
+    .b-json    { background: #3a1e1e; border: 1px solid #7a3a3a; color: #fca5a5; }
+    .b-infra   { background: #2e2010; border: 1px solid #6a4a20; color: #fcd34d; }
+    .b-shared  { background: #2a2a10; border: 1px solid #6a6a20; color: #fef08a; }
+    .b-test    { background: #1a2a10; border: 1px solid #4a6a20; color: #bef264; }
+
+    /* ── section label inside layer ── */
+    .section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #475569;
+      align-self: center;
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+
+    .divider {
+      width: 1px;
+      background: #2d3748;
+      margin: 0 8px;
+      align-self: stretch;
+    }
+
+    /* ── legend ── */
+    .legend {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+    .legend-swatch {
+      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    /* ── data flow callout ── */
+    .flow-section {
+      max-width: 1100px;
+      margin: 48px auto 0;
+    }
+    .flow-section h2 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .flow-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      align-items: center;
+    }
+    .flow-step {
+      background: #1e2030;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+    .flow-arrow {
+      font-size: 1rem;
+      color: #334155;
+      padding: 0 6px;
+      user-select: none;
+    }
+
+    /* ── key concepts ── */
+    .concepts {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .concept-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .concept-card h3 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #93c5fd;
+      margin-bottom: 6px;
+    }
+    .concept-card p {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Student Expense Tracker</h1>
+  <p class="subtitle">Stage 1 Architecture · Pure Python · CLI · In-Memory Repositories</p>
+
+  <div class="diagram">
+
+    <!-- ── APP LAYER ── -->
+    <div class="layer layer-app">
+      <div class="layer-label">App</div>
+      <div class="layer-body">
+        <div class="box b-entry">
+          <span>main.py</span>
+          <span class="path">app/main.py</span>
+        </div>
+        <div class="box b-cli">
+          <span>CliApplication</span>
+          <span class="path">app/cli.py</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row">↓ &nbsp; calls &nbsp; ↓</div>
+
+    <!-- ── SERVICE LAYER ── -->
+    <div class="layer layer-svc">
+      <div class="layer-label">Services</div>
+      <div class="layer-body">
+        <div class="box b-service">
+          <span>SessionService</span>
+          <span class="path">services/session_service.py</span>
+        </div>
+        <div class="box b-service">
+          <span>IncomeService</span>
+          <span class="path">services/income_service.py</span>
+        </div>
+        <div class="box b-service">
+          <span>ChargeService</span>
+          <span class="path">services/charge_service.py</span>
+        </div>
+        <div class="box b-service">
+          <span>FuzzyChargeService</span>
+          <span class="path">services/fuzzy_charge_service.py</span>
+        </div>
+        <div class="box b-service">
+          <span>SpendService</span>
+          <span class="path">services/spend_service.py</span>
+        </div>
+        <div class="box b-service">
+          <span>BalanceService</span>
+          <span class="path">services/balance_service.py</span>
+        </div>
+        <div class="divider"></div>
+        <div class="box b-engine">
+          <span>BalanceEngine</span>
+          <span class="path">calculations.py</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row">↓ &nbsp; reads/writes &nbsp; ↓</div>
+
+    <!-- ── DOMAIN LAYER ── -->
+    <div class="layer layer-domain">
+      <div class="layer-label">Domain</div>
+      <div class="layer-body">
+        <span class="section-title">Models</span>
+        <div class="box b-model">
+          <span>AppSession</span>
+          <span class="path">models/session.py</span>
+        </div>
+        <div class="box b-model">
+          <span>IncomeEntry</span>
+          <span class="path">models/income.py</span>
+        </div>
+        <div class="box b-model">
+          <span>CommittedCharge</span>
+          <span class="path">models/charges.py</span>
+        </div>
+        <div class="box b-model">
+          <span>FuzzyCharge</span>
+          <span class="path">models/charges.py</span>
+        </div>
+        <div class="box b-model">
+          <span>RecurringRule</span>
+          <span class="path">models/charges.py</span>
+        </div>
+        <div class="box b-model">
+          <span>Transaction</span>
+          <span class="path">models/transaction.py</span>
+        </div>
+        <div class="box b-model">
+          <span>BalanceSnapshot</span>
+          <span class="path">models/balance.py</span>
+        </div>
+        <div class="divider"></div>
+        <span class="section-title">Validation</span>
+        <div class="box b-validator">
+          <span>validators.py</span>
+          <span class="path">domain/validators.py</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-row">↓ &nbsp; depends on &nbsp; ↓</div>
+
+    <!-- ── PORTS ── -->
+    <div class="layer layer-port">
+      <div class="layer-label">Ports</div>
+      <div class="layer-body">
+        <span class="section-title">Repository Protocols</span>
+        <div class="box b-port">SessionRepository</div>
+        <div class="box b-port">IncomeRepository</div>
+        <div class="box b-port">ChargeRepository</div>
+        <div class="box b-port">RecurringRuleRepository</div>
+        <div class="box b-port">FuzzyChargeRepository</div>
+        <div class="box b-port">TransactionRepository</div>
+      </div>
+    </div>
+
+    <div class="arrow-row">↓ &nbsp; implemented by &nbsp; ↓</div>
+
+    <!-- ── INFRASTRUCTURE ── -->
+    <div class="layer layer-infra">
+      <div class="layer-label">Infra</div>
+      <div class="layer-body">
+        <span class="section-title">Stage 1 (active)</span>
+        <div class="box b-inmem">InMemory repos</div>
+        <div class="divider"></div>
+        <span class="section-title">Stage 2 (wired next)</span>
+        <div class="box b-json">JsonSessionRepo</div>
+        <div class="box b-json">JsonIncomeRepo</div>
+        <div class="box b-json">JsonChargeRepo</div>
+        <div class="box b-json">JsonFuzzyRepo</div>
+        <div class="box b-json">JsonTransactionRepo</div>
+        <div class="divider"></div>
+        <span class="section-title">Stage 3+</span>
+        <div class="box b-infra" style="opacity:0.4">Postgres repos</div>
+        <div class="box b-infra" style="opacity:0.4">Web layer</div>
+        <div class="divider"></div>
+        <div class="box b-infra">LoggerFactory</div>
+      </div>
+    </div>
+
+    <!-- ── SHARED (cross-cutting) ── -->
+    <div class="arrow-row">↕ &nbsp; used by all layers &nbsp; ↕</div>
+
+    <div class="layer layer-shared">
+      <div class="layer-label">Shared</div>
+      <div class="layer-body">
+        <div class="box b-shared">
+          <span>Exception Hierarchy</span>
+          <span class="path">shared/exceptions.py</span>
+        </div>
+        <span style="font-size:0.7rem;color:#475569;margin-left:4px">
+          ExpenseTrackerError → ValidationError · ApplicationError · InfrastructureError
+        </span>
+      </div>
+    </div>
+
+    <!-- ── TESTS ── -->
+    <div class="arrow-row">↑ &nbsp; tests &nbsp; ↑</div>
+
+    <div class="layer layer-tests">
+      <div class="layer-label">Tests</div>
+      <div class="layer-body">
+        <div class="box b-test">test_calculations</div>
+        <div class="box b-test">test_charge_service</div>
+        <div class="box b-test">test_income_service</div>
+        <div class="box b-test">test_spend_service</div>
+        <div class="box b-test">test_fuzzy_charge_service</div>
+        <div class="box b-test">test_validators</div>
+        <div class="box b-test">test_repositories</div>
+        <div class="box b-test">test_shared_cross_cutting</div>
+        <div class="box b-test">test_cli_flows</div>
+        <span style="margin-left:8px;font-size:0.72rem;color:#4ade80;font-weight:700">208 / 208 ✓</span>
+      </div>
+    </div>
+
+  </div><!-- /diagram -->
+
+  <!-- ── DATA FLOW ── -->
+  <div class="flow-section">
+    <h2>Request Data Flow — example: spend add</h2>
+    <div class="flow-steps">
+      <div class="flow-step">User: <code>spend add --amount 45 --description "lunch"</code></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">CliApplication parses flags</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">validators.py parses &amp; validates input</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">SpendService re-validates + creates Transaction</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">TransactionRepository.add()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">exit 0</div>
+    </div>
+  </div>
+
+  <!-- ── KEY CONCEPTS ── -->
+  <div class="concepts">
+    <div class="concept-card">
+      <h3>Free Money</h3>
+      <p>opening_balance + total_income − committed_charges − total_spent. Committed charges deduct immediately on logging — before they're due.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Fuzzy Charges</h3>
+      <p>Upcoming payments with uncertain amounts or dates. Stay PENDING until the student explicitly resolves (→ concrete charge) or discards them.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Recurring Charges</h3>
+      <p>Monthly obligations (rent, phone). When marked paid, the next month's charge is auto-generated. Month-boundary safe (day 31 → last valid day).</p>
+    </div>
+    <div class="concept-card">
+      <h3>On-Track State</h3>
+      <p>GREEN → spent &lt; 100% of budget. YELLOW → 100–130%. RED → &gt;130%. TIGHT_MONTH → income − committed ≤ 0.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Balance State</h3>
+      <p>NORMAL → free_money &gt; caution threshold. CAUTION → above zero but tight. CRISIS → free_money ≤ 0.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Decimal Arithmetic</h3>
+      <p>All monetary values use Python's <code>decimal.Decimal</code>. No floating-point rounding errors anywhere in the money path.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Repository Pattern</h3>
+      <p>Services depend on Python <code>Protocol</code> interfaces, not concrete classes. Swap in-memory → JSON → Postgres without touching service code.</p>
+    </div>
+    <div class="concept-card">
+      <h3>Immutable Models</h3>
+      <p>All domain entities are <code>@dataclass(frozen=True)</code>. Updates create new instances. Prevents accidental mutation of financial records.</p>
+    </div>
+  </div>
+
+  <!-- ── LEGEND ── -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:#2d3a5a;border:1px solid #4a6aaa"></div>Entry / CLI</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#1e3048;border:1px solid #2a5080"></div>Service</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#1a3040;border:1px solid #2a6070"></div>Engine (pure logic)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#1a3028;border:1px solid #2a6040"></div>Domain Model</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#1e2e1e;border:1px solid #3a5a3a"></div>Validator</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#2a1e3a;border:1px solid #5a3a7a"></div>Port (Protocol)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#2a1e2a;border:1px solid #6a3a6a"></div>In-Memory Repo</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#3a1e1e;border:1px solid #7a3a3a"></div>JSON Repo</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#2a2a10;border:1px solid #6a6a20"></div>Shared</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#1a2a10;border:1px solid #4a6a20"></div>Tests</div>
+  </div>
+
+</body>
+</html>

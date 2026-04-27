@@ -11,6 +11,7 @@ venv/
 
 # Local Copilot/Claude settings
 .claude/
+CLAUDE.md
 
 # Generated design export
 Docs/design_file_2.html
