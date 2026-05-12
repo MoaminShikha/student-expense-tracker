@@ -4,6 +4,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import Sequence
+from decimal import Decimal
 
 from ..application.calculations import BalanceEngine
 from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
