@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mizān · Project Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          hsl(36 25% 96%);
+  --paper:       hsl(38 28% 94%);
+  --surface:     hsl(0 0% 100%);
+  --hairline:    hsl(36 16% 86%);
+  --hairline-s:  hsl(36 14% 76%);
+  --fg:          hsl(240 28% 12%);
+  --muted:       hsl(222 12% 55%);
+  --muted-fg:    hsl(224 14% 38%);
+  --navy:        hsl(240 30% 11%);
+  --navy-2:      hsl(240 25% 15%);
+  --gold:        hsl(42 55% 50%);
+  --gold-leaf:   hsl(42 65% 40%);
+  --red:         hsl(0 55% 38%);
+  --green:       hsl(162 60% 26%);
+  --green-bg:    hsl(162 45% 92%);
+  --amber:       hsl(32 80% 38%);
+  --amber-bg:    hsl(38 78% 94%);
+  --amber-bd:    hsl(38 60% 70%);
+  --yellow:      hsl(48 90% 42%);
+  --yellow-bg:   hsl(48 80% 94%);
+  --code-bg:     hsl(240 22% 13%);
+  --code-border: hsl(240 18% 20%);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+/* ── DOT GRID ── */
+.dot-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(hsl(36 20% 60% / 0.07) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+.site-wrap { position: relative; z-index: 1; }
+
+/* ── FADE-UP ── */
+.fade-up { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) { .fade-up { opacity: 1; transform: none; transition: none; } }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; height: 52px;
+  background: hsl(36 25% 96% / 0.93); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--hairline);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; z-index: 200;
+}
+.nav-left { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-mark { width: 26px; height: 26px; background: var(--navy); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+.nav-arabic { font-family: 'Noto Naskh Arabic', serif; font-size: 14px; color: var(--gold); direction: rtl; line-height: 1; }
+.nav-wordmark { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: var(--fg); }
+.nav-sep { width: 1px; height: 14px; background: var(--hairline); }
+.nav-page { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
+.nav-links a { font-size: 13px; color: var(--muted-fg); text-decoration: none; transition: color 0.15s; }
+.nav-links a:hover { color: var(--fg); }
+.nav-cta { background: var(--navy); color: hsl(42 65% 80%); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 7px 16px; border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
+.nav-cta:hover { opacity: 0.82; }
+
+/* ── SECTION SHELL ── */
+section { padding: 80px 40px; }
+.inner { max-width: 1100px; margin: 0 auto; }
+.sec-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.sec-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 3.5vw, 42px); font-weight: 900; color: var(--fg); letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 12px; }
+.sec-title em { font-style: italic; color: var(--gold-leaf); }
+.sec-lead { font-size: 15px; color: var(--muted-fg); max-width: 540px; line-height: 1.75; }
+
+/* ── HERO ── */
+.hero { background: var(--navy); padding: 110px 40px 72px; }
+.hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 64px; align-items: start; }
+.hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+.hero-arabic { font-family: 'Noto Naskh Arabic', serif; font-size: 20px; color: var(--gold); direction: rtl; line-height: 1; }
+.hero-line { width: 24px; height: 1px; background: hsl(42 40% 35%); }
+.hero-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: hsl(240 10% 45%); }
+.hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px, 4vw, 54px); font-weight: 900; color: #fff; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 20px; }
+.hero h1 em { font-style: italic; color: hsl(42 65% 68%); }
+.hero p.lead { font-size: 15.5px; color: hsl(240 10% 52%); max-width: 500px; line-height: 1.78; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.btn-gold { background: var(--gold); color: var(--navy); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 20px; border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
+.btn-gold:hover { opacity: 0.88; }
+.btn-ghost-light { font-size: 13.5px; color: hsl(240 10% 46%); text-decoration: none; border-bottom: 1px solid hsl(240 10% 24%); padding-bottom: 1px; transition: color 0.15s, border-color 0.15s; }
+.btn-ghost-light:hover { color: #aaa; border-color: #555; }
+
+/* Stage badge */
+.stage-badge {
+  background: var(--navy-2); border: 1px solid hsl(240 18% 22%);
+  border-radius: 10px; padding: 20px 24px;
+}
+.sb-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.sb-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(240 10% 40%); }
+.sb-status { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; background: hsl(162 60% 16%); color: hsl(162 60% 60%); padding: 3px 8px; border-radius: 3px; }
+.stage-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+.stage-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid hsl(240 18% 18%); font-size: 12.5px; }
+.stage-item:last-child { border-bottom: none; }
+.stage-num { font-family: 'DM Mono', monospace; font-size: 9px; color: hsl(240 10% 35%); width: 18px; flex-shrink: 0; }
+.stage-name { flex: 1; color: hsl(240 10% 55%); }
+.stage-name.done { color: #fff; }
+.stage-pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.stage-pip.done { background: hsl(162 60% 45%); }
+.stage-pip.next { background: var(--gold); }
+.stage-pip.later { background: hsl(240 10% 28%); }
+.stage-tests { font-family: 'DM Mono', monospace; font-size: 9px; color: hsl(162 50% 40%); }
+
+/* ── RESEARCH STRIP ── */
+.research-strip { background: var(--surface); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: 28px 40px; }
+.research-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+.research-item { padding: 0 24px; border-right: 1px solid var(--hairline); }
+.research-item:first-child { padding-left: 0; }
+.research-item:last-child { border-right: none; }
+.research-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; color: var(--fg); line-height: 1; margin-bottom: 5px; }
+.research-num em { font-style: italic; color: var(--gold-leaf); }
+.research-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
+.research-src { font-size: 11px; color: hsl(222 10% 68%); margin-top: 3px; }
+
+/* ── THE PROBLEM ── */
+.problem-section { background: var(--bg); }
+.problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 52px; align-items: start; }
+.problem-callout { background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 28px 32px; }
+.problem-callout blockquote { font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic; color: var(--fg); line-height: 1.65; margin-bottom: 16px; }
+.problem-callout cite { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-style: normal; }
+.problem-points { display: flex; flex-direction: column; gap: 18px; }
+.problem-point { display: flex; gap: 14px; align-items: flex-start; }
+.pp-icon { width: 32px; height: 32px; border-radius: 7px; background: hsl(0 55% 96%); border: 1px solid hsl(0 55% 88%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--red); }
+.pp-icon svg { width: 14px; height: 14px; }
+.problem-point h4 { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 3px; }
+.problem-point p { font-size: 13px; color: var(--muted-fg); line-height: 1.6; }
+
+/* ── CORE MECHANIC ── */
+.mechanic-section { background: var(--surface); }
+.mechanic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 52px; align-items: start; }
+.formula-block { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 10px; padding: 24px 28px; }
+.formula-block .formula-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(240 10% 38%); margin-bottom: 18px; }
+.formula-line { display: flex; align-items: baseline; gap: 10px; padding: 10px 0; border-bottom: 1px solid hsl(240 18% 18%); font-family: 'DM Mono', monospace; }
+.formula-line:last-child { border-bottom: none; }
+.f-op { font-size: 16px; font-weight: 500; width: 18px; flex-shrink: 0; text-align: center; }
+.f-label { font-size: 12px; flex: 1; }
+.f-amt { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; }
+.f-op.plus { color: hsl(162 60% 50%); }
+.f-op.minus { color: hsl(0 55% 55%); }
+.f-op.equals { color: var(--gold); }
+.f-label.plus { color: hsl(162 60% 60%); }
+.f-label.minus { color: hsl(0 55% 60%); }
+.f-label.equals { color: var(--gold); }
+.f-amt.result { color: var(--gold); font-size: 18px; }
+.f-amt.red { color: hsl(0 55% 55%); }
+.f-amt.green { color: hsl(162 60% 50%); }
+.f-amt.amber { color: hsl(32 80% 55%); font-style: italic; }
+
+.mechanic-explains { display: flex; flex-direction: column; gap: 14px; }
+.mechanic-card { border: 1px solid var(--hairline); border-radius: 10px; padding: 18px 22px; background: var(--bg); }
+.mechanic-card.highlight { border-color: var(--gold); background: hsl(42 60% 97%); }
+.mechanic-card .mc-tag { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.mechanic-card.highlight .mc-tag { color: var(--gold-leaf); }
+.mechanic-card h4 { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+.mechanic-card p { font-size: 13px; color: var(--muted-fg); line-height: 1.6; }
+
+/* ── BALANCE STATES ── */
+.states-section { background: var(--bg); }
+.states-2row { margin-top: 52px; display: flex; flex-direction: column; gap: 12px; }
+.states-row { display: grid; gap: 12px; }
+.states-row.row1 { grid-template-columns: repeat(3, 1fr); }
+.states-row.row2 { grid-template-columns: repeat(4, 1fr); }
+.state-block { border-radius: 10px; padding: 20px 22px; border: 1px solid; }
+/* Balance states */
+.state-block.normal { background: var(--green-bg); border-color: hsl(162 40% 76%); }
+.state-block.caution { background: var(--amber-bg); border-color: var(--amber-bd); }
+.state-block.crisis { background: hsl(0 55% 97%); border-color: hsl(0 55% 80%); }
+/* On-track states */
+.state-block.green-s { background: var(--green-bg); border-color: hsl(162 40% 76%); }
+.state-block.yellow-s { background: var(--yellow-bg); border-color: hsl(48 60% 75%); }
+.state-block.red-s { background: hsl(0 55% 97%); border-color: hsl(0 55% 80%); }
+.state-block.tight-s { background: hsl(240 20% 97%); border-color: hsl(240 16% 82%); }
+.state-group-label { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.state-block-tag { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.state-block.normal .state-block-tag,
+.state-block.green-s .state-block-tag { color: var(--green); }
+.state-block.caution .state-block-tag { color: var(--amber); }
+.state-block.crisis .state-block-tag,
+.state-block.red-s .state-block-tag { color: var(--red); }
+.state-block.yellow-s .state-block-tag { color: var(--yellow); }
+.state-block.tight-s .state-block-tag { color: var(--muted-fg); }
+.state-block h4 { font-size: 13.5px; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+.state-block p { font-size: 12.5px; color: var(--muted-fg); line-height: 1.55; }
+.state-block .threshold { margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 10px; }
+.state-block.normal .threshold { color: var(--green); }
+.state-block.caution .threshold { color: var(--amber); }
+.state-block.crisis .threshold { color: var(--red); }
+.state-block.green-s .threshold { color: var(--green); }
+.state-block.yellow-s .threshold { color: var(--yellow); }
+.state-block.red-s .threshold { color: var(--red); }
+.state-block.tight-s .threshold { color: var(--muted-fg); }
+
+/* ── DOMAIN MODEL ── */
+.domain-section { background: var(--surface); }
+.domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 52px; }
+.entity-card { background: var(--bg); border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+.entity-card.wide { grid-column: span 2; }
+.entity-header { padding: 14px 18px; border-bottom: 1px solid var(--hairline); background: var(--surface); display: flex; align-items: baseline; justify-content: space-between; }
+.entity-name { font-family: 'DM Mono', monospace; font-size: 11.5px; font-weight: 500; color: var(--fg); }
+.entity-badge { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; }
+.entity-badge.core { background: hsl(42 55% 50% / 0.1); color: var(--gold-leaf); }
+.entity-badge.lifecycle { background: hsl(217 82% 52% / 0.1); color: hsl(217 60% 45%); }
+.entity-badge.rule { background: hsl(162 60% 26% / 0.1); color: var(--green); }
+.entity-fields { padding: 0; }
+.entity-field { display: flex; align-items: baseline; gap: 10px; padding: 9px 18px; border-bottom: 1px solid var(--hairline); font-size: 12.5px; }
+.entity-field:last-child { border-bottom: none; }
+.field-name { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--fg); flex-shrink: 0; min-width: 160px; }
+.field-type { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(217 60% 50%); flex-shrink: 0; min-width: 80px; }
+.field-desc { font-size: 12px; color: var(--muted); line-height: 1.45; }
+
+/* ── ARCHITECTURE ── */
+.arch-section { background: var(--bg); }
+.arch-layers { margin-top: 52px; display: flex; flex-direction: column; gap: 3px; }
+.arch-layer { border-radius: 8px; overflow: hidden; border: 1px solid var(--hairline); }
+.arch-layer-header { padding: 12px 20px; display: flex; align-items: center; gap: 14px; }
+.arch-layer-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 500; min-width: 100px; }
+.arch-layer-arrow { font-size: 11px; color: var(--hairline-s); }
+.arch-layer-desc { font-size: 12.5px; color: var(--muted-fg); }
+.arch-layer-components { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 20px 14px; background: var(--surface); border-top: 1px solid var(--hairline); }
+.arch-chip { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 3px; border: 1px solid; }
+
+/* Layer color coding */
+.arch-layer.cli    .arch-layer-header { background: hsl(240 30% 11%); }
+.arch-layer.cli    .arch-layer-label  { color: hsl(240 10% 55%); }
+.arch-layer.svc    .arch-layer-header { background: hsl(240 25% 14%); }
+.arch-layer.svc    .arch-layer-label  { color: hsl(217 60% 65%); }
+.arch-layer.domain .arch-layer-header { background: hsl(42 40% 95%); border-bottom: 1px solid var(--hairline); }
+.arch-layer.domain .arch-layer-label  { color: var(--gold-leaf); }
+.arch-layer.ports  .arch-layer-header { background: hsl(162 30% 95%); border-bottom: 1px solid var(--hairline); }
+.arch-layer.ports  .arch-layer-label  { color: var(--green); }
+.arch-layer.infra  .arch-layer-header { background: var(--surface); border-bottom: 1px solid var(--hairline); }
+.arch-layer.infra  .arch-layer-label  { color: var(--muted-fg); }
+.arch-layer.shared .arch-layer-header { background: var(--bg); border-bottom: 1px solid var(--hairline); }
+.arch-layer.shared .arch-layer-label  { color: var(--muted); }
+
+.arch-layer.cli .arch-chip    { background: hsl(240 25% 18%); border-color: hsl(240 20% 25%); color: hsl(240 10% 65%); }
+.arch-layer.svc .arch-chip    { background: hsl(217 30% 94%); border-color: hsl(217 30% 82%); color: hsl(217 60% 38%); }
+.arch-layer.domain .arch-chip { background: hsl(42 50% 92%); border-color: hsl(42 40% 80%); color: var(--gold-leaf); }
+.arch-layer.ports .arch-chip  { background: hsl(162 30% 92%); border-color: hsl(162 30% 78%); color: var(--green); }
+.arch-layer.infra .arch-chip  { background: var(--bg); border-color: var(--hairline); color: var(--muted-fg); }
+.arch-layer.shared .arch-chip { background: var(--surface); border-color: var(--hairline); color: var(--muted); }
+.arch-layer.cli .arch-layer-desc { color: hsl(240 10% 45%); }
+.arch-layer.svc .arch-layer-desc { color: hsl(240 10% 45%); }
+
+.arch-rule {
+  margin-top: 18px; padding: 14px 20px; background: var(--surface);
+  border: 1px solid var(--hairline); border-radius: 8px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.arch-rule-icon { font-size: 13px; flex-shrink: 0; margin-top: 2px; color: var(--gold-leaf); }
+.arch-rule-text { font-size: 13px; color: var(--muted-fg); line-height: 1.6; }
+.arch-rule-text strong { color: var(--fg); font-weight: 600; }
+
+/* ── CLI ── */
+.cli-section { background: var(--surface); }
+.cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 52px; }
+.cli-card { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 10px; overflow: hidden; }
+.cli-card.full { grid-column: span 2; }
+.cli-card-header { padding: 10px 18px; border-bottom: 1px solid var(--code-border); display: flex; align-items: center; justify-content: space-between; }
+.cli-card-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: hsl(240 10% 40%); }
+.cli-card-badge { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; }
+.cli-card-badge.done { background: hsl(162 60% 16%); color: hsl(162 60% 55%); }
+.cli-code { padding: 16px 18px; font-family: 'DM Mono', monospace; font-size: 11.5px; line-height: 1.8; }
+.cli-comment { color: hsl(240 10% 36%); }
+.cli-prompt { color: hsl(240 10% 35%); }
+.cli-cmd { color: hsl(42 60% 65%); }
+.cli-flag { color: hsl(162 50% 55%); }
+.cli-val { color: hsl(217 60% 68%); }
+.cli-out { color: hsl(240 10% 55%); display: block; padding-left: 2px; }
+.cli-out.ok { color: hsl(162 50% 50%); }
+.cli-out.num { color: var(--gold); font-weight: 500; }
+
+/* ── INVARIANTS ── */
+.inv-section { background: var(--bg); }
+.inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 52px; }
+.inv-card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; padding: 20px 22px; }
+.inv-card.span2 { grid-column: span 2; }
+.inv-num { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.inv-card h4 { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+.inv-card p { font-size: 13px; color: var(--muted-fg); line-height: 1.6; }
+.inv-rule { margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 10.5px; padding: 6px 12px; border-radius: 4px; border-left: 3px solid var(--gold); background: hsl(42 60% 97%); color: var(--gold-leaf); }
+
+/* ── CHARGE LIFECYCLE ── */
+.lifecycle-section { background: var(--surface); }
+.lifecycle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 52px; }
+.lc-card { background: var(--bg); border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+.lc-header { padding: 14px 18px; border-bottom: 1px solid var(--hairline); background: var(--surface); }
+.lc-header .lc-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+.lc-header.committed .lc-tag { color: var(--red); }
+.lc-header.recurring .lc-tag { color: hsl(217 60% 50%); }
+.lc-header.fuzzy .lc-tag { color: var(--amber); }
+.lc-header h4 { font-size: 14px; font-weight: 600; color: var(--fg); }
+.lc-flow { padding: 16px 18px; display: flex; flex-direction: column; gap: 0; }
+.lc-step { display: flex; gap: 12px; align-items: stretch; }
+.lc-aside { display: flex; flex-direction: column; align-items: center; width: 16px; flex-shrink: 0; }
+.lc-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 14px; }
+.lc-dot.committed { background: var(--red); }
+.lc-dot.recurring { background: hsl(217 60% 50%); }
+.lc-dot.fuzzy { background: var(--amber); }
+.lc-dot.ok { background: var(--green); }
+.lc-dot.gray { background: var(--muted); }
+.lc-vline { width: 1px; background: var(--hairline); flex: 1; }
+.lc-step:last-child .lc-vline { display: none; }
+.lc-content { flex: 1; padding: 10px 0 16px; }
+.lc-state { font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 500; color: var(--fg); margin-bottom: 2px; }
+.lc-note { font-size: 12px; color: var(--muted-fg); line-height: 1.5; }
+
+/* ── ROADMAP ── */
+.roadmap-section { background: var(--navy); padding: 80px 40px; }
+.roadmap-inner { max-width: 1100px; margin: 0 auto; }
+.roadmap-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: hsl(42 30% 40%); margin-bottom: 14px; }
+.roadmap-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 3.5vw, 42px); font-weight: 900; color: #fff; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 12px; }
+.roadmap-title em { font-style: italic; color: hsl(42 65% 65%); }
+.roadmap-lead { font-size: 15px; color: hsl(240 10% 48%); max-width: 520px; line-height: 1.75; margin-bottom: 48px; }
+.roadmap-track { display: flex; flex-direction: column; gap: 3px; }
+.rm-stage { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; border: 1px solid hsl(240 18% 18%); }
+.rm-stage-num { width: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; border-right: 1px solid hsl(240 18% 18%); }
+.rm-stage.done .rm-stage-num { background: hsl(162 30% 12%); color: hsl(162 50% 45%); }
+.rm-stage.next .rm-stage-num { background: hsl(42 40% 14%); color: var(--gold); }
+.rm-stage.later .rm-stage-num { background: hsl(240 22% 13%); color: hsl(240 10% 32%); }
+.rm-stage-body { flex: 1; padding: 16px 20px; }
+.rm-stage.done .rm-stage-body { background: hsl(240 22% 12%); }
+.rm-stage.next .rm-stage-body { background: hsl(240 22% 13%); }
+.rm-stage.later .rm-stage-body { background: hsl(240 22% 12%); }
+.rm-stage-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.rm-stage-name { font-size: 14px; font-weight: 600; }
+.rm-stage.done .rm-stage-name { color: #fff; }
+.rm-stage.next .rm-stage-name { color: hsl(42 65% 78%); }
+.rm-stage.later .rm-stage-name { color: hsl(240 10% 42%); }
+.rm-stage-status { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 2px; flex-shrink: 0; }
+.rm-stage.done .rm-stage-status { background: hsl(162 50% 14%); color: hsl(162 50% 48%); }
+.rm-stage.next .rm-stage-status { background: hsl(42 50% 14%); color: var(--gold); }
+.rm-stage.later .rm-stage-status { background: hsl(240 18% 17%); color: hsl(240 10% 36%); }
+.rm-stage-desc { font-size: 13px; }
+.rm-stage.done .rm-stage-desc { color: hsl(240 10% 48%); }
+.rm-stage.next .rm-stage-desc { color: hsl(240 10% 44%); }
+.rm-stage.later .rm-stage-desc { color: hsl(240 10% 32%); }
+.rm-stage-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.rm-chip { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 2px; }
+.rm-stage.done .rm-chip { background: hsl(240 18% 18%); color: hsl(240 10% 42%); border: 1px solid hsl(240 18% 22%); }
+.rm-stage.next .rm-chip { background: hsl(42 30% 14%); color: hsl(42 40% 50%); border: 1px solid hsl(42 30% 20%); }
+.rm-stage.later .rm-chip { background: hsl(240 18% 15%); color: hsl(240 10% 28%); border: 1px solid hsl(240 18% 18%); }
+
+/* ── TEST COUNTER ── */
+.tests-section { background: var(--bg); }
+.tests-grid { display: grid; grid-template-columns: 280px 1fr; gap: 56px; margin-top: 52px; align-items: start; }
+.tests-big { text-align: center; background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 36px 28px; }
+.tests-num { font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 900; color: var(--fg); line-height: 1; letter-spacing: -0.03em; }
+.tests-denom { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--muted); }
+.tests-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+.tests-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: var(--green-bg); color: var(--green); border: 1px solid hsl(162 40% 76%); }
+.tests-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.tests-layers { display: flex; flex-direction: column; gap: 8px; }
+.tests-layer { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 8px; }
+.tests-layer-name { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted-fg); min-width: 100px; }
+.tests-layer-bar-wrap { flex: 1; height: 5px; background: hsl(36 16% 92%); border-radius: 999px; }
+.tests-layer-bar { height: 100%; border-radius: 999px; background: var(--green); }
+.tests-layer-count { font-family: 'DM Mono', monospace; font-size: 10.5px; color: var(--fg); min-width: 32px; text-align: right; }
+
+/* ── LINK TO DASHBOARD ── */
+.link-section { background: var(--surface); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); padding: 40px 40px; }
+.link-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.link-left h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+.link-left p { font-size: 14px; color: var(--muted-fg); }
+.link-right { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+.btn-primary { background: var(--navy); color: hsl(42 65% 80%); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 11px 20px; border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
+.btn-primary:hover { opacity: 0.82; }
+.btn-secondary { font-size: 13.5px; color: var(--muted-fg); text-decoration: none; border-bottom: 1px solid var(--hairline); padding-bottom: 1px; transition: color 0.15s, border-color 0.15s; }
+.btn-secondary:hover { color: var(--fg); border-color: var(--fg); }
+
+/* ── FOOTER ── */
+footer { background: var(--navy); border-top: 1px solid hsl(240 20% 14%); padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-arabic { font-family: 'Noto Naskh Arabic', serif; font-size: 16px; color: var(--gold); direction: rtl; line-height: 1; }
+.footer-wordmark { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: hsl(42 65% 75%); }
+footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240 10% 32%); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  section { padding: 60px 20px; }
+  .hero { padding: 100px 20px 60px; }
+  .hero-inner { grid-template-columns: 1fr; gap: 36px; }
+  .research-strip { padding: 22px 20px; }
+  .research-inner { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .research-item { border-right: none; padding: 0; }
+  .problem-grid, .mechanic-grid { grid-template-columns: 1fr; }
+  .states-row.row1 { grid-template-columns: 1fr; }
+  .states-row.row2 { grid-template-columns: 1fr 1fr; }
+  .domain-grid { grid-template-columns: 1fr; }
+  .entity-card.wide { grid-column: span 1; }
+  .cli-grid { grid-template-columns: 1fr; }
+  .cli-card.full { grid-column: span 1; }
+  .inv-grid { grid-template-columns: 1fr; }
+  .inv-card.span2 { grid-column: span 1; }
+  .lifecycle-grid { grid-template-columns: 1fr; }
+  .tests-grid { grid-template-columns: 1fr; }
+  .link-inner { flex-direction: column; align-items: flex-start; }
+  footer { flex-direction: column; gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="dot-grid" aria-hidden="true"></div>
+<div class="site-wrap">
+
+<!-- NAV -->
+<nav>
+  <a class="nav-left" href="#">
+    <div class="nav-mark"><span class="nav-arabic">م</span></div>
+    <span class="nav-wordmark">Mizān</span>
+    <span class="nav-sep"></span>
+    <span class="nav-page">Project Overview</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#mechanic">Mechanic</a></li>
+    <li><a href="#domain">Domain</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#cli">CLI</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="mizan-landing.html">Landing</a></li>
+    <li><a href="index.html">All pages</a></li>
+  </ul>
+  <a class="nav-cta" href="mizan_dashboard.html">Open Dashboard →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="fade-up">
+      <div class="hero-eyebrow">
+        <span class="hero-arabic">ميزان</span>
+        <span class="hero-line"></span>
+        <span class="hero-tag">Technical Overview · Stage 1 Complete</span>
+      </div>
+      <h1>A student budgeting system<br>built from <em>first principles.</em></h1>
+      <p class="lead">Mizān solves a precise problem: Israeli university students run out of money because their bank balance includes committed obligations. The app separates what's genuinely free to spend from what's already spoken for — and tells you one honest number every day.</p>
+      <div class="hero-actions">
+        <a class="btn-gold" href="#mechanic">Explore the mechanics</a>
+        <a class="btn-ghost-light" href="mizan_dashboard.html">Open dashboard →</a>
+      </div>
+    </div>
+    <div class="stage-badge fade-up" style="transition-delay:0.1s;">
+      <div class="sb-row">
+        <span class="sb-lbl">Build stages</span>
+        <span class="sb-status">Stage 1 complete</span>
+      </div>
+      <ul class="stage-list">
+        <li class="stage-item"><span class="stage-num">01</span><span class="stage-name done">CLI + JSON storage</span><span class="stage-tests">208 tests</span><span class="stage-pip done"></span></li>
+        <li class="stage-item"><span class="stage-num">02</span><span class="stage-name">PyQt6 desktop</span><span class="stage-tests"></span><span class="stage-pip next"></span></li>
+        <li class="stage-item"><span class="stage-num">03</span><span class="stage-name">PostgreSQL</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
+        <li class="stage-item"><span class="stage-num">04</span><span class="stage-name">Reminders + patterns</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
+        <li class="stage-item"><span class="stage-num">05</span><span class="stage-name">Web UI (FastAPI + React)</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
+        <li class="stage-item"><span class="stage-num">06</span><span class="stage-name">Bank connectivity</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- RESEARCH STRIP -->
+<div class="research-strip">
+  <div class="research-inner">
+    <div class="research-item fade-up">
+      <div class="research-num"><em>64%</em></div>
+      <div class="research-lbl">of students run out of money before semester end</div>
+      <div class="research-src">Edvisors survey</div>
+    </div>
+    <div class="research-item fade-up" style="transition-delay:0.05s;">
+      <div class="research-num"><em>80%</em></div>
+      <div class="research-lbl">worry about making ends meet each month</div>
+      <div class="research-src">Save the Student 2025</div>
+    </div>
+    <div class="research-item fade-up" style="transition-delay:0.1s;">
+      <div class="research-num"><em>51%</em></div>
+      <div class="research-lbl">above EU average — Israeli food prices</div>
+      <div class="research-src">2025 cost-of-living data</div>
+    </div>
+    <div class="research-item fade-up" style="transition-delay:0.15s;">
+      <div class="research-num">₪<em>10k</em></div>
+      <div class="research-lbl">avg unexpected annual costs for Israeli households</div>
+      <div class="research-src">Israelis 2025 report</div>
+    </div>
+  </div>
+</div>
+
+<!-- THE PROBLEM -->
+<section class="problem-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Why this exists</div>
+    <h2 class="sec-title fade-up">Bank balance is a <em>lie.</em></h2>
+    <p class="sec-lead fade-up">The balance in your account includes money earmarked for rent, tuition, and phone bills. Nothing deducts these obligations until they actually clear — creating a false sense of available funds and recurring end-of-month shortfalls.</p>
+
+    <div class="problem-grid">
+      <div class="problem-callout fade-up">
+        <blockquote>"Nothing deducts future charges from the balance until they actually clear. A student sees ₪2,000 available and spends freely — then rent hits and they're in crisis."</blockquote>
+        <cite>Concept.md · Problem Statement</cite>
+      </div>
+      <div class="problem-points fade-up" style="transition-delay:0.1s;">
+        <div class="problem-point">
+          <div class="pp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div><h4>Committed obligations are invisible</h4><p>Rent due next week still shows as "available" in the bank. The student has no systemic way to deduct it until it clears.</p></div>
+        </div>
+        <div class="problem-point">
+          <div class="pp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l18 18M3 21l7-7"/><path d="M10.5 10.5A5 5 0 0 1 21 12a5 5 0 0 1-4 4.9"/></svg></div>
+          <div><h4>Irregular income makes it harder</h4><p>Family transfers, scholarships, and part-time work arrive unpredictably. Simple monthly budgets break when income isn't uniform.</p></div>
+        </div>
+        <div class="problem-point">
+          <div class="pp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div><h4>No visibility into spend trajectory</h4><p>Students have no daily signal for whether they're on pace. They discover the problem at month-end, when it's too late to adjust.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CORE MECHANIC -->
+<section class="mechanic-section" id="mechanic">
+  <div class="inner">
+    <div class="sec-tag fade-up">The core mechanic</div>
+    <h2 class="sec-title fade-up"><em>Free Money</em> — the only<br>number that matters.</h2>
+    <p class="sec-lead fade-up">The BalanceEngine computes Free Money deterministically from a session opening balance, all income entries, all committed charges, and all logged transactions. No estimates, no bank sync required.</p>
+
+    <div class="mechanic-grid">
+      <div class="formula-block fade-up">
+        <div class="formula-title">BalanceEngine · free_money formula</div>
+        <div class="formula-line">
+          <span class="f-op plus">+</span>
+          <span class="f-label plus">opening_balance</span>
+          <span class="f-amt green">₪2,000</span>
+        </div>
+        <div class="formula-line">
+          <span class="f-op plus">+</span>
+          <span class="f-label plus">total_income</span>
+          <span class="f-amt green">₪835</span>
+        </div>
+        <div class="formula-line">
+          <span class="f-op minus">−</span>
+          <span class="f-label minus">total_committed</span>
+          <span class="f-amt red">₪1,200</span>
+        </div>
+        <div class="formula-line">
+          <span class="f-op minus">−</span>
+          <span class="f-label minus">total_spent</span>
+          <span class="f-amt red">₪995</span>
+        </div>
+        <div class="formula-line" style="border-top:1px solid hsl(240 18% 20%); margin-top:4px; padding-top:14px;">
+          <span class="f-op equals">=</span>
+          <span class="f-label equals" style="font-weight:500;">free_money</span>
+          <span class="f-amt result">₪640</span>
+        </div>
+        <div style="margin-top:18px; padding-top:14px; border-top:1px solid hsl(240 18% 18%);">
+          <div class="formula-title" style="margin-bottom:12px;">on_track_pct · monthly signal</div>
+          <div class="formula-line" style="border:none; padding:0;">
+            <span class="f-label" style="color:hsl(240 10% 55%);">monthly_spent ÷ monthly_budget × 100</span>
+            <span class="f-amt" style="color:hsl(240 10% 55%);">= 35%</span>
+          </div>
+        </div>
+      </div>
+      <div class="mechanic-explains fade-up" style="transition-delay:0.1s;">
+        <div class="mechanic-card highlight">
+          <div class="mc-tag">Core invariant</div>
+          <h4>Committed charges deduct at log time — not due date</h4>
+          <p>The moment you log a committed charge, it is immediately subtracted from Free Money. Even if rent isn't due for two weeks, it's already gone from your usable balance. This is the mechanic that makes the system honest.</p>
+        </div>
+        <div class="mechanic-card">
+          <div class="mc-tag">Session model</div>
+          <h4>One continuous session — no forced monthly reset</h4>
+          <p>The AppSession persists across months with an opening_balance. This handles irregular income and charges that don't align with calendar months.</p>
+        </div>
+        <div class="mechanic-card">
+          <div class="mc-tag">Fuzzy charges</div>
+          <h4>Uncertain charges never touch Free Money directly</h4>
+          <p>A fuzzy charge (course books, ₪80–150) is tracked separately and shown on the timeline. It only enters the formula when resolved to a confirmed amount — never as an estimate.</p>
+        </div>
+        <div class="mechanic-card">
+          <div class="mc-tag">Caution threshold</div>
+          <h4>Caution triggers at 7 × average daily spend</h4>
+          <p>The CAUTION state fires when Free Money drops below 7 times the student's average daily spend — a student-overridable buffer designed to give enough runway to adjust.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BALANCE STATES -->
+<section class="states-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">State machines</div>
+    <h2 class="sec-title fade-up">Two independent state signals.<br>Always explicit, never silent.</h2>
+    <p class="sec-lead fade-up">The BalanceEngine computes two separate state values on every snapshot — BalanceState (based on Free Money) and OnTrackState (based on monthly pace) — which drive the dashboard's color signals independently.</p>
+
+    <div class="states-2row">
+      <div>
+        <div class="state-group-label fade-up">BalanceState — based on Free Money</div>
+        <div class="states-row row1">
+          <div class="state-block normal fade-up">
+            <div class="state-block-tag">NORMAL</div>
+            <h4>Safe to spend</h4>
+            <p>Free Money is above the caution threshold. The green hero card. Daily number is reliable.</p>
+            <div class="threshold">free_money &gt; 7 × avg_daily</div>
+          </div>
+          <div class="state-block caution fade-up" style="transition-delay:0.08s;">
+            <div class="state-block-tag">CAUTION</div>
+            <h4>Buffer running low</h4>
+            <p>Free Money is positive but within 7 days of average spend. Time to cut back before it becomes a crisis.</p>
+            <div class="threshold">0 &lt; free_money ≤ 7 × avg_daily</div>
+          </div>
+          <div class="state-block crisis fade-up" style="transition-delay:0.16s;">
+            <div class="state-block-tag">CRISIS</div>
+            <h4>In the red</h4>
+            <p>Free Money is at or below zero. Committed charges exceed available funds. The red hero card — cannot be hidden or softened.</p>
+            <div class="threshold">free_money ≤ 0</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="state-group-label fade-up">OnTrackState — based on monthly spend pace</div>
+        <div class="states-row row2">
+          <div class="state-block green-s fade-up">
+            <div class="state-block-tag">GREEN</div>
+            <h4>On pace</h4>
+            <p>Monthly spend is within budget. Safe daily is positive.</p>
+            <div class="threshold">on_track_pct &lt; 100%</div>
+          </div>
+          <div class="state-block yellow-s fade-up" style="transition-delay:0.07s;">
+            <div class="state-block-tag">YELLOW</div>
+            <h4>Over budget</h4>
+            <p>Monthly spend has exceeded the monthly budget but hasn't hit the crisis threshold yet.</p>
+            <div class="threshold">100% ≤ pct &lt; 130%</div>
+          </div>
+          <div class="state-block red-s fade-up" style="transition-delay:0.14s;">
+            <div class="state-block-tag">RED</div>
+            <h4>Well over budget</h4>
+            <p>Spend is 30%+ over the monthly budget. Significant adjustment required.</p>
+            <div class="threshold">pct ≥ 130%</div>
+          </div>
+          <div class="state-block tight-s fade-up" style="transition-delay:0.21s;">
+            <div class="state-block-tag">TIGHT_MONTH</div>
+            <h4>No budget headroom</h4>
+            <p>Monthly budget is zero or negative — income this month doesn't exceed committed charges.</p>
+            <div class="threshold">monthly_budget ≤ 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOMAIN MODEL -->
+<section class="domain-section" id="domain">
+  <div class="inner">
+    <div class="sec-tag fade-up">Domain model</div>
+    <h2 class="sec-title fade-up">Six entities. Every field<br>carries a <em>precise meaning.</em></h2>
+    <p class="sec-lead fade-up">All money values use <code style="font-family:'DM Mono',monospace;font-size:12px;background:var(--bg);border:1px solid var(--hairline);padding:1px 5px;border-radius:3px;">Decimal</code> — never float. Dates go through a single centralized utility. No silent defaults.</p>
+
+    <div class="domain-grid">
+      <!-- AppSession -->
+      <div class="entity-card fade-up">
+        <div class="entity-header">
+          <span class="entity-name">AppSession</span>
+          <span class="entity-badge core">Core</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">session_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier for the session lifetime</span></div>
+          <div class="entity-field"><span class="field-name">start_date</span><span class="field-type">date</span><span class="field-desc">When the session began; anchor for all calculations</span></div>
+          <div class="entity-field"><span class="field-name">opening_balance</span><span class="field-type">Decimal</span><span class="field-desc">Bank balance at session start — foundation of free_money</span></div>
+        </div>
+      </div>
+      <!-- IncomeEntry -->
+      <div class="entity-card fade-up" style="transition-delay:0.05s;">
+        <div class="entity-header">
+          <span class="entity-name">IncomeEntry</span>
+          <span class="entity-badge core">Core</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">income_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier</span></div>
+          <div class="entity-field"><span class="field-name">amount</span><span class="field-type">Decimal</span><span class="field-desc">Always positive; added to free_money</span></div>
+          <div class="entity-field"><span class="field-name">source</span><span class="field-type">enum</span><span class="field-desc">scholarship | family | work | other</span></div>
+          <div class="entity-field"><span class="field-name">date</span><span class="field-type">date</span><span class="field-desc">When income was received; used in monthly_budget</span></div>
+        </div>
+      </div>
+      <!-- CommittedCharge -->
+      <div class="entity-card fade-up" style="transition-delay:0.1s;">
+        <div class="entity-header">
+          <span class="entity-name">CommittedCharge</span>
+          <span class="entity-badge lifecycle">Lifecycle</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">charge_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier</span></div>
+          <div class="entity-field"><span class="field-name">name</span><span class="field-type">str</span><span class="field-desc">Human label — "Rent", "Gym"</span></div>
+          <div class="entity-field"><span class="field-name">amount</span><span class="field-type">Decimal</span><span class="field-desc">Exact, known amount. Deducted immediately at log time</span></div>
+          <div class="entity-field"><span class="field-name">due_date</span><span class="field-type">date</span><span class="field-desc">When the charge is due; drives reminders</span></div>
+          <div class="entity-field"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-desc">upcoming | paid</span></div>
+          <div class="entity-field"><span class="field-name">recurring_rule_id</span><span class="field-type">UUID?</span><span class="field-desc">Links to RecurringRule if auto-generated</span></div>
+        </div>
+      </div>
+      <!-- FuzzyCharge -->
+      <div class="entity-card fade-up" style="transition-delay:0.05s;">
+        <div class="entity-header">
+          <span class="entity-name">FuzzyCharge</span>
+          <span class="entity-badge lifecycle">Lifecycle</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">fuzzy_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier</span></div>
+          <div class="entity-field"><span class="field-name">name</span><span class="field-type">str</span><span class="field-desc">Human label — "Course books"</span></div>
+          <div class="entity-field"><span class="field-name">due_date</span><span class="field-type">date</span><span class="field-desc">Approximate expected date</span></div>
+          <div class="entity-field"><span class="field-name">estimated_amount</span><span class="field-type">Decimal?</span><span class="field-desc">Optional estimate. Never enters free_money formula</span></div>
+          <div class="entity-field"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-desc">pending | overdue | resolved | discarded</span></div>
+        </div>
+      </div>
+      <!-- RecurringRule -->
+      <div class="entity-card fade-up" style="transition-delay:0.1s;">
+        <div class="entity-header">
+          <span class="entity-name">RecurringRule</span>
+          <span class="entity-badge rule">Rule</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">rule_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier</span></div>
+          <div class="entity-field"><span class="field-name">name</span><span class="field-type">str</span><span class="field-desc">Human label — "Rent"</span></div>
+          <div class="entity-field"><span class="field-name">amount</span><span class="field-type">Decimal</span><span class="field-desc">Fixed amount per occurrence</span></div>
+          <div class="entity-field"><span class="field-name">frequency</span><span class="field-type">enum</span><span class="field-desc">monthly (Stage 1 only)</span></div>
+          <div class="entity-field"><span class="field-name">day_of_month</span><span class="field-type">int</span><span class="field-desc">1–28. Auto-generates next charge on mark_paid</span></div>
+          <div class="entity-field"><span class="field-name">reminder_days</span><span class="field-type">int</span><span class="field-desc">Days before due_date to surface reminder (default 3)</span></div>
+        </div>
+      </div>
+      <!-- Transaction -->
+      <div class="entity-card fade-up">
+        <div class="entity-header">
+          <span class="entity-name">Transaction</span>
+          <span class="entity-badge core">Core</span>
+        </div>
+        <div class="entity-fields">
+          <div class="entity-field"><span class="field-name">tx_id</span><span class="field-type">UUID</span><span class="field-desc">Stable identifier</span></div>
+          <div class="entity-field"><span class="field-name">amount</span><span class="field-type">Decimal</span><span class="field-desc">Always positive; deducted from free_money as total_spent</span></div>
+          <div class="entity-field"><span class="field-name">description</span><span class="field-type">str</span><span class="field-desc">Free text — "Café Najjar"</span></div>
+          <div class="entity-field"><span class="field-name">category</span><span class="field-type">enum</span><span class="field-desc">food | transport | education | entertainment | other</span></div>
+          <div class="entity-field"><span class="field-name">date</span><span class="field-type">date</span><span class="field-desc">Used in monthly_spent; defaults to today</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <div class="inner">
+    <div class="sec-tag fade-up">Architecture</div>
+    <h2 class="sec-title fade-up">Four strict layers.<br>One direction of <em>dependency.</em></h2>
+    <p class="sec-lead fade-up">CLI → Services → Domain + Ports ← Infrastructure. No layer may reach across or skip a layer. Repository protocols make storage swappable with no domain change.</p>
+
+    <div class="arch-layers">
+      <div class="arch-layer cli fade-up">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">CLI</span>
+          <span class="arch-layer-arrow">→</span>
+          <span class="arch-layer-desc">Parses input, calls services, prints output. Zero business logic.</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">main.py</span>
+          <span class="arch-chip">cli.py</span>
+          <span class="arch-chip">10 command handlers</span>
+        </div>
+      </div>
+      <div class="arch-layer svc fade-up" style="transition-delay:0.05s;">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">Services</span>
+          <span class="arch-layer-arrow">→</span>
+          <span class="arch-layer-desc">Orchestrate use cases. Compose models, validators, calculations, repos.</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">SessionService</span>
+          <span class="arch-chip">IncomeService</span>
+          <span class="arch-chip">ChargeService</span>
+          <span class="arch-chip">FuzzyChargeService</span>
+          <span class="arch-chip">SpendService</span>
+          <span class="arch-chip">BalanceService</span>
+        </div>
+      </div>
+      <div class="arch-layer domain fade-up" style="transition-delay:0.1s;">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">Domain</span>
+          <span class="arch-layer-arrow">·</span>
+          <span class="arch-layer-desc">Entities, value objects, validators, BalanceEngine (pure, deterministic, no side effects).</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">models.py</span>
+          <span class="arch-chip">validators.py</span>
+          <span class="arch-chip">calculations.py · BalanceEngine</span>
+          <span class="arch-chip">AppSession</span>
+          <span class="arch-chip">IncomeEntry</span>
+          <span class="arch-chip">CommittedCharge</span>
+          <span class="arch-chip">FuzzyCharge</span>
+          <span class="arch-chip">RecurringRule</span>
+          <span class="arch-chip">Transaction</span>
+          <span class="arch-chip">BalanceSnapshot</span>
+        </div>
+      </div>
+      <div class="arch-layer ports fade-up" style="transition-delay:0.15s;">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">Ports</span>
+          <span class="arch-layer-arrow">←</span>
+          <span class="arch-layer-desc">Repository protocols (Python Protocols). Domain depends on abstractions, not concrete storage.</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">SessionRepository</span>
+          <span class="arch-chip">IncomeRepository</span>
+          <span class="arch-chip">ChargeRepository</span>
+          <span class="arch-chip">RecurringRuleRepository</span>
+          <span class="arch-chip">FuzzyChargeRepository</span>
+          <span class="arch-chip">TransactionRepository</span>
+        </div>
+      </div>
+      <div class="arch-layer infra fade-up" style="transition-delay:0.2s;">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">Infrastructure</span>
+          <span class="arch-layer-arrow">·</span>
+          <span class="arch-layer-desc">Concrete adapters. Stage 1: JSON file storage. Stage 3: PostgreSQL — zero domain changes required.</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">JsonSessionRepo</span>
+          <span class="arch-chip">JsonIncomeRepo</span>
+          <span class="arch-chip">JsonChargeRepo</span>
+          <span class="arch-chip">JsonRecurringRuleRepo</span>
+          <span class="arch-chip">JsonFuzzyChargeRepo</span>
+          <span class="arch-chip">JsonTransactionRepo</span>
+          <span class="arch-chip">LoggerFactory</span>
+        </div>
+      </div>
+      <div class="arch-layer shared fade-up" style="transition-delay:0.25s;">
+        <div class="arch-layer-header">
+          <span class="arch-layer-label">Shared</span>
+          <span class="arch-layer-arrow">·</span>
+          <span class="arch-layer-desc">Exception hierarchy and utilities available across all layers.</span>
+        </div>
+        <div class="arch-layer-components">
+          <span class="arch-chip">ExpenseTrackerError</span>
+          <span class="arch-chip">ValidationError</span>
+          <span class="arch-chip">ApplicationError</span>
+          <span class="arch-chip">InfrastructureError</span>
+          <span class="arch-chip">date_utils</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-rule fade-up" style="transition-delay:0.1s;">
+      <span class="arch-rule-icon">→</span>
+      <span class="arch-rule-text"><strong>Data flow example:</strong> CLI parses <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--bg);padding:1px 4px;border-radius:2px;">spend add --amount 32 --description "Café Najjar" --category food</code> → ValidationError checked → SpendService.add_transaction() → Transaction model constructed with Decimal amount → JsonTransactionRepository.save() → exit with success output.</span>
+    </div>
+  </div>
+</section>
+
+<!-- CLI -->
+<section class="cli-section" id="cli">
+  <div class="inner">
+    <div class="sec-tag fade-up">CLI — Stage 1 interface</div>
+    <h2 class="sec-title fade-up">Ten commands.<br>Complete coverage.</h2>
+    <p class="sec-lead fade-up">The CLI is the Stage 1 interface — every use case in the system is reachable from the terminal. The PyQt6 desktop (Stage 2) will call the same service layer.</p>
+
+    <div class="cli-grid">
+      <div class="cli-card fade-up">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Session</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Start a new session</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker session init</span><br>
+          <span class="cli-flag">  --balance </span><span class="cli-val">2000.00</span><br>
+          <span class="cli-out ok">✓ Session started · opening balance ₪2,000.00</span>
+        </div>
+      </div>
+      <div class="cli-card fade-up" style="transition-delay:0.05s;">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Income</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Log a scholarship payment</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker income add</span><br>
+          <span class="cli-flag">  --amount </span><span class="cli-val">835.00</span><span class="cli-flag"> --source </span><span class="cli-val">scholarship</span><br>
+          <span class="cli-out ok">✓ Income logged · free money ↑ ₪835.00</span>
+        </div>
+      </div>
+      <div class="cli-card fade-up">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Committed charge — one-off</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Log rent (deducts immediately)</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker charge add</span><br>
+          <span class="cli-flag">  --name </span><span class="cli-val">"Rent"</span><span class="cli-flag"> --amount </span><span class="cli-val">1200.00</span><span class="cli-flag"> --due-date </span><span class="cli-val">2026-05-01</span><br>
+          <span class="cli-out ok">✓ Charge logged · free money ↓ ₪1,200.00</span>
+        </div>
+      </div>
+      <div class="cli-card fade-up" style="transition-delay:0.05s;">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Recurring charge</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Gym — auto-generates next on mark-paid</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker charge add</span><br>
+          <span class="cli-flag">  --recurring --name </span><span class="cli-val">"Gym"</span><br>
+          <span class="cli-flag">  --amount </span><span class="cli-val">85.00</span><span class="cli-flag"> --day-of-month </span><span class="cli-val">5</span><br>
+          <span class="cli-out ok">✓ Recurring rule created · next charge 5 May</span>
+        </div>
+      </div>
+      <div class="cli-card fade-up">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Fuzzy charge</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Uncertain — shown on timeline, not in formula</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker fuzzy-charge add</span><br>
+          <span class="cli-flag">  --name </span><span class="cli-val">"Course books"</span><span class="cli-flag"> --due-date </span><span class="cli-val">2026-05-15</span><br>
+          <span class="cli-flag">  --estimate </span><span class="cli-val">80.00</span><span class="cli-val"> 150.00</span><br>
+          <span class="cli-out ok">✓ Fuzzy charge added · shown on timeline</span>
+        </div>
+      </div>
+      <div class="cli-card fade-up" style="transition-delay:0.05s;">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Log transaction</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-comment"># Daily spend — deducts from free money</span><br>
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker spend add</span><br>
+          <span class="cli-flag">  --amount </span><span class="cli-val">32.00</span><span class="cli-flag"> --description </span><span class="cli-val">"Café Najjar"</span><br>
+          <span class="cli-flag">  --category </span><span class="cli-val">food</span><br>
+          <span class="cli-out ok">✓ Logged ₪32.00 · food · free money ₪640</span>
+        </div>
+      </div>
+      <div class="cli-card full fade-up" style="transition-delay:0.05s;">
+        <div class="cli-card-header">
+          <span class="cli-card-title">Dashboard show — the money view</span>
+          <span class="cli-card-badge done">Done</span>
+        </div>
+        <div class="cli-code">
+          <span class="cli-prompt">$ </span><span class="cli-cmd">python -m expense_tracker dashboard show</span><br><br>
+          <span class="cli-out">  ┌─────────────────────────────────────────────┐</span><br>
+          <span class="cli-out">  │  FREE MONEY                                 │</span><br>
+          <span class="cli-out num">  │  ₪640.00                                     │</span><br>
+          <span class="cli-out ok">  │  ● ON TRACK  · 11 days left in April        │</span><br>
+          <span class="cli-out">  │  Spent ₪995  ·  Committed ₪1,200           │</span><br>
+          <span class="cli-out">  │  Monthly budget: ₪1,635  ·  Used 35%         │</span><br>
+          <span class="cli-out">  │  Safe daily: ₪58.18                          │</span><br>
+          <span class="cli-out">  └─────────────────────────────────────────────┘</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INVARIANTS -->
+<section class="inv-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Design invariants</div>
+    <h2 class="sec-title fade-up">Rules that cannot be broken<br>at <em>any</em> stage.</h2>
+    <p class="sec-lead fade-up">These invariants are enforced at every layer and cannot be softened, routed around, or deferred to a later stage. They exist because violating any of them breaks the user's trust in the number.</p>
+
+    <div class="inv-grid">
+      <div class="inv-card fade-up">
+        <div class="inv-num">INV-01</div>
+        <h4>Free money never displayed as normal in crisis</h4>
+        <p>The BalanceState drives the hero card colour. CRISIS always renders red — it cannot be overridden by the student, a setting, or a theme.</p>
+        <div class="inv-rule">BalanceState.CRISIS → red hero, always</div>
+      </div>
+      <div class="inv-card fade-up" style="transition-delay:0.07s;">
+        <div class="inv-num">INV-02</div>
+        <h4>Budget signal always from free money — never bank balance</h4>
+        <p>The dashboard number is computed, not fetched. Bank balance is read once at session init and never again used as the display figure.</p>
+        <div class="inv-rule">display = BalanceEngine.free_money()</div>
+      </div>
+      <div class="inv-card fade-up" style="transition-delay:0.14s;">
+        <div class="inv-num">INV-03</div>
+        <h4>Committed charge deducts at log time, not due date</h4>
+        <p>This is the core mechanic. The moment a charge is logged, it reduces free_money. Its due_date is only used for reminder surfacing.</p>
+        <div class="inv-rule">total_committed = sum(all upcoming charges)</div>
+      </div>
+      <div class="inv-card fade-up">
+        <div class="inv-num">INV-04</div>
+        <h4>Fuzzy charges never enter the free_money formula</h4>
+        <p>A fuzzy charge is tracked and shown on the UI but never touches the formula until resolved. Guesses don't become facts until confirmed.</p>
+        <div class="inv-rule">fuzzy → timeline only, not formula</div>
+      </div>
+      <div class="inv-card fade-up" style="transition-delay:0.07s;">
+        <div class="inv-num">INV-05</div>
+        <h4>AppSession must exist before any financial write</h4>
+        <p>Income, charges, and transactions are rejected with ApplicationError if no active session exists. Orphaned financial data cannot exist.</p>
+        <div class="inv-rule">SessionService.get_active() gates all writes</div>
+      </div>
+      <div class="inv-card span2 fade-up" style="transition-delay:0.14s;">
+        <div class="inv-num">INV-06</div>
+        <h4>Insight fires at most once per category per period</h4>
+        <p>The pattern detection engine (Stage 4) may surface one spend insight per category per month — never more. The system will not flood the student with observations. One relevant signal at the right moment is the design target, not a notification feed.</p>
+        <div class="inv-rule">insight_count[category][period] ≤ 1</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHARGE LIFECYCLE -->
+<section class="lifecycle-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Charge lifecycles</div>
+    <h2 class="sec-title fade-up">Three types of charge.<br>Three distinct <em>state machines.</em></h2>
+    <p class="sec-lead fade-up">Each charge type has its own lifecycle. Recurring charges auto-generate their next occurrence on mark-paid. Fuzzy charges only enter the formula on resolution — never before.</p>
+
+    <div class="lifecycle-grid">
+      <div class="lc-card fade-up">
+        <div class="lc-header committed">
+          <div class="lc-tag">CommittedCharge</div>
+          <h4>One-off</h4>
+        </div>
+        <div class="lc-flow">
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot committed"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">UPCOMING</div><div class="lc-note">Logged. Amount deducted from free_money immediately.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot ok"></div></div><div class="lc-content"><div class="lc-state">PAID</div><div class="lc-note">Marked paid by developer. Removed from upcoming charges. Terminal state.</div></div></div>
+        </div>
+      </div>
+      <div class="lc-card fade-up" style="transition-delay:0.08s;">
+        <div class="lc-header recurring">
+          <div class="lc-tag">CommittedCharge + RecurringRule</div>
+          <h4>Recurring</h4>
+        </div>
+        <div class="lc-flow">
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot recurring"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">UPCOMING</div><div class="lc-note">Auto-generated from RecurringRule. Deducts immediately.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot ok"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">PAID</div><div class="lc-note">Marked paid. Triggers auto-generation of next occurrence.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot recurring"></div></div><div class="lc-content"><div class="lc-state">UPCOMING (next)</div><div class="lc-note">New charge created for day_of_month next month. Cycle continues.</div></div></div>
+        </div>
+      </div>
+      <div class="lc-card fade-up" style="transition-delay:0.16s;">
+        <div class="lc-header fuzzy">
+          <div class="lc-tag">FuzzyCharge</div>
+          <h4>Uncertain</h4>
+        </div>
+        <div class="lc-flow">
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot fuzzy"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">PENDING</div><div class="lc-note">Logged. Shown on timeline. Not in free_money formula.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot fuzzy"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">OVERDUE (optional)</div><div class="lc-note">Past due_date without resolution. Surfaced in UI as warning.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot ok"></div><div class="lc-vline"></div></div><div class="lc-content"><div class="lc-state">RESOLVED</div><div class="lc-note">Confirmed amount becomes a CommittedCharge. Deducts for the first time.</div></div></div>
+          <div class="lc-step"><div class="lc-aside"><div class="lc-dot gray"></div></div><div class="lc-content"><div class="lc-state">DISCARDED</div><div class="lc-note">Charge won't happen. Removed from timeline. No impact on formula.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEST SUITE -->
+<section class="tests-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Test suite</div>
+    <h2 class="sec-title fade-up">208 tests.<br><em>All passing.</em></h2>
+    <p class="sec-lead fade-up">Every layer is independently tested. The BalanceEngine has its own unit test suite covering all state transitions. Repository tests run against real JSON adapters.</p>
+
+    <div class="tests-grid">
+      <div class="tests-big fade-up">
+        <div class="tests-num" id="test-count">0</div>
+        <div class="tests-denom">/208</div>
+        <div class="tests-lbl">Unit tests passing</div>
+        <div class="tests-pill"><div class="tests-dot"></div>All green</div>
+      </div>
+      <div class="tests-layers fade-up" style="transition-delay:0.1s;">
+        <div class="tests-layer">
+          <span class="tests-layer-name">Domain / Engine</span>
+          <div class="tests-layer-bar-wrap"><div class="tests-layer-bar" style="width:100%;"></div></div>
+          <span class="tests-layer-count">72</span>
+        </div>
+        <div class="tests-layer">
+          <span class="tests-layer-name">Services</span>
+          <div class="tests-layer-bar-wrap"><div class="tests-layer-bar" style="width:85%;"></div></div>
+          <span class="tests-layer-count">58</span>
+        </div>
+        <div class="tests-layer">
+          <span class="tests-layer-name">Infrastructure</span>
+          <div class="tests-layer-bar-wrap"><div class="tests-layer-bar" style="width:62%;"></div></div>
+          <span class="tests-layer-count">44</span>
+        </div>
+        <div class="tests-layer">
+          <span class="tests-layer-name">Validators</span>
+          <div class="tests-layer-bar-wrap"><div class="tests-layer-bar" style="width:46%;"></div></div>
+          <span class="tests-layer-count">22</span>
+        </div>
+        <div class="tests-layer">
+          <span class="tests-layer-name">CLI smoke</span>
+          <div class="tests-layer-bar-wrap"><div class="tests-layer-bar" style="width:17%;"></div></div>
+          <span class="tests-layer-count">12</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="roadmap-section" id="roadmap">
+  <div class="roadmap-inner">
+    <div class="roadmap-tag fade-up">Build roadmap</div>
+    <h2 class="roadmap-title fade-up">Six stages.<br>One stage <em>complete.</em></h2>
+    <p class="roadmap-lead fade-up">The architecture is designed so each stage adds a new delivery surface without touching the domain layer. The BalanceEngine computes the same way whether called from CLI, PyQt6, or a React frontend.</p>
+
+    <div class="roadmap-track">
+      <div class="rm-stage done fade-up">
+        <div class="rm-stage-num">01</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">CLI + JSON storage</span>
+            <span class="rm-stage-status">Complete · 208/208 tests</span>
+          </div>
+          <div class="rm-stage-desc">All 10 commands wired. Full domain model. BalanceEngine fully tested. JSON persistence. The entire backend logic is done and frozen.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">Python 3.12</span><span class="rm-chip">Decimal money</span><span class="rm-chip">JSON repos</span><span class="rm-chip">Layered arch</span><span class="rm-chip">pytest 208 tests</span>
+          </div>
+        </div>
+      </div>
+      <div class="rm-stage next fade-up" style="transition-delay:0.06s;">
+        <div class="rm-stage-num">02</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">PyQt6 desktop dashboard</span>
+            <span class="rm-stage-status">Next</span>
+          </div>
+          <div class="rm-stage-desc">The Mizān dashboard design (see mizan_dashboard.html) implemented as a native desktop app. Calls the same service layer as the CLI — no new business logic.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">PyQt6</span><span class="rm-chip">Same service layer</span><span class="rm-chip">Native desktop</span><span class="rm-chip">Full dashboard UI</span>
+          </div>
+        </div>
+      </div>
+      <div class="rm-stage later fade-up" style="transition-delay:0.12s;">
+        <div class="rm-stage-num">03</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">PostgreSQL persistence</span>
+            <span class="rm-stage-status">Planned</span>
+          </div>
+          <div class="rm-stage-desc">Swap JSON repositories for PostgreSQL adapters. Repository protocols mean this is a pure infrastructure change — domain and services untouched.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">PostgreSQL</span><span class="rm-chip">SQLAlchemy</span><span class="rm-chip">Zero domain changes</span>
+          </div>
+        </div>
+      </div>
+      <div class="rm-stage later fade-up" style="transition-delay:0.18s;">
+        <div class="rm-stage-num">04</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">Reminders + spend pattern detection</span>
+            <span class="rm-stage-status">Planned</span>
+          </div>
+          <div class="rm-stage-desc">Pre-charge reminders (3 days before due date). One spend pattern insight surfaced per category per period — never a notification feed. Fuzzy charge overdue alerts.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">Reminder engine</span><span class="rm-chip">Pattern detection</span><span class="rm-chip">≤1 insight / category / period</span>
+          </div>
+        </div>
+      </div>
+      <div class="rm-stage later fade-up" style="transition-delay:0.24s;">
+        <div class="rm-stage-num">05</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">Web UI — FastAPI + React</span>
+            <span class="rm-stage-status">Planned</span>
+          </div>
+          <div class="rm-stage-desc">REST API over the service layer. React frontend following the Mizān design system. Mobile-optimised companion view (see mizan_mobile.html). Same backend, new surface.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">FastAPI</span><span class="rm-chip">React</span><span class="rm-chip">Mizān design system</span><span class="rm-chip">Mobile view</span>
+          </div>
+        </div>
+      </div>
+      <div class="rm-stage later fade-up" style="transition-delay:0.30s;">
+        <div class="rm-stage-num">06</div>
+        <div class="rm-stage-body">
+          <div class="rm-stage-header">
+            <span class="rm-stage-name">Local bank connectivity</span>
+            <span class="rm-stage-status">Future</span>
+          </div>
+          <div class="rm-stage-desc">Read-only integration with Israeli banking APIs. Auto-import transactions. Auto-detect committed charge settlements. The formula stays the same — the data becomes automatic.</div>
+          <div class="rm-stage-chips">
+            <span class="rm-chip">Bank API (read-only)</span><span class="rm-chip">Auto-import</span><span class="rm-chip">ILS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LINK TO DASHBOARD -->
+<div class="link-section">
+  <div class="link-inner">
+    <div class="link-left">
+      <h3>See the Stage 2 design target</h3>
+      <p>The PyQt6 desktop dashboard design is already built as an HTML mockup — fully interactive, with real state switching and animations.</p>
+    </div>
+    <div class="link-right">
+      <a class="btn-primary" href="mizan_dashboard.html">Open dashboard →</a>
+      <a class="btn-secondary" href="mizan-landing.html">Landing page →</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <span class="footer-arabic">ميزان</span>
+    <span class="footer-wordmark">Mizān</span>
+  </div>
+  <span>Student Expense Tracker · Stage 1 Complete · 208/208 tests</span>
+  <span>Python · PyQt6 next · FastAPI + React planned</span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Fade-up observer */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+  /* Count-up for test number */
+  function countUp(el, target, duration) {
+    if (!el) return;
+    if (reduceMotion) { el.textContent = target; return; }
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const testEl = document.getElementById('test-count');
+  if (testEl) {
+    const tIo = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        countUp(testEl, 208, 1200);
+        tIo.disconnect();
+      }
+    }, { threshold: 0.5 });
+    tIo.observe(testEl);
+  }
+})();
+</script>
+
+</body>
+</html>
