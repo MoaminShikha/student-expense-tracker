@@ -2,8 +2,8 @@
 import logging
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ...application.services import BalanceService, ChargeService, IncomeService, SessionService, SpendService
-    from .views.main_window import MainWindow
+    from ....application.services import BalanceService, ChargeService, IncomeService, SessionService, SpendService
+    from ..views.main_window import MainWindow
 class DashboardController:
     """Thin orchestrator connecting MainWindow signals with application services."""
     def __init__(
