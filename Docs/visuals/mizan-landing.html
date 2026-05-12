@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mizān · Student Budget Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         hsl(36 25% 96%);
+    --paper:      hsl(38 28% 94%);
+    --surface:    hsl(0 0% 100%);
+    --hairline:   hsl(36 16% 86%);
+    --hairline-s: hsl(36 14% 76%);
+    --fg:         hsl(240 28% 12%);
+    --muted:      hsl(222 12% 55%);
+    --muted-fg:   hsl(224 14% 38%);
+    --navy:       hsl(240 30% 11%);
+    --gold:       hsl(42 55% 50%);
+    --gold-leaf:  hsl(42 65% 40%);
+    --red:        hsl(0 55% 38%);
+    --green:      hsl(162 60% 26%);
+    --green-bg:   hsl(162 45% 92%);
+    --amber:      hsl(32 80% 38%);
+    --amber-bg:   hsl(38 78% 94%);
+    --amber-bd:   hsl(38 60% 70%);
+    --cat-food:   hsl(18 88% 50%);
+    --cat-edu:    hsl(217 82% 52%);
+    --cat-trans:  hsl(162 72% 36%);
+    --cat-other:  hsl(268 65% 58%);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--fg);
+    background: var(--bg);
+  }
+
+  /* ── DOT GRID — isolated overlay, no global z-index hack ── */
+  .dot-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(hsl(36 20% 60% / 0.07) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  .site-wrap {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── FADE-UP ANIMATION ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-up { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 54px;
+    background: hsl(36 25% 96% / 0.93);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 200;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-mark {
+    width: 28px; height: 28px;
+    background: var(--navy);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-arabic-sm { font-family: 'Noto Naskh Arabic', serif; font-size: 15px; color: var(--gold); direction: rtl; line-height: 1; }
+  .nav-wordmark { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--fg); }
+  .nav-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-left: 2px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+  .nav-links a { font-size: 13.5px; color: var(--muted-fg); text-decoration: none; transition: color 0.15s; }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-cta {
+    background: var(--navy);
+    color: hsl(42 65% 80%);
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 18px; border-radius: 6px;
+    text-decoration: none; transition: opacity 0.15s;
+  }
+  .nav-cta:hover { opacity: 0.82; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 130px 40px 80px;
+    max-width: 1140px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 72px;
+    align-items: center;
+  }
+  .hero-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .hero-arabic-lg { font-family: 'Noto Naskh Arabic', serif; font-size: 22px; color: var(--gold-leaf); direction: rtl; line-height: 1; }
+  .hero-eyebrow-line { width: 28px; height: 1px; background: var(--gold); flex-shrink: 0; }
+  .hero-eyebrow-tag { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 900; line-height: 1.08;
+    color: var(--fg); letter-spacing: -0.03em; margin-bottom: 22px;
+  }
+  .hero h1 em { font-style: italic; font-weight: 700; color: var(--gold-leaf); }
+  .hero p.lead { font-size: 17px; color: var(--muted-fg); max-width: 460px; line-height: 1.78; margin-bottom: 40px; }
+  .hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--navy); color: hsl(42 65% 80%);
+    font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 12px 22px; border-radius: 6px; text-decoration: none; transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.82; }
+  .btn-ghost { font-size: 14px; color: var(--muted-fg); text-decoration: none; border-bottom: 1px solid var(--hairline); padding-bottom: 1px; transition: color 0.15s, border-color 0.15s; }
+  .btn-ghost:hover { color: var(--fg); border-color: var(--fg); }
+
+  /* ── HERO CARD MOCKUP — faithful gradient ── */
+  .hero-mockup {
+    background:
+      radial-gradient(ellipse 80% 60% at 88% 0%, hsl(42 65% 90% / 0.85) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 60% at 8% 100%, hsl(36 40% 90% / 0.75) 0%, transparent 60%),
+      linear-gradient(155deg, hsl(42 60% 97%) 0%, hsl(36 35% 93%) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 24px 28px;
+    overflow: hidden;
+  }
+  .mockup-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 2px; }
+  .mockup-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .mockup-num { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 64px; color: var(--fg); letter-spacing: -0.03em; line-height: 1; display: flex; align-items: baseline; gap: 2px; }
+  .mockup-sym { font-style: italic; font-weight: 400; font-size: 28px; opacity: 0.35; }
+  .mockup-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    padding: 5px 11px; border-radius: 3px;
+    background: hsl(42 55% 50% / 0.12); color: var(--gold-leaf);
+    margin: 12px 0;
+  }
+  .mockup-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .mockup-leg { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted-fg); font-family: 'DM Mono', monospace; }
+  .mockup-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .mockup-val { font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 700; }
+
+  /* ── FIXED TIMELINE — Today is a tick on the track, not a bottom label ── */
+  .mockup-track-wrap { position: relative; margin-bottom: 22px; }
+  .mockup-track {
+    height: 6px;
+    background: hsl(36 16% 92%);
+    border-radius: 999px;
+    position: relative;
+    overflow: visible;
+  }
+  .mockup-spent { position: absolute; top: 0; left: 0; height: 100%; width: 35%; background: var(--gold-leaf); border-radius: 999px 0 0 999px; }
+  .mockup-committed { position: absolute; top: 0; left: 35%; height: 100%; width: 28%; background: var(--red); }
+  .mockup-fuzzy {
+    position: absolute; top: 0; left: 63%; height: 100%; width: 7%;
+    border-radius: 0 999px 999px 0;
+    background: repeating-linear-gradient(45deg, hsl(0 55% 38% / 0.55) 0px, hsl(0 55% 38% / 0.55) 3px, transparent 3px, transparent 7px);
+  }
+  /* Today tick — positioned on the track itself, not below it */
+  .mockup-today-tick {
+    position: absolute;
+    top: -5px;
+    left: 63%;
+    width: 2px; height: 16px;
+    background: var(--fg);
+    border-radius: 1px;
+  }
+  .mockup-today-lbl {
+    position: absolute;
+    top: -18px;
+    left: 63%;
+    transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg); white-space: nowrap; font-weight: 500;
+  }
+  .mockup-limit-tick { position: absolute; top: -4px; left: 78%; width: 1.5px; height: 14px; background: hsl(240 28% 12% / 0.25); border-radius: 1px; }
+  .mockup-track-labels { display: flex; justify-content: space-between; margin-top: 8px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
+
+  .mockup-changes {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding-top: 12px; border-top: 1px solid hsl(36 20% 70% / 0.3);
+    font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted-fg);
+  }
+  .mockup-changes-lbl { font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .mockup-sep { opacity: 0.35; }
+
+  /* ── STRIP ── */
+  .strip { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); background: var(--surface); padding: 28px 40px; }
+  .strip-inner { max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .strip-item { padding: 0 24px; border-right: 1px solid var(--hairline); }
+  .strip-item:first-child { padding-left: 0; }
+  .strip-item:last-child { border-right: none; }
+  .strip-val { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--fg); line-height: 1; margin-bottom: 5px; }
+  .strip-val em { font-style: italic; color: var(--gold-leaf); }
+  .strip-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+
+  /* ── GENERIC SECTION ── */
+  section { padding: 88px 40px; }
+  .inner { max-width: 1140px; margin: 0 auto; }
+  .sec-tag { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  .sec-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: var(--fg); letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 14px; }
+  .sec-title em { font-style: italic; color: var(--gold-leaf); }
+  .sec-lead { font-size: 16px; color: var(--muted-fg); max-width: 520px; line-height: 1.75; }
+
+  /* ── ALERT CALLOUT ── */
+  .alert-section { background: var(--surface); }
+  .alert-showcase {
+    margin-top: 52px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .alert-demo {
+    border-radius: 10px;
+    background: var(--amber-bg);
+    box-shadow: inset 0 0 0 1px var(--amber-bd);
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+  }
+  .alert-badge-demo {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: hsl(38 50% 86%); color: var(--amber);
+    padding: 4px 9px; border-radius: 4px; white-space: nowrap;
+    flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+  }
+  .alert-body-demo { flex: 1; font-size: 13.5px; color: var(--fg); }
+  .alert-body-demo strong { font-weight: 700; }
+  .alert-amt-demo { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--red); white-space: nowrap; }
+  .alert-explains { display: flex; flex-direction: column; gap: 18px; }
+  .alert-item { display: flex; gap: 14px; align-items: flex-start; }
+  .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; background: var(--amber); }
+  .alert-item h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+  .alert-item p { font-size: 14px; color: var(--muted-fg); line-height: 1.65; }
+
+  /* ── FREE MONEY ── */
+  .free-section { background: var(--bg); }
+  .free-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 56px; align-items: start; }
+  .free-formula { background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 28px 32px; }
+  .formula-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .formula-row { display: flex; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-op { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; width: 20px; flex-shrink: 0; text-align: center; }
+  .formula-label { font-size: 14px; color: var(--fg); flex: 1; }
+  .formula-label span { font-size: 12px; color: var(--muted); margin-left: 4px; }
+  .formula-amt { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--muted-fg); }
+  .formula-amt.result { color: var(--gold-leaf); font-size: 20px; }
+  .formula-amt.red { color: var(--red); }
+  .formula-amt.amber { color: var(--amber); font-style: italic; }
+  .free-explains { display: flex; flex-direction: column; gap: 22px; }
+  .explain-item { display: flex; gap: 14px; align-items: flex-start; }
+  .explain-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  .explain-item h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+  .explain-item p { font-size: 14px; color: var(--muted-fg); line-height: 1.65; }
+
+  /* ── SAFE DAILY ── */
+  .safe-section { background: var(--surface); }
+  .safe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 56px; align-items: center; }
+  .safe-card-big { background: var(--bg); border: 1px solid var(--hairline); border-radius: 14px; padding: 28px 32px; }
+  .safe-lbl-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .safe-card-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .safe-card-period { font-size: 11.5px; color: var(--muted); }
+  .safe-card-num { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 900; color: var(--green); letter-spacing: -0.03em; line-height: 1; margin-bottom: 10px; }
+  .safe-card-sym { font-style: italic; font-size: 22px; opacity: 0.4; margin-right: 2px; }
+  .safe-card-explain { font-size: 13.5px; color: var(--muted-fg); line-height: 1.6; margin-bottom: 16px; }
+  .burn-bars-big { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-bottom: 4px; }
+  .burn-b { flex: 1; border-radius: 3px; }
+  .burn-b.today { background: var(--green); }
+  .burn-b.future { background: hsl(36 14% 76% / 0.5); }
+  .safe-explains { display: flex; flex-direction: column; gap: 18px; }
+  .safe-item { background: var(--bg); border: 1px solid var(--hairline); border-radius: 10px; padding: 18px 22px; }
+  .safe-item h4 { font-size: 14.5px; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+  .safe-item p { font-size: 13.5px; color: var(--muted-fg); line-height: 1.6; }
+  .safe-rule { margin-top: 10px; background: var(--surface); border-left: 3px solid var(--gold); padding: 8px 14px; border-radius: 0 4px 4px 0; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold-leaf); }
+
+  /* ── BUDGET STATES ── */
+  .states-section { background: var(--bg); }
+  .states-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 52px; }
+  .state-card { border-radius: 14px; padding: 28px 32px; border: 2px solid; }
+  .state-card.green { background: var(--green-bg); border-color: hsl(162 40% 76%); }
+  .state-card.amber { background: var(--amber-bg); border-color: var(--amber-bd); }
+  .state-card.red   { background: hsl(0 55% 97%); border-color: hsl(0 55% 80%); }
+  .state-pill { display: inline-flex; align-items: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 9.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; margin-bottom: 16px; border: 1px solid; }
+  .state-card.green .state-pill { background: var(--green-bg); border-color: hsl(162 40% 76%); color: var(--green); }
+  .state-card.amber .state-pill { background: var(--amber-bg); border-color: var(--amber-bd); color: var(--amber); }
+  .state-card.red   .state-pill { background: hsl(0 55% 97%); border-color: hsl(0 55% 80%); color: var(--red); }
+  .state-pulse { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; animation: pulse-demo 2.4s ease-out infinite; }
+  .state-card.green .state-pulse { background: var(--green); }
+  .state-card.amber .state-pulse { background: var(--amber); }
+  .state-card.red   .state-pulse { background: var(--red); }
+  @keyframes pulse-demo { 0%,100%{ box-shadow:0 0 0 0 currentColor; } 50%{ box-shadow:0 0 0 4px transparent; } }
+  .state-card h3 { font-size: 18px; font-weight: 600; color: var(--fg); margin-bottom: 8px; }
+  .state-card p { font-size: 14px; color: var(--muted-fg); line-height: 1.65; }
+  .state-trigger { margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+  /* ── FEATURES ── */
+  .features-section { background: var(--surface); }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 52px; }
+  .feat-card { background: var(--bg); border: 1px solid var(--hairline); border-radius: 12px; padding: 22px 26px; }
+  .feat-card.wide { grid-column: span 2; }
+  .feat-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--surface); border: 1px solid var(--hairline); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--gold-leaf); }
+  .feat-icon svg { width: 16px; height: 16px; }
+  .feat-card h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .feat-card p { font-size: 13.5px; color: var(--muted-fg); line-height: 1.65; }
+  .feat-tag { display: inline-block; margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; background: hsl(42 55% 50% / 0.1); color: var(--gold-leaf); }
+
+  /* ── CHARGES ── */
+  .charges-section { background: var(--bg); }
+  .charges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 52px; align-items: start; }
+  .charge-demo { background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; }
+  .charge-demo-header { padding: 14px 18px; border-bottom: 1px solid var(--hairline); background: var(--bg); }
+  .charge-demo-title { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .charge-demo-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .charge-item { display: flex; align-items: stretch; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--hairline); }
+  .charge-item:last-child { border-bottom: none; }
+  .charge-stripe { width: 3px; border-radius: 999px; align-self: stretch; min-height: 30px; flex-shrink: 0; }
+  .charge-body { flex: 1; }
+  .charge-name { font-size: 13px; font-weight: 500; color: var(--fg); }
+  .charge-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .charge-right { text-align: right; }
+  .charge-amt { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; }
+  .charge-amt.due { color: var(--red); }
+  .charge-amt.fuzzy { color: var(--amber); font-style: italic; }
+  .charge-amt.later { color: var(--muted-fg); }
+  .charge-timing { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .charges-explains { display: flex; flex-direction: column; gap: 18px; }
+  .ctype { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 10px; }
+  .ctype-stripe { width: 4px; align-self: stretch; border-radius: 999px; flex-shrink: 0; min-height: 36px; }
+  .ctype h4 { font-size: 14.5px; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+  .ctype p { font-size: 13px; color: var(--muted-fg); line-height: 1.6; }
+
+  /* ── TRANSACTIONS ── */
+  .tx-section { background: var(--surface); }
+  .tx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 52px; align-items: start; }
+  .tx-panel { background: var(--bg); border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; }
+  .tx-panel-header { padding: 14px 18px; border-bottom: 1px solid var(--hairline); display: flex; justify-content: space-between; align-items: baseline; }
+  .tx-panel-title { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .tx-panel-sub { font-size: 11px; color: var(--muted); }
+  .tx-row-demo { display: flex; align-items: center; gap: 12px; padding: 11px 18px; border-bottom: 1px solid var(--hairline); }
+  .tx-row-demo:last-child { border-bottom: none; }
+  .tx-icon-demo { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--hairline-s); background: var(--surface); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tx-body-demo { flex: 1; min-width: 0; }
+  .tx-name-demo { font-size: 12.5px; color: var(--fg); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-meta-demo { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .tx-right-demo { text-align: right; flex-shrink: 0; }
+  .tx-amt-demo { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: var(--fg); }
+  .tx-amt-demo.income { color: var(--green); }
+  .tx-time-demo { font-size: 10px; color: var(--muted); margin-top: 1px; font-family: 'DM Mono', monospace; }
+  .tx-sym-demo { font-size: 11px; font-style: italic; opacity: 0.4; margin-right: 1px; }
+  .tx-explains { display: flex; flex-direction: column; gap: 18px; }
+  .tx-item { background: var(--bg); border: 1px solid var(--hairline); border-radius: 10px; padding: 18px 22px; }
+  .tx-item h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+  .tx-item p { font-size: 13.5px; color: var(--muted-fg); line-height: 1.6; }
+
+  /* ── CATEGORIES ── */
+  .cats-section { background: var(--bg); }
+  .cats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 52px; }
+  .cat-card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 20px 22px; }
+  .cat-dot-big { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 12px; }
+  .cat-card h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .cat-bar-wrap { height: 5px; background: hsl(36 16% 92%); border-radius: 999px; margin: 10px 0 6px; }
+  .cat-bar-fill { height: 100%; border-radius: 999px; }
+  .cat-card-meta { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 9.5px; color: var(--muted); }
+  .cat-card-amt { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--fg); }
+
+  /* ── STREAK ── */
+  .streak-section { background: var(--surface); }
+  .streak-big { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 52px; align-items: center; }
+  .streak-demo { background: var(--paper); border: 1px solid var(--hairline); border-radius: 14px; padding: 24px 28px; }
+  .streak-demo-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .streak-demo-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .streak-demo-count { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--fg); }
+  .streak-demo-unit { font-size: 12px; color: var(--muted); margin-left: 2px; }
+  .streak-segs { display: flex; gap: 4px; }
+  .streak-seg { flex: 1; height: 8px; border-radius: 4px; }
+  .streak-seg.on { background: var(--gold); }
+  .streak-seg.off { background: var(--hairline); }
+  .streak-explains { display: flex; flex-direction: column; gap: 18px; }
+  .streak-item h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 5px; }
+  .streak-item p { font-size: 14px; color: var(--muted-fg); line-height: 1.65; }
+
+  /* ── DESIGN ── */
+  .design-section { background: var(--bg); }
+  .design-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 52px; }
+  .design-card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 22px 26px; }
+  .design-card.accent { background: var(--navy); border-color: transparent; }
+  .design-card.accent h4 { color: hsl(42 65% 85%); }
+  .design-card.accent p { color: hsl(240 10% 58%); }
+  .design-card h4 { font-size: 15px; font-weight: 600; color: var(--fg); margin-bottom: 8px; }
+  .design-card p { font-size: 13.5px; color: var(--muted-fg); line-height: 1.65; }
+  .font-sample { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--hairline); }
+  .font-sample-item { line-height: 1.2; margin-bottom: 4px; }
+  .font-sample-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .color-swatches { display: flex; gap: 6px; margin-top: 14px; }
+  .swatch { flex: 1; height: 28px; border-radius: 4px; display: flex; align-items: flex-end; padding: 2px 4px; }
+  .swatch-lbl { font-family: 'DM Mono', monospace; font-size: 7.5px; opacity: 0.7; }
+
+  /* ── LIVE DASHBOARD EMBED ── */
+  .embed-section { background: var(--navy); padding: 88px 40px; }
+  .embed-inner { max-width: 1140px; margin: 0 auto; }
+  .embed-tag { font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: hsl(42 30% 45%); margin-bottom: 16px; }
+  .embed-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: #fff; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 12px; }
+  .embed-title em { font-style: italic; color: hsl(42 65% 70%); }
+  .embed-lead { font-size: 15px; color: hsl(240 10% 52%); margin-bottom: 36px; max-width: 500px; line-height: 1.7; }
+  .embed-hint {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: hsl(42 40% 48%); margin-bottom: 20px;
+  }
+  .embed-hint::before { content: ''; display: block; width: 16px; height: 1px; background: currentColor; }
+  .embed-frame-wrap {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid hsl(240 20% 20%);
+    box-shadow: 0 32px 80px hsl(240 30% 5% / 0.6), 0 0 0 1px hsl(240 20% 16%);
+  }
+  .embed-frame-bar {
+    background: hsl(240 25% 14%);
+    border-bottom: 1px solid hsl(240 20% 18%);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .frame-dots { display: flex; gap: 6px; }
+  .frame-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .frame-dot:nth-child(1) { background: hsl(0 70% 55%); }
+  .frame-dot:nth-child(2) { background: hsl(42 80% 55%); }
+  .frame-dot:nth-child(3) { background: hsl(120 60% 45%); }
+  .frame-url {
+    flex: 1; text-align: center;
+    font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240 10% 38%);
+    letter-spacing: 0.04em;
+  }
+  .embed-iframe {
+    display: block;
+    width: 100%;
+    height: 700px;
+    border: none;
+    background: var(--bg);
+  }
+
+  /* ── CTA ── */
+  .cta-section { background: var(--navy); padding: 96px 40px; border-top: 1px solid hsl(240 20% 16%); }
+  .cta-inner { max-width: 640px; margin: 0 auto; text-align: center; }
+  .cta-arabic { font-family: 'Noto Naskh Arabic', serif; font-size: 36px; color: var(--gold); direction: rtl; line-height: 1; margin-bottom: 20px; }
+  .cta-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: #fff; letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 16px; }
+  .cta-title em { font-style: italic; color: hsl(42 65% 70%); }
+  .cta-lead { font-size: 16px; color: hsl(240 10% 52%); margin: 0 auto 40px; max-width: 440px; line-height: 1.75; }
+  .cta-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .btn-gold { background: var(--gold); color: var(--navy); font-family: 'DM Mono', monospace; font-size: 10.5px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 12px 22px; border-radius: 6px; text-decoration: none; transition: opacity 0.15s; }
+  .btn-gold:hover { opacity: 0.88; }
+  .btn-ghost-light { font-size: 14px; color: hsl(240 10% 46%); text-decoration: none; border-bottom: 1px solid hsl(240 10% 24%); padding-bottom: 1px; transition: color 0.15s, border-color 0.15s; }
+  .btn-ghost-light:hover { color: #aaa; border-color: #555; }
+
+  /* ── FOOTER ── */
+  footer { background: var(--navy); border-top: 1px solid hsl(240 20% 14%); padding: 28px 40px; display: flex; justify-content: space-between; align-items: center; }
+  .footer-brand { display: flex; align-items: center; gap: 10px; }
+  .footer-arabic { font-family: 'Noto Naskh Arabic', serif; font-size: 16px; color: var(--gold); direction: rtl; line-height: 1; }
+  .footer-wordmark { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: hsl(42 65% 75%); }
+  footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240 10% 32%); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 980px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 110px 20px 64px; gap: 48px; }
+    section { padding: 64px 20px; }
+    .strip { padding: 24px 20px; }
+    .strip-inner { grid-template-columns: repeat(3, 1fr); }
+    .strip-item:nth-child(4), .strip-item:nth-child(5) { display: none; }
+    .free-grid, .safe-grid, .charges-grid, .tx-grid, .streak-big { grid-template-columns: 1fr; }
+    .alert-showcase { grid-template-columns: 1fr; }
+    .states-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .feat-card.wide { grid-column: span 1; }
+    .cats-grid { grid-template-columns: 1fr 1fr; }
+    .design-grid { grid-template-columns: 1fr; }
+    .embed-section { padding: 64px 20px; }
+    .embed-iframe { height: 500px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .state-pulse { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Isolated dot grid overlay — no global z-index hack -->
+<div class="dot-grid" aria-hidden="true"></div>
+
+<div class="site-wrap">
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-mark"><span class="nav-arabic-sm">م</span></div>
+    <span class="nav-wordmark">Mizān</span>
+    <span class="nav-tag">v0.9</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#free-money">Free Money</a></li>
+    <li><a href="#safe-daily">Safe Daily</a></li>
+    <li><a href="#live">Live Dashboard</a></li>
+    <li><a href="mizan-project.html">Technical Docs</a></li>
+    <li><a href="mizan_mobile.html">Mobile</a></li>
+    <li><a href="index.html">All pages</a></li>
+  </ul>
+  <a class="nav-cta" href="mizan_dashboard.html">Open Dashboard</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="fade-up">
+    <div class="hero-eyebrow">
+      <span class="hero-arabic-lg">ميزان</span>
+      <span class="hero-eyebrow-line"></span>
+      <span class="hero-eyebrow-tag">Student Budget Dashboard</span>
+    </div>
+    <h1>Know exactly how much<br>you can <em>actually</em> spend today.</h1>
+    <p class="lead">Mizān turns your income, fixed bills, and uncertain future charges into one honest number — your safe daily allowance. Built for students, not spreadsheets.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#live">See it live</a>
+      <a class="btn-ghost" href="#free-money">How it works →</a>
+    </div>
+  </div>
+
+  <!-- Faithful hero card mockup -->
+  <div class="hero-mockup fade-up" style="transition-delay:0.1s;">
+    <div class="mockup-label">Free Money · April</div>
+    <div class="mockup-sub">after spend &amp; committed charges</div>
+    <div class="mockup-num">
+      <span class="mockup-sym">₪</span>
+      <span id="hero-count">640</span>
+    </div>
+    <div class="mockup-badge">
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4L6 12L2 8"/></svg>
+      On track · 11 days left
+    </div>
+    <div class="mockup-legend">
+      <div class="mockup-leg"><div class="mockup-dot" style="background:var(--gold-leaf);"></div>Spent&nbsp;<span class="mockup-val" style="color:var(--gold-leaf);">₪995</span></div>
+      <div class="mockup-leg"><div class="mockup-dot" style="background:var(--red);"></div>Committed&nbsp;<span class="mockup-val" style="color:var(--red);">₪1,200</span></div>
+      <div class="mockup-leg"><div class="mockup-dot" style="background:var(--amber); border-radius:2px;"></div>Fuzzy&nbsp;<span class="mockup-val" style="color:var(--amber);">₪80–150</span></div>
+    </div>
+    <!-- Fixed timeline: Today is a tick ON the track, not a bottom label -->
+    <div class="mockup-track-wrap">
+      <div class="mockup-today-lbl">Today</div>
+      <div class="mockup-track">
+        <div class="mockup-spent"></div>
+        <div class="mockup-committed"></div>
+        <div class="mockup-fuzzy"></div>
+        <div class="mockup-today-tick"></div>
+        <div class="mockup-limit-tick"></div>
+      </div>
+      <div class="mockup-track-labels"><span>1 Apr</span><span>30 Apr</span></div>
+    </div>
+    <div class="mockup-changes">
+      <span class="mockup-changes-lbl">Today</span>
+      <span>−₪32 Café Najjar</span>
+      <span class="mockup-sep">·</span>
+      <span>2 entries logged</span>
+      <span class="mockup-sep">·</span>
+      <span>Safe daily ↑₪3</span>
+    </div>
+  </div>
+</div>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-item">
+      <div class="strip-val"><em>₪58</em></div>
+      <div class="strip-lbl">Safe daily allowance</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val">4</div>
+      <div class="strip-lbl">Spending categories</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val">3</div>
+      <div class="strip-lbl">Budget states</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val">₪1,345</div>
+      <div class="strip-lbl">Upcoming charges, always visible</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val">12</div>
+      <div class="strip-lbl">Day logging streak</div>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT BANNER FEATURE -->
+<section class="alert-section" id="alerts">
+  <div class="inner">
+    <div class="sec-tag fade-up">Proactive alerts</div>
+    <h2 class="sec-title fade-up">You'll never be caught off guard<br>by a bill you <em>forgot.</em></h2>
+    <p class="sec-lead fade-up">An amber banner surfaces at the top of every session when a committed charge is due soon — so you always know before you spend.</p>
+
+    <div class="alert-showcase">
+      <div class="fade-up">
+        <div class="alert-demo">
+          <div class="alert-badge-demo">
+            <svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1L1 14h14L8 1zm0 5v4M8 12.5v.5"/></svg>
+            Heads-up
+          </div>
+          <div class="alert-body-demo"><strong>Rent</strong> · due in <strong>3 days</strong> · already counted in your balance</div>
+          <span class="alert-amt-demo">₪1,200</span>
+        </div>
+        <p style="margin-top:14px; font-size:13px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:0.04em;">The actual alert — shown at the top of the dashboard</p>
+      </div>
+      <div class="alert-explains fade-up" style="transition-delay:0.1s;">
+        <div class="alert-item">
+          <div class="alert-dot"></div>
+          <div>
+            <h4>Surfaces at session start</h4>
+            <p>Any committed charge due within the next 7 days triggers the amber banner. It's the first thing you see when you open the dashboard.</p>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot"></div>
+          <div>
+            <h4>Already counted — no double deduction</h4>
+            <p>The alert confirms the charge is already subtracted from your Free Money. It's a reminder, not a recalculation — your number is already correct.</p>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot"></div>
+          <div>
+            <h4>Amount shown inline</h4>
+            <p>The exact amount appears right in the banner so you can match it against your bank statement without navigating to the Charges panel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FREE MONEY -->
+<section class="free-section" id="free-money">
+  <div class="inner">
+    <div class="sec-tag fade-up">The core concept</div>
+    <h2 class="sec-title fade-up">Your <em>Free Money</em> —<br>one honest number.</h2>
+    <p class="sec-lead fade-up">Most budget apps show you what you've spent. Mizān shows what's actually left after everything that's already spoken for.</p>
+
+    <div class="free-grid">
+      <div class="free-formula fade-up">
+        <div class="formula-title">Free Money · April calculation</div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:var(--green);">+</div>
+          <div class="formula-label">Monthly income <span>(stipend)</span></div>
+          <div class="formula-amt" style="color:var(--green);">₪2,835</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:var(--red);">−</div>
+          <div class="formula-label">Spent so far <span>(MTD)</span></div>
+          <div class="formula-amt red">₪995</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:var(--red);">−</div>
+          <div class="formula-label">Committed charges <span>(rent)</span></div>
+          <div class="formula-amt red">₪1,200</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:var(--amber);">−</div>
+          <div class="formula-label">Fuzzy charges <span>(est. midpoint)</span></div>
+          <div class="formula-amt amber">~₪115</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:var(--gold-leaf);">=</div>
+          <div class="formula-label" style="font-weight:600;">Free Money</div>
+          <div class="formula-amt result">₪525</div>
+        </div>
+      </div>
+      <div class="free-explains fade-up" style="transition-delay:0.1s;">
+        <div class="explain-item">
+          <div class="explain-dot" style="background:var(--gold-leaf);"></div>
+          <div>
+            <h4>Spent — what's already gone</h4>
+            <p>Every logged transaction this month. Shown as the gold segment on the timeline. 35% of the monthly limit so far in April.</p>
+          </div>
+        </div>
+        <div class="explain-item">
+          <div class="explain-dot" style="background:var(--red);"></div>
+          <div>
+            <h4>Committed — bills with a fixed date and amount</h4>
+            <p>Rent, gym, subscriptions. Already deducted from your Free Money the moment they're entered — so you never accidentally spend money earmarked for next week's rent.</p>
+          </div>
+        </div>
+        <div class="explain-item">
+          <div class="explain-dot" style="background:var(--amber);"></div>
+          <div>
+            <h4>Fuzzy — uncertain charges, handled conservatively</h4>
+            <p>Course books, a planned trip. You enter a range (₪80–150). Mizān uses the midpoint in its calculation and marks it on the timeline so it's never invisible.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAFE DAILY -->
+<section class="safe-section" id="safe-daily">
+  <div class="inner">
+    <div class="sec-tag fade-up">The daily number</div>
+    <h2 class="sec-title fade-up">Safe Daily recalculates<br><em>every time you log.</em></h2>
+    <p class="sec-lead fade-up">Spend more today and tomorrow's allowance drops. Spend less and it grows. The math is always honest — no rounding, no forgiveness.</p>
+
+    <div class="safe-grid">
+      <div class="safe-card-big fade-up">
+        <div class="safe-lbl-row">
+          <span class="safe-card-lbl">Safe daily</span>
+          <span class="safe-card-period">22 Apr → 30 Apr · 8 days</span>
+        </div>
+        <div class="safe-card-num"><span class="safe-card-sym">₪</span>58</div>
+        <div class="safe-card-explain">Spend more today → tomorrow drops. Spend less → tomorrow grows.</div>
+        <div class="burn-bars-big" aria-hidden="true">
+          <div class="burn-b today" style="height:20px;"></div>
+          <div class="burn-b future" style="height:26px;"></div>
+          <div class="burn-b future" style="height:18px;"></div>
+          <div class="burn-b future" style="height:30px;"></div>
+          <div class="burn-b future" style="height:20px;"></div>
+          <div class="burn-b future" style="height:24px;"></div>
+          <div class="burn-b future" style="height:16px;"></div>
+          <div class="burn-b future" style="height:22px;"></div>
+        </div>
+      </div>
+      <div class="safe-explains fade-up" style="transition-delay:0.1s;">
+        <div class="safe-item">
+          <h4>Calculated from your Free Money</h4>
+          <p>Safe Daily = Free Money ÷ days remaining. Committed charges are already subtracted. You're never spending money that belongs to rent.</p>
+          <div class="safe-rule">Free Money ÷ days remaining in the month</div>
+        </div>
+        <div class="safe-item">
+          <h4>Updates on every sync</h4>
+          <p>Add a transaction, hit sync, and the burn-down chart shifts immediately. The Safe Daily for tomorrow recalculates against the updated Free Money figure.</p>
+        </div>
+        <div class="safe-item">
+          <h4>The burn-down chart shows your remaining days</h4>
+          <p>Today's bar is green. Future bars are grey. As you move through the month, the chart shrinks — giving you a spatial sense of how much runway is left.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUDGET STATES -->
+<section class="states-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Budget states</div>
+    <h2 class="sec-title fade-up">Always know where you stand.</h2>
+    <p class="sec-lead fade-up">The topbar pill and hero card border shift color together. You get an instant health read without reading a single number.</p>
+
+    <div class="states-grid">
+      <div class="state-card green fade-up">
+        <div class="state-pill"><div class="state-pulse"></div>On track</div>
+        <h3>Everything is fine</h3>
+        <p>Your spending is within the safe daily pace. You're on track to close the month inside your limit.</p>
+        <div class="state-trigger">Spend ≤ safe daily pace</div>
+      </div>
+      <div class="state-card amber fade-up" style="transition-delay:0.1s;">
+        <div class="state-pill"><div class="state-pulse"></div>Caution</div>
+        <h3>Getting close</h3>
+        <p>You've spent above pace but you're not in crisis yet. Cut back for a few days and the number recovers.</p>
+        <div class="state-trigger">Pace slightly above budget</div>
+      </div>
+      <div class="state-card red fade-up" style="transition-delay:0.2s;">
+        <div class="state-pill"><div class="state-pulse"></div>Crisis</div>
+        <h3>Over budget</h3>
+        <p>Your current trajectory puts you past the monthly limit. The dashboard shows how much to cut per day to recover.</p>
+        <div class="state-trigger">Pace exceeds monthly limit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">What's in the dashboard</div>
+    <h2 class="sec-title fade-up">Built for students.<br>Not spreadsheets.</h2>
+    <p class="sec-lead fade-up">Every panel is designed around a student's actual financial life — irregular stipends, recurring bills, and unpredictable day-to-day spending.</p>
+
+    <div class="features-grid">
+      <div class="feat-card fade-up">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <h4>Overview dashboard</h4>
+        <p>Hero card, stat column, and three panels — categories, upcoming charges, recent transactions — always visible at once.</p>
+        <div class="feat-tag">Always visible</div>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.05s;">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h4>7-day sparkline</h4>
+        <p>A mini trend line in the topbar shows whether your spending is accelerating or calming down — at a glance, before you read a number.</p>
+        <div class="feat-tag">Last 7 days</div>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.1s;">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h4>Mobile companion</h4>
+        <p>A one-tap link in the topbar opens the mobile view — optimised for logging a transaction on the spot, right after you pay.</p>
+        <div class="feat-tag">Always reachable</div>
+      </div>
+      <div class="feat-card wide fade-up" style="transition-delay:0.05s;">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <h4>Month timeline — the full picture in one track</h4>
+        <p>Spent (gold), committed (red), fuzzy (hatched), your spending limit marker, event ticks for rent and stipend, and today's position — all on a single horizontal track inside the hero card. You can read the whole month's shape in under two seconds.</p>
+        <div class="feat-tag">Visual budget map</div>
+      </div>
+      <div class="feat-card fade-up">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+        </div>
+        <h4>Period switcher</h4>
+        <p>Toggle between weekly, monthly, and yearly views. Numbers and charts recalculate instantly without a page reload.</p>
+        <div class="feat-tag">W / M / Y</div>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:0.05s;">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <h4>Hover tooltips everywhere</h4>
+        <p>Every term that needs explaining — "Free Money", "Safe Daily", "Committed" — has a tooltip on hover. No glossary needed.</p>
+        <div class="feat-tag">Contextual help</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHARGES -->
+<section class="charges-section" id="charges">
+  <div class="inner">
+    <div class="sec-tag fade-up">Upcoming charges</div>
+    <h2 class="sec-title fade-up">Three types of charges.<br>None of them <em>hidden.</em></h2>
+    <p class="sec-lead fade-up">Mizān separates charges by how certain they are — so you never get blindsided by a bill you forgot.</p>
+
+    <div class="charges-grid">
+      <div class="charge-demo fade-up">
+        <div class="charge-demo-header">
+          <div class="charge-demo-title">Upcoming</div>
+          <div class="charge-demo-sub">4 charges · ₪1,345 total</div>
+        </div>
+        <div class="charge-item">
+          <div class="charge-stripe" style="background:var(--red);"></div>
+          <div class="charge-body"><div class="charge-name">Rent ↻</div><div class="charge-date">1 May</div></div>
+          <div class="charge-right"><div class="charge-amt due">₪1,200</div><div class="charge-timing">in 3d</div></div>
+        </div>
+        <div class="charge-item">
+          <div class="charge-stripe" style="background:var(--amber);"></div>
+          <div class="charge-body"><div class="charge-name">Course books</div><div class="charge-date">approx. mid-May</div></div>
+          <div class="charge-right"><div class="charge-amt fuzzy">₪80–150</div><div class="charge-timing">~2 wks</div></div>
+        </div>
+        <div class="charge-item">
+          <div class="charge-stripe" style="background:var(--red);"></div>
+          <div class="charge-body"><div class="charge-name">Gym membership ↻</div><div class="charge-date">5 May</div></div>
+          <div class="charge-right"><div class="charge-amt due">₪85</div><div class="charge-timing">in 7d</div></div>
+        </div>
+        <div class="charge-item">
+          <div class="charge-stripe" style="background:var(--muted);"></div>
+          <div class="charge-body"><div class="charge-name">Phone bill ↻</div><div class="charge-date">12 Jun</div></div>
+          <div class="charge-right"><div class="charge-amt later">₪60</div><div class="charge-timing">next mo</div></div>
+        </div>
+      </div>
+      <div class="charges-explains fade-up" style="transition-delay:0.1s;">
+        <div class="ctype">
+          <div class="ctype-stripe" style="background:var(--red);"></div>
+          <div><h4>Committed — fixed amount, known date</h4><p>Rent, subscriptions, gym. Exact amount, exact date. Immediately deducted from Free Money when entered.</p></div>
+        </div>
+        <div class="ctype">
+          <div class="ctype-stripe" style="background:var(--amber);"></div>
+          <div><h4>Fuzzy — uncertain amount or date</h4><p>Course books, a planned trip. Enter a range (₪80–150). The midpoint is used conservatively. The hatched bar on the timeline keeps it visible all month.</p></div>
+        </div>
+        <div class="ctype">
+          <div class="ctype-stripe" style="background:var(--muted);"></div>
+          <div><h4>Later — next month and beyond</h4><p>Bills already on your radar that don't affect this month's budget. Shown so they stay on your radar; deducted when the period arrives.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT TRANSACTIONS -->
+<section class="tx-section" id="transactions">
+  <div class="inner">
+    <div class="sec-tag fade-up">Recent transactions</div>
+    <h2 class="sec-title fade-up">Every shekel.<br><em>Logged and categorised.</em></h2>
+    <p class="sec-lead fade-up">The Recent panel shows your last four entries with category, location, and time — so you always know what moved your balance since yesterday.</p>
+
+    <div class="tx-grid">
+      <div class="tx-panel fade-up">
+        <div class="tx-panel-header">
+          <span class="tx-panel-title">Recent</span>
+          <span class="tx-panel-sub">Last 4 entries</span>
+        </div>
+        <!-- Café Najjar -->
+        <div class="tx-row-demo">
+          <div class="tx-icon-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cat-food)" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div class="tx-body-demo"><div class="tx-name-demo">Café Najjar — lunch</div><div class="tx-meta-demo">Food · Ramallah</div></div>
+          <div class="tx-right-demo"><div class="tx-amt-demo"><span class="tx-sym-demo">₪</span>32</div><div class="tx-time-demo">Today · 13:42</div></div>
+        </div>
+        <!-- Library photocopies -->
+        <div class="tx-row-demo">
+          <div class="tx-icon-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cat-edu)" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div class="tx-body-demo"><div class="tx-name-demo">Library photocopies</div><div class="tx-meta-demo">Education · Campus</div></div>
+          <div class="tx-right-demo"><div class="tx-amt-demo"><span class="tx-sym-demo">₪</span>18</div><div class="tx-time-demo">Yesterday · 10:15</div></div>
+        </div>
+        <!-- Service taxi -->
+        <div class="tx-row-demo">
+          <div class="tx-icon-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--cat-trans)" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="tx-body-demo"><div class="tx-name-demo">Service taxi to campus</div><div class="tx-meta-demo">Transport · Al-Bireh</div></div>
+          <div class="tx-right-demo"><div class="tx-amt-demo"><span class="tx-sym-demo">₪</span>7</div><div class="tx-time-demo">Yesterday · 08:00</div></div>
+        </div>
+        <!-- Stipend -->
+        <div class="tx-row-demo">
+          <div class="tx-icon-demo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/></svg>
+          </div>
+          <div class="tx-body-demo"><div class="tx-name-demo">Stipend</div><div class="tx-meta-demo">Income · Bank transfer</div></div>
+          <div class="tx-right-demo"><div class="tx-amt-demo income"><span class="tx-sym-demo">₪</span>1,200</div><div class="tx-time-demo">20 Apr · 08:00</div></div>
+        </div>
+      </div>
+      <div class="tx-explains fade-up" style="transition-delay:0.1s;">
+        <div class="tx-item">
+          <h4>Income is green — always distinct</h4>
+          <p>Stipend deposits, allowances, and transfers appear in green. They're immediately visible in the transaction list so you never confuse an income event with an expense.</p>
+        </div>
+        <div class="tx-item">
+          <h4>Category icons at a glance</h4>
+          <p>Each transaction carries a colour-coded category icon — food, education, transport, other. You can read the breakdown of your day without opening the Category panel.</p>
+        </div>
+        <div class="tx-item">
+          <h4>Location and timestamp on every entry</h4>
+          <p>Café Najjar · Ramallah · Today 13:42. The detail is there when you need to audit an entry, invisible when you don't.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="cats-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Spending breakdown</div>
+    <h2 class="sec-title fade-up">Four categories.<br>Every shekel accounted for.</h2>
+    <p class="sec-lead fade-up">The By Category panel shows a progress bar and percentage for each category relative to total month-to-date spend.</p>
+
+    <div class="cats-grid">
+      <div class="cat-card fade-up">
+        <div class="cat-dot-big" style="background:var(--cat-food);"></div>
+        <h4>Food</h4>
+        <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:42%;background:var(--cat-food);"></div></div>
+        <div class="cat-card-meta"><span>42%</span><span class="cat-card-amt">₪418</span></div>
+      </div>
+      <div class="cat-card fade-up" style="transition-delay:0.05s;">
+        <div class="cat-dot-big" style="background:var(--cat-edu);"></div>
+        <h4>Education</h4>
+        <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:28%;background:var(--cat-edu);"></div></div>
+        <div class="cat-card-meta"><span>28%</span><span class="cat-card-amt">₪278</span></div>
+      </div>
+      <div class="cat-card fade-up" style="transition-delay:0.1s;">
+        <div class="cat-dot-big" style="background:var(--cat-trans);"></div>
+        <h4>Transport</h4>
+        <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:18%;background:var(--cat-trans);"></div></div>
+        <div class="cat-card-meta"><span>18%</span><span class="cat-card-amt">₪179</span></div>
+      </div>
+      <div class="cat-card fade-up" style="transition-delay:0.15s;">
+        <div class="cat-dot-big" style="background:var(--cat-other);"></div>
+        <h4>Other</h4>
+        <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:12%;background:var(--cat-other);"></div></div>
+        <div class="cat-card-meta"><span>12%</span><span class="cat-card-amt">₪120</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STREAK -->
+<section class="streak-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Consistency</div>
+    <h2 class="sec-title fade-up">Logging streaks keep<br>your numbers <em>honest.</em></h2>
+    <p class="sec-lead fade-up">Every day you skip, your Free Money figure becomes an overestimate. The streak makes the gap visible before it becomes a problem.</p>
+
+    <div class="streak-big">
+      <div class="streak-demo fade-up">
+        <div class="streak-demo-top">
+          <span class="streak-demo-lbl">Logging streak</span>
+          <div><span class="streak-demo-count">12</span><span class="streak-demo-unit">days</span></div>
+        </div>
+        <div class="streak-segs" aria-hidden="true">
+          <div class="streak-seg on"></div><div class="streak-seg on"></div><div class="streak-seg on"></div>
+          <div class="streak-seg on"></div><div class="streak-seg on"></div><div class="streak-seg on"></div>
+          <div class="streak-seg on"></div><div class="streak-seg on"></div><div class="streak-seg on"></div>
+          <div class="streak-seg on"></div><div class="streak-seg on"></div><div class="streak-seg on"></div>
+          <div class="streak-seg off"></div><div class="streak-seg off"></div>
+        </div>
+      </div>
+      <div class="streak-explains fade-up" style="transition-delay:0.1s;">
+        <div class="streak-item">
+          <h4>Your Safe Daily depends on it</h4>
+          <p>Miss two days and your spent total is incomplete — the Safe Daily becomes optimistic and you overspend without knowing it. The streak is a data quality signal, not just a habit tracker.</p>
+        </div>
+        <div class="streak-item">
+          <h4>Always visible in the sidebar</h4>
+          <p>The streak box sits below the navigation, always visible. No notifications, no pressure — just a quiet nudge each time you open the dashboard.</p>
+        </div>
+        <div class="streak-item">
+          <h4>Daily logging takes 10 seconds</h4>
+          <p>Enter an amount, pick a category, done. The habit is low-friction by design — because if it costs effort, it won't happen under pressure.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DESIGN -->
+<section class="design-section">
+  <div class="inner">
+    <div class="sec-tag fade-up">Design language</div>
+    <h2 class="sec-title fade-up">Quiet. Editorial. <em>Warm.</em></h2>
+    <p class="sec-lead fade-up">Mizān is designed to feel like a well-kept notebook — not a banking app. The aesthetic is calm by design, because money is stressful enough.</p>
+
+    <div class="design-grid">
+      <div class="design-card accent fade-up">
+        <h4>Arabic at the core</h4>
+        <p>ميزان means "scale" or "balance" in Arabic. The wordmark uses Noto Naskh Arabic — an elegant, readable script that grounds the product in its cultural origin.</p>
+        <div style="font-family:'Noto Naskh Arabic',serif; font-size:44px; color:hsl(42 65% 70%); direction:rtl; line-height:1; margin-top:18px;">ميزان</div>
+      </div>
+      <div class="design-card fade-up" style="transition-delay:0.05s;">
+        <h4>Typography</h4>
+        <p>Playfair Display for figures, DM Mono for labels and chrome, Noto Naskh Arabic for the wordmark.</p>
+        <div class="font-sample">
+          <div class="font-sample-item" style="font-family:'Playfair Display',serif; font-weight:900; font-size:30px; letter-spacing:-0.03em;">₪640</div>
+          <div class="font-sample-lbl">Playfair Display 900 — numbers</div>
+          <div class="font-sample-item" style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; margin-top:12px;">Safe Daily</div>
+          <div class="font-sample-lbl">DM Mono — labels & UI</div>
+        </div>
+      </div>
+      <div class="design-card fade-up" style="transition-delay:0.1s;">
+        <h4>Color palette</h4>
+        <p>Warm cream background, navy sidebar, gold accents, semantic red / green / amber for states. Every color has one meaning and never appears out of context.</p>
+        <div class="color-swatches">
+          <div class="swatch" style="background:var(--paper); border:1px solid var(--hairline);"><span class="swatch-lbl" style="color:var(--muted);">bg</span></div>
+          <div class="swatch" style="background:var(--navy);"><span class="swatch-lbl" style="color:#444;">navy</span></div>
+          <div class="swatch" style="background:var(--gold);"><span class="swatch-lbl" style="color:#a07020;">gold</span></div>
+          <div class="swatch" style="background:var(--red);"><span class="swatch-lbl" style="color:#faa;">red</span></div>
+          <div class="swatch" style="background:var(--green);"><span class="swatch-lbl" style="color:#86efac;">grn</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DASHBOARD EMBED -->
+<section class="embed-section" id="live">
+  <div class="embed-inner">
+    <div class="embed-tag">Live dashboard</div>
+    <h2 class="embed-title">The full thing — <em>right here.</em></h2>
+    <p class="embed-lead">The actual Mizān dashboard, embedded and fully interactive. Try switching the demo state (On track → Caution → Crisis), syncing, and switching the time period.</p>
+    <div class="embed-hint">Fully interactive — try the state switcher in the top bar</div>
+    <div class="embed-frame-wrap">
+      <div class="embed-frame-bar">
+        <div class="frame-dots">
+          <div class="frame-dot"></div>
+          <div class="frame-dot"></div>
+          <div class="frame-dot"></div>
+        </div>
+        <div class="frame-url">mizan · student budget dashboard · v0.9</div>
+      </div>
+      <iframe
+        class="embed-iframe"
+        src="mizan_dashboard.html"
+        title="Mizān Dashboard — fully interactive"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-arabic">ميزان</div>
+    <h2 class="cta-title">Know your balance.<br><em>Every single day.</em></h2>
+    <p class="cta-lead">A quiet, editorial student budget dashboard. Free Money, Safe Daily, and no more end-of-month surprises.</p>
+    <div class="cta-actions">
+      <a class="btn-gold" href="#live">Open Dashboard</a>
+      <a class="btn-ghost-light" href="#free-money">How it works →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <span class="footer-arabic">ميزان</span>
+    <span class="footer-wordmark">Mizān</span>
+  </div>
+  <span>Student Budget Dashboard · v0.9</span>
+  <span>Quiet by design.</span>
+</footer>
+
+</div><!-- /site-wrap -->
+
+<script>
+(function () {
+  'use strict';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── COUNT-UP on hero number ── */
+  function countUp(el, target, duration) {
+    if (!el) return;
+    if (reduceMotion) { el.textContent = target.toLocaleString(); return; }
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      el.textContent = Math.round(ease * target).toLocaleString();
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ── INTERSECTION OBSERVER — fade-up + trigger count-up once ── */
+  let heroTriggered = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+  /* Trigger count-up when hero mockup becomes visible */
+  const heroCount = document.getElementById('hero-count');
+  if (heroCount) {
+    const heroIo = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !heroTriggered) {
+        heroTriggered = true;
+        countUp(heroCount, 640, 900);
+        heroIo.disconnect();
+      }
+    }, { threshold: 0.5 });
+    heroIo.observe(heroCount);
+  }
+})();
+</script>
+
+</body>
+</html>
