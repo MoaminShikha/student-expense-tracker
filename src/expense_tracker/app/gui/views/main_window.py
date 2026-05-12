@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from ..view_models.balance_view_model import BalanceViewModel
 
 
+# /* ── TIMELINE WIDGET ── */
 class TimelineWidget(QWidget):
     """
     Custom timeline visualization widget — presentation only.
@@ -90,6 +91,7 @@ class TimelineWidget(QWidget):
         painter.end()
 
 
+# /* ── MAIN WINDOW (PRESENTATION ONLY) ── */
 class MainWindow(QMainWindow):
     """
     Presentation-only main dashboard window.

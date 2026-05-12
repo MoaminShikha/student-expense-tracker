@@ -5,8 +5,11 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
 
-# Ensure src/ is in path for direct execution (pytest handles this via conftest.py)
-_src_path = Path(__file__).resolve().parent.parent.parent.parent / "src"
+# Ensure top-level 'src' directory is in path for direct execution.
+# Resolve parents[3] which points to the repository 'src' root without
+# appending an extra /"src" (avoids creating .../src/src when running
+# the module directly).
+_src_path = Path(__file__).resolve().parents[3]
 if str(_src_path) not in sys.path:
     sys.path.insert(0, str(_src_path))
 
