@@ -95,7 +95,7 @@ def test_refresh_with_active_session_and_snapshot():
     assert view.set_snapshot_called is True
     vm = view.last_snapshot
     assert vm.free_money == Decimal("500")
-    assert vm.free_money_str == "₪500.00"
+    assert vm.free_money_str == "₪500"
     assert vm.monthly_budget == Decimal("1000")
     assert vm.monthly_spent == Decimal("200")
     # timeline spent percent = 200/1000*100 == 20.0

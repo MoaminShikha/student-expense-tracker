@@ -25,10 +25,10 @@ AMBER      = "#9e4a0a"   # hsl(32,80%,38%)  — caution / fuzzy charges
 AMBER_BG   = "#fdf3e3"   # hsl(38,78%,94%)  — amber tinted background
 AMBER_BD   = "#e8c57a"   # hsl(38,60%,70%)  — amber border
 
-# ── HERO CARD STATES ──────────────────────────────────────────────────────────
-HERO_OUTLINE_GREEN = "#c8962a"   # GOLD
-HERO_OUTLINE_AMBER = "#b05a10"   # deep amber
-HERO_OUTLINE_RED   = "#8f2a2a"   # RED
+# ── HERO CARD STATES (border colors per state) ────────────────────────────────
+HERO_OUTLINE_GREEN = GOLD         # on-track state
+HERO_OUTLINE_AMBER = "#b05a10"    # caution state
+HERO_OUTLINE_RED   = RED          # crisis state
 
 # ── CATEGORY COLORS ───────────────────────────────────────────────────────────
 CAT_FOOD   = "#e85d10"   # hsl(18,88%,50%)  — food / orange
