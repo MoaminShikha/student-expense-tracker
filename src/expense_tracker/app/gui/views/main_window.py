@@ -248,7 +248,7 @@ class MainWindow(QMainWindow):
             QWidget#dashboardRoot {
                 background: #f7f3ec;
                 color: #17172b;
-                font-family: Consolas, "Courier New", monospace;
+                font-family: "Segoe UI", Consolas, "Courier New", monospace;
             }
             QLabel#eyebrow {
                 color: #747887;
@@ -271,6 +271,7 @@ class MainWindow(QMainWindow):
             QLabel#moneyValue {
                 font-size: 54px;
                 font-weight: 700;
+                color: #17172b;
             }
             QLabel#stateValue {
                 background: #edf7f2;
@@ -282,6 +283,7 @@ class MainWindow(QMainWindow):
             QLabel#statValue {
                 font-size: 24px;
                 font-weight: 700;
+                color: #17172b;
             }
             QPushButton {
                 background: #17172b;
