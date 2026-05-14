@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+import calendar
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QBrush, QPalette
 from PyQt6.QtWidgets import (
     QFrame,
     QGridLayout,
@@ -12,12 +14,36 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.styles.textures import dot_grain
+from expense_tracker.app.gui.widgets.footer_strip import FooterStrip
+from expense_tracker.app.gui.widgets.heads_up_alert import HeadsUpAlert
+from expense_tracker.app.gui.widgets.hero_card import HeroCard
+from expense_tracker.app.gui.widgets.panels import CategoryPanel, ChargeRowVM, RecentPanel, TxRowVM, UpcomingPanel, CategoryRowVM
+from expense_tracker.app.gui.widgets.sidebar import Sidebar
+from expense_tracker.app.gui.widgets.stat_column import StatColumn
 from expense_tracker.app.gui.widgets.timeline_widget import TimelineWidget
+from expense_tracker.app.gui.widgets.topbar import Topbar
+
+
+class PaperWidget(QWidget):
+    """
+    Scroll-content background: solid BG fill + dot-grain texture overlay.
+    Matches the HTML body::before radial-gradient dot pattern.
+    """
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        palette = self.palette()
+        palette.setBrush(QPalette.ColorRole.Window, QBrush(dot_grain()))
+        self.setPalette(palette)
+        self.setAutoFillBackground(True)
 
 if TYPE_CHECKING:
     from expense_tracker.app.gui.view_models.balance_view_model import BalanceViewModel
@@ -27,7 +53,7 @@ class MainWindow(QMainWindow):
     """
     Presentation-only main dashboard window.
 
-    Displays balance snapshot, monthly stats, and upcoming/recent transactions.
+    Two-column layout: Sidebar (fixed) + Main area (topbar + scrollable content).
     Emits signals for user actions — no business logic, no repository access.
     """
 
@@ -40,18 +66,29 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Mizān")
-        self.setMinimumSize(1000, 680)
+        self.setMinimumSize(1100, 720)
 
-        # Display widgets — created before layout so layout methods can reference them
-        self._free_money_value   = QLabel("₪0")
-        self._state_value        = QLabel("normal")
-        self._monthly_budget_value = QLabel("₪0")
-        self._monthly_spent_value  = QLabel("₪0")
-        self._monthly_left_value   = QLabel("₪0")
-        self._last_sync_label    = QLabel("Never synced")
-        self._timeline_widget    = TimelineWidget()
+        # Sub-widgets
+        self._sidebar     = Sidebar()
+        self._topbar      = Topbar()
+        self._stat_column = StatColumn()
+        self._hero        = HeroCard()
 
-        self.setCentralWidget(self._build_central_widget())
+        # Heads-up alert strip
+        self._alert = HeadsUpAlert()
+
+        # Bottom panels
+        self._cat_panel      = CategoryPanel(self.add_income_requested)
+        self._upcoming_panel = UpcomingPanel(self.add_charge_requested)
+        self._recent_panel   = RecentPanel(self.add_spend_requested)
+
+        # Footer
+        self._footer = FooterStrip()
+
+        # Wire topbar sync button → window signal
+        self._topbar.refresh_requested.connect(self.refresh_requested.emit)
+
+        self.setCentralWidget(self._build_root())
 
     # ── PUBLIC SETTERS ─────────────────────────────────────────────────────────
 
@@ -62,34 +99,42 @@ class MainWindow(QMainWindow):
         animate: bool = True,
     ) -> None:
         """Push a balance snapshot into the view."""
-        self._free_money_value.setText(snapshot.free_money_str)
-        self._state_value.setText(snapshot.balance_state_value)
-        self._monthly_budget_value.setText(snapshot.monthly_budget_str)
-        self._monthly_spent_value.setText(snapshot.monthly_spent_str)
-        self._monthly_left_value.setText(snapshot.monthly_left_str)
-
-        if last_sync:
-            self._last_sync_label.setText(f"Last synced: {last_sync.strftime('%Y-%m-%d %H:%M')}")
-
-        self._timeline_widget.set_percentages(
+        self._hero.set_money(snapshot.free_money_str)
+        self._hero.set_state(snapshot.balance_state_value)
+        self._hero.set_period_for_today()
+        self._hero.set_legend(
+            snapshot.monthly_spent_str,
+            "₪0",
+            "₪0",
+            snapshot.monthly_budget_str,
+        )
+        self._hero.set_today_changes(f"TODAY  ·  Monthly left {snapshot.monthly_left_str}")
+        self._hero.timeline.set_percentages(
             snapshot.timeline_spent_pct,
             snapshot.timeline_committed_pct,
             snapshot.timeline_fuzzy_left_pct,
             snapshot.timeline_fuzzy_width_pct,
             snapshot.today_pct,
         )
+        today = datetime.now().date()
+        last_day = calendar.monthrange(today.year, today.month)[1]
+        self._hero.timeline.set_ticks([(100.0, "Rent")])
+        self._hero.timeline.set_endpoints("Limit", f"Rent · {last_day} {today.strftime('%b')}")
 
-    def set_upcoming(self, charges: Iterable[Any]) -> None:
-        """Update upcoming charges list (placeholder — implemented in Phase 5)."""
-        pass
+        if last_sync:
+            self._topbar.set_last_sync(last_sync.strftime("%d %b · %H:%M"))
 
-    def set_recent(self, transactions: Iterable[Any]) -> None:
-        """Update recent transactions list (placeholder — implemented in Phase 5)."""
-        pass
+        self._topbar.set_on_track_state(snapshot.on_track_state_value)
+        self._stat_column.set_snapshot(snapshot)
 
-    def set_categories(self, categories: Iterable[Any]) -> None:
-        """Update category breakdown (placeholder — implemented in Phase 5)."""
-        pass
+    def set_upcoming(self, rows: Iterable[ChargeRowVM]) -> None:
+        self._upcoming_panel.set_upcoming(list(rows))
+
+    def set_recent(self, rows: Iterable[TxRowVM]) -> None:
+        self._recent_panel.set_recent(list(rows))
+
+    def set_categories(self, rows: Iterable[CategoryRowVM]) -> None:
+        self._cat_panel.set_categories(list(rows))
 
     def update_timeline(
         self,
@@ -99,213 +144,188 @@ class MainWindow(QMainWindow):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
-        """Update timeline directly without a full snapshot push."""
-        self._timeline_widget.set_percentages(
+        self._hero.timeline.set_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )
 
     def set_last_sync(self, dt: datetime | None) -> None:
-        """Update the last-sync label."""
-        self._last_sync_label.setText(
-            f"Last synced: {dt.strftime('%Y-%m-%d %H:%M')}" if dt else "Never synced"
-        )
+        if dt:
+            self._topbar.set_last_sync(dt.strftime("%d %b · %H:%M"))
 
-    # ── LAYOUT ────────────────────────────────────────────────────────────────
+    def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
+        """Show or hide the heads-up alert strip with the given content."""
+        self._alert.set_data(body_html, amount_str)
+        self._alert.set_visible(visible)
 
-    def _build_central_widget(self) -> QWidget:
+    # ── ROOT LAYOUT ───────────────────────────────────────────────────────────
+
+    def _build_root(self) -> QWidget:
+        """Two-column root: Sidebar | Main area."""
         root = QWidget()
-        root.setObjectName("dashboardRoot")
+        root.setObjectName("appRoot")
 
-        layout = QVBoxLayout(root)
-        layout.setContentsMargins(28, 24, 28, 24)
-        layout.setSpacing(18)
+        h = QHBoxLayout(root)
+        h.setContentsMargins(0, 0, 0, 0)
+        h.setSpacing(0)
 
-        layout.addLayout(self._build_header())
-        layout.addWidget(self._build_money_panel())
-        layout.addWidget(self._timeline_widget)
-        layout.addLayout(self._build_stat_row())
-        layout.addLayout(self._build_detail_grid(), stretch=1)
-        layout.addLayout(self._build_action_row())
+        h.addWidget(self._sidebar)
+        h.addWidget(self._build_main_area(), stretch=1)
 
         root.setStyleSheet(f"""
-            QWidget#dashboardRoot {{
+            QWidget#appRoot {{
                 background: {tokens.BG};
-                color: {tokens.FG};
-                font-family: "Segoe UI", "DM Mono", Consolas, monospace;
-            }}
-            QLabel#eyebrow {{
-                color: {tokens.MUTED};
-                font-size: 10px;
-                letter-spacing: 1px;
-            }}
-            QLabel#dashTitle {{
-                font-size: 28px;
-                font-weight: 700;
-                color: {tokens.FG};
-            }}
-            QFrame#card {{
-                background: {tokens.SURFACE};
-                border: 1px solid {tokens.HAIRLINE};
-                border-radius: 8px;
-            }}
-            QLabel#cardLabel {{
-                color: {tokens.MUTED_FG};
-                font-size: 11px;
-            }}
-            QLabel#panelTitle {{
-                font-size: 13px;
-                font-weight: 600;
-                color: {tokens.FG};
-            }}
-            QLabel#moneyValue {{
-                font-size: 54px;
-                font-weight: 700;
-                color: {tokens.FG};
-            }}
-            QLabel#stateValue {{
-                background: {tokens.GREEN_BG};
-                color: {tokens.GREEN};
-                border: 1px solid #b9decf;
-                border-radius: 4px;
-                padding: 4px 10px;
-            }}
-            QLabel#statValue {{
-                font-size: 24px;
-                font-weight: 700;
-                color: {tokens.FG};
-            }}
-            QPushButton {{
-                background: {tokens.NAVY};
-                color: {tokens.GOLD};
-                border: none;
-                border-radius: 6px;
-                padding: 9px 14px;
-            }}
-            QPushButton:hover {{
-                background: {tokens.FG};
             }}
         """)
         return root
 
-    def _build_header(self) -> QHBoxLayout:
-        layout = QHBoxLayout()
+    def _build_main_area(self) -> QWidget:
+        """Topbar + scrollable content."""
+        w = QWidget()
+        w.setObjectName("mainArea")
 
-        title_stack = QVBoxLayout()
-        eyebrow = QLabel("Stage 2 / PyQt6")
-        eyebrow.setObjectName("eyebrow")
-        title = QLabel("Mizān Dashboard")
-        title.setObjectName("dashTitle")
-        title_stack.addWidget(eyebrow)
-        title_stack.addWidget(title)
+        v = QVBoxLayout(w)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(0)
 
-        layout.addLayout(title_stack)
-        layout.addWidget(self._last_sync_label)
-        layout.addStretch()
+        # Topbar
+        v.addWidget(self._topbar)
 
-        refresh_btn = QPushButton("Refresh")
-        refresh_btn.clicked.connect(self.refresh_requested.emit)
-        layout.addWidget(refresh_btn)
+        # Hairline divider below topbar
+        divider = QFrame()
+        divider.setObjectName("topbarDivider")
+        divider.setFixedHeight(1)
+        v.addWidget(divider)
 
-        return layout
+        # Scrollable content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidget(self._build_content())
+        v.addWidget(scroll, stretch=1)
 
-    def _build_money_panel(self) -> QFrame:
-        card = self._card()
-        layout = QVBoxLayout(card)
-        layout.setContentsMargins(22, 18, 22, 18)
-        layout.setSpacing(10)
+        w.setStyleSheet(f"""
+            QWidget#mainArea {{
+                background: {tokens.BG};
+            }}
+            QFrame#topbarDivider {{
+                background: {tokens.HAIRLINE};
+            }}
+            QScrollArea {{
+                background: {tokens.BG};
+                border: none;
+            }}
+            QWidget#contentRoot {{
+                background: transparent;
+            }}
+        """)
+        return w
 
-        top_row = QHBoxLayout()
-        lbl = QLabel("Free Money")
-        lbl.setObjectName("cardLabel")
-        self._state_value.setObjectName("stateValue")
-        top_row.addWidget(lbl)
-        top_row.addStretch()
-        top_row.addWidget(self._state_value)
+    def _build_content(self) -> QWidget:
+        """Scrollable content: hero row + panels + footer."""
+        w = PaperWidget()
+        w.setObjectName("contentRoot")
 
-        self._free_money_value.setObjectName("moneyValue")
-        subtitle = QLabel("after spend and committed charges")
-        subtitle.setObjectName("cardLabel")
-
-        layout.addLayout(top_row)
-        layout.addWidget(self._free_money_value)
-        layout.addWidget(subtitle)
-        return card
-
-    def _build_stat_row(self) -> QHBoxLayout:
-        layout = QHBoxLayout()
+        layout = QVBoxLayout(w)
+        layout.setContentsMargins(
+            tokens.CONTENT_PAD, 18,
+            tokens.CONTENT_PAD, 18,
+        )
         layout.setSpacing(14)
-        layout.addWidget(self._build_stat_card("Monthly Budget", self._monthly_budget_value))
-        layout.addWidget(self._build_stat_card("Monthly Spent",  self._monthly_spent_value))
-        layout.addWidget(self._build_stat_card("Monthly Left",   self._monthly_left_value))
-        return layout
 
-    def _build_detail_grid(self) -> QGridLayout:
-        layout = QGridLayout()
-        layout.setSpacing(14)
-        layout.addWidget(
-            self._build_placeholder_panel("Upcoming Charges", "No upcoming charges loaded yet."),
-            0, 0,
-        )
-        layout.addWidget(
-            self._build_placeholder_panel("Recent Transactions", "No recent transactions loaded yet."),
-            0, 1,
-        )
-        layout.addWidget(
-            self._build_placeholder_panel("By Category", "Category breakdown will appear here."),
-            1, 0, 1, 2,
-        )
-        return layout
+        # Alert strip (hidden by default, shown when a charge is due soon)
+        layout.addWidget(self._alert)
 
-    def _build_action_row(self) -> QHBoxLayout:
-        layout = QHBoxLayout()
-        layout.addStretch()
+        # Hero row: hero card (stretch) + stat column (fixed)
+        # Must use a container widget so child QFrames get a C++ parent
+        hero_container = QWidget()
+        hero_row = QHBoxLayout(hero_container)
+        hero_row.setContentsMargins(0, 0, 0, 0)
+        hero_row.setSpacing(12)
+        hero_row.addWidget(self._hero, stretch=1)
+        hero_row.addWidget(self._stat_column)
+        layout.addWidget(hero_container)
 
-        for label, signal in [
-            ("Add Income", self.add_income_requested),
-            ("Add Spend",  self.add_spend_requested),
-            ("Add Charge", self.add_charge_requested),
-        ]:
-            btn = QPushButton(label)
-            btn.clicked.connect(signal.emit)
-            layout.addWidget(btn)
+        # Panels row: 3 equal columns
+        layout.addWidget(self._build_panels_row())
 
-        return layout
+        # Footer
+        layout.addWidget(self._footer)
 
-    def _build_stat_card(self, label_text: str, value_label: QLabel) -> QFrame:
-        card = self._card()
-        layout = QVBoxLayout(card)
-        layout.setContentsMargins(18, 14, 18, 14)
-        layout.setSpacing(8)
+        # Apply content-level styles — background is transparent so PaperWidget shows through
+        w.setStyleSheet(f"""
+            QWidget#contentRoot {{
+                background: transparent;
+                font-family: "DM Mono", Consolas, monospace;
+            }}
+            QFrame#card {{
+                background: {tokens.SURFACE};
+                border: 1px solid {tokens.HAIRLINE};
+                border-radius: {tokens.CARD_RADIUS}px;
+            }}
+            QLabel#cardMicro {{
+                font-size: {tokens.T_MINI}px;
+                letter-spacing: 2px;
+                color: {tokens.MUTED};
+                background: transparent;
+            }}
+            QLabel#cardSubtitle {{
+                font-size: {tokens.T_SM}px;
+                color: {tokens.MUTED};
+                background: transparent;
+            }}
+            QLabel#moneyValue {{
+                font-size: 54px;
+                font-weight: 900;
+                font-family: "Playfair Display";
+                color: {tokens.FG};
+                background: transparent;
+            }}
+            QLabel#panelTitle {{
+                font-size: {tokens.T_BASE}px;
+                font-weight: 500;
+                color: {tokens.FG};
+                background: transparent;
+            }}
+            QLabel#emptyState {{
+                font-size: {tokens.T_SM}px;
+                color: {tokens.MUTED};
+                background: transparent;
+            }}
+            QLabel#footerText {{
+                font-size: {tokens.T_MINI}px;
+                letter-spacing: 1px;
+                color: {tokens.MUTED};
+                background: transparent;
+            }}
+            QPushButton#actionBtn {{
+                font-family: "DM Mono", Consolas, monospace;
+                font-size: {tokens.T_SM}px;
+                font-weight: 500;
+                background: {tokens.NAVY};
+                color: {tokens.GOLD};
+                border: none;
+                border-radius: 6px;
+                padding: 9px 16px;
+                letter-spacing: 1px;
+            }}
+            QPushButton#actionBtn:hover {{
+                background: {tokens.FG};
+            }}
+        """)
+        return w
 
-        lbl = QLabel(label_text)
-        lbl.setObjectName("cardLabel")
-        value_label.setObjectName("statValue")
+    # Hero card is self._hero (HeroCard instance, built in __init__)
 
-        layout.addWidget(lbl)
-        layout.addWidget(value_label)
-        layout.addStretch()
-        return card
+    # ── PANELS ────────────────────────────────────────────────────────────────
 
-    def _build_placeholder_panel(self, title_text: str, empty_text: str) -> QFrame:
-        card = self._card()
-        layout = QVBoxLayout(card)
-        layout.setContentsMargins(18, 14, 18, 14)
+    def _build_panels_row(self) -> QWidget:
+        w = QWidget()
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(10)
+        layout.addWidget(self._cat_panel,      stretch=1)
+        layout.addWidget(self._upcoming_panel, stretch=1)
+        layout.addWidget(self._recent_panel,   stretch=1)
+        return w
 
-        title = QLabel(title_text)
-        title.setObjectName("panelTitle")   # fixed: was "title", caused 28px font collision
-
-        empty = QLabel(empty_text)
-        empty.setObjectName("cardLabel")
-        empty.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        layout.addWidget(title)
-        layout.addWidget(empty)
-        layout.addStretch()
-        return card
-
-    @staticmethod
-    def _card() -> QFrame:
-        card = QFrame()
-        card.setObjectName("card")
-        return card
+    # Footer is self._footer (FooterStrip instance, built in __init__)
