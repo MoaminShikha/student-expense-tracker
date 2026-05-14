@@ -85,13 +85,47 @@ class DashboardController:
         self.refresh()
 
     def _on_add_income_requested(self) -> None:
-        self._logger.debug("Add income requested — dialog not yet implemented")
+        if self._income_service is None:
+            return
+        from expense_tracker.app.gui.dialogs.add_income_dialog import AddIncomeDialog
+        dlg = AddIncomeDialog()
+        if dlg.exec():
+            try:
+                self._income_service.add_income(dlg.amount, dlg.source_tag, dlg.entry_date)
+                self.refresh()
+            except Exception:
+                self._logger.exception("Failed to add income")
 
     def _on_add_spend_requested(self) -> None:
-        self._logger.debug("Add spend requested — dialog not yet implemented")
+        if self._spend_service is None:
+            return
+        from expense_tracker.app.gui.dialogs.add_spend_dialog import AddSpendDialog
+        dlg = AddSpendDialog()
+        if dlg.exec():
+            try:
+                self._spend_service.add_transaction(
+                    dlg.amount, dlg.description, dlg.category, dlg.spent_on
+                )
+                self.refresh()
+            except Exception:
+                self._logger.exception("Failed to add spend")
 
     def _on_add_charge_requested(self) -> None:
-        self._logger.debug("Add charge requested — dialog not yet implemented")
+        if self._charge_service is None:
+            return
+        from expense_tracker.app.gui.dialogs.add_charge_dialog import AddChargeDialog
+        dlg = AddChargeDialog()
+        if dlg.exec():
+            try:
+                if dlg.is_recurring:
+                    self._charge_service.add_recurring_charge(
+                        dlg.name, dlg.amount, dlg.day_of_month, dlg.reminder_days
+                    )
+                else:
+                    self._charge_service.add_charge(dlg.name, dlg.amount, dlg.due_date)
+                self.refresh()
+            except Exception:
+                self._logger.exception("Failed to add charge")
 
     # ── Presentation mapping ──────────────────────────────────────────────────
 
