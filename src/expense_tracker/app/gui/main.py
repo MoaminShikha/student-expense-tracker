@@ -42,7 +42,7 @@ _CAUTION_THRESHOLD = Decimal("100")
 
 def main() -> int:
     """Start the PyQt6 desktop application with all services wired."""
-    app = QApplication(sys.argv)
+    app = QApplication([])
     load_fonts()
 
     try:
