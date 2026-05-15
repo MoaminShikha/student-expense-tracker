@@ -23,6 +23,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+
+def _split_amount(amount_str: str) -> tuple[str, str]:
+    """Split '₪1,234' into ('₪', '1,234'). Handles missing sym gracefully."""
+    s = amount_str.strip()
+    if s.startswith("₪"):
+        return "₪", s[1:]
+    return "", s
+
 from expense_tracker.app.gui.styles import tokens
 
 if __name__ != "__main__":
@@ -122,7 +130,22 @@ def _stat_card(
     ctx = QLabel(context_text)
     ctx.setObjectName("sCtx")
 
-    val = QLabel("₪0")
+    # Amount row: small italic ₪ sym + large number — mirrors HTML .sn-sym + .sn
+    amt_row = QWidget()
+    amt_row.setStyleSheet("background: transparent;")
+    amt_layout = QHBoxLayout(amt_row)
+    amt_layout.setContentsMargins(0, 0, 0, 0)
+    amt_layout.setSpacing(2)
+
+    sym = QLabel("₪")
+    sym.setStyleSheet(
+        f"color: rgba(24,26,44,0.38);"
+        f"font-family: 'Segoe UI', 'Arial', sans-serif;"
+        f"font-size: {tokens.T_BASE}px;"
+        f"background: transparent;"
+    )
+
+    val = QLabel("0")
     val.setObjectName("statValue")
     val.setStyleSheet(
         f"color: {value_color};"
@@ -132,17 +155,37 @@ def _stat_card(
         f"letter-spacing: -0.01em;"
         f"background: transparent;"
     )
-    val.setMinimumHeight(value_size + 14)
+    val.setMinimumHeight(value_size + 6)
+
+    amt_layout.addWidget(sym, alignment=Qt.AlignmentFlag.AlignBottom)
+    amt_layout.addWidget(val, alignment=Qt.AlignmentFlag.AlignBottom)
+    amt_layout.addStretch()
 
     sub = QLabel("")
     sub.setObjectName("sSub")
 
     layout.addWidget(micro)
     layout.addWidget(ctx)
-    layout.addWidget(val)
+    layout.addWidget(amt_row)
     layout.addWidget(sub)
 
     return frame, val, sub
+
+
+def _insight_placeholder(text: str) -> QLabel:
+    """Return a muted placeholder for future rotating insight text."""
+    lbl = QLabel(text)
+    lbl.setWordWrap(True)
+    lbl.setStyleSheet(f"""
+        color: {tokens.MUTED_FG};
+        background: {tokens.PAPER_WARM};
+        border: 1px solid {tokens.HAIRLINE};
+        border-radius: 6px;
+        padding: 7px 9px;
+        font-size: {tokens.T_XS}px;
+        font-family: "DM Mono", Consolas, monospace;
+    """)
+    return lbl
 
 
 # ── StatColumn ────────────────────────────────────────────────────────────────
@@ -165,7 +208,6 @@ class StatColumn(QWidget):
         spent_card, self._spent_val, self._spent_sub = _stat_card(
             "SPENT · MTD", "this calendar month", tokens.GOLD_LEAF, 28
         )
-        # add delta row to spent card
         self._delta_lbl = QLabel("")
         self._delta_lbl.setObjectName("sDelta")
         spent_card.layout().addWidget(self._delta_lbl)
@@ -177,7 +219,7 @@ class StatColumn(QWidget):
 
         # Card 3 — MONTHLY LEFT
         left_card, self._left_val, self._left_sub = _stat_card(
-            "MONTHLY LEFT", "", tokens.GREEN, 26
+            "MONTHLY LEFT", "income minus charges minus spend", tokens.GREEN, 26
         )
         self._burn = BurnBars()
         # Labels row under burn bar
@@ -209,9 +251,12 @@ class StatColumn(QWidget):
 
     def set_snapshot(self, vm: "BalanceViewModel") -> None:
         from decimal import Decimal
-        self._spent_val.setText(vm.monthly_spent_str)
-        self._committed_val.setText(vm.monthly_budget_str)
-        self._left_val.setText(vm.monthly_left_str)
+        _, spent_num  = _split_amount(vm.monthly_spent_str)
+        _, budget_num = _split_amount(vm.monthly_budget_str)
+        _, left_num   = _split_amount(vm.monthly_left_str)
+        self._spent_val.setText(spent_num)
+        self._committed_val.setText(budget_num)
+        self._left_val.setText(left_num)
 
         # Burn bar
         budget = vm.monthly_budget

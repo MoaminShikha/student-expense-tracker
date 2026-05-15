@@ -11,7 +11,7 @@ from PyQt6.QtGui import QColor, QPainter, QPixmap
 
 
 @lru_cache(maxsize=4)
-def dot_grain(color_hex: str = "#9e9474", alpha: int = 20, tile: int = 3) -> QPixmap:
+def dot_grain(color_hex: str = "#9e9474", alpha: int = 35, tile: int = 3) -> QPixmap:
     """
     Return a tiny tiled QPixmap with a single 1×1 dot in the top-left corner.
     Set as a widget's background brush to get the HTML dot-grain texture.

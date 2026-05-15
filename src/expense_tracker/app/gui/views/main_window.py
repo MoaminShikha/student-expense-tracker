@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QBrush, QPalette
+from PyQt6.QtGui import QBrush, QColor, QPainter
 from PyQt6.QtWidgets import (
     QFrame,
     QGridLayout,
@@ -22,7 +22,6 @@ from PyQt6.QtWidgets import (
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.styles.textures import dot_grain
 from expense_tracker.app.gui.widgets.footer_strip import FooterStrip
-from expense_tracker.app.gui.widgets.heads_up_alert import HeadsUpAlert
 from expense_tracker.app.gui.widgets.hero_card import HeroCard
 from expense_tracker.app.gui.widgets.panels import CategoryPanel, ChargeRowVM, RecentPanel, TxRowVM, UpcomingPanel, CategoryRowVM
 from expense_tracker.app.gui.widgets.sidebar import Sidebar
@@ -34,16 +33,22 @@ from expense_tracker.app.gui.widgets.topbar import Topbar
 class PaperWidget(QWidget):
     """
     Scroll-content background: solid BG fill + dot-grain texture overlay.
+    Uses paintEvent so the QScrollArea viewport cannot override it.
     Matches the HTML body::before radial-gradient dot pattern.
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        palette = self.palette()
-        palette.setBrush(QPalette.ColorRole.Window, QBrush(dot_grain()))
-        self.setPalette(palette)
-        self.setAutoFillBackground(True)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, True)
+
+    def paintEvent(self, _event) -> None:  # type: ignore[override]
+        p = QPainter(self)
+        # Solid warm cream base
+        p.fillRect(self.rect(), QColor(tokens.BG))
+        # Dot-grain overlay at 50% opacity
+        p.setOpacity(0.5)
+        p.fillRect(self.rect(), QBrush(dot_grain()))
+        p.end()
 
 if TYPE_CHECKING:
     from expense_tracker.app.gui.view_models.balance_view_model import BalanceViewModel
@@ -74,8 +79,7 @@ class MainWindow(QMainWindow):
         self._stat_column = StatColumn()
         self._hero        = HeroCard()
 
-        # Heads-up alert strip
-        self._alert = HeadsUpAlert()
+        self._alert = None  # alert now lives inside hero card
 
         # Bottom panels
         self._cat_panel      = CategoryPanel(self.add_income_requested)
@@ -104,11 +108,11 @@ class MainWindow(QMainWindow):
         self._hero.set_period_for_today()
         self._hero.set_legend(
             snapshot.monthly_spent_str,
-            "₪0",
-            "₪0",
+            "",
+            "",
             snapshot.monthly_budget_str,
         )
-        self._hero.set_today_changes(f"TODAY  ·  Monthly left {snapshot.monthly_left_str}")
+        self._hero.set_daily_allowance(snapshot.monthly_left_str, "")
         self._hero.timeline.set_percentages(
             snapshot.timeline_spent_pct,
             snapshot.timeline_committed_pct,
@@ -116,10 +120,12 @@ class MainWindow(QMainWindow):
             snapshot.timeline_fuzzy_width_pct,
             snapshot.today_pct,
         )
+        self._hero.timeline.set_committed_due_pcts(snapshot.committed_due_pcts)
+        self._hero.timeline.set_spend_day_pcts(snapshot.spend_day_pcts)
         today = datetime.now().date()
         last_day = calendar.monthrange(today.year, today.month)[1]
-        self._hero.timeline.set_ticks([(100.0, "Rent")])
-        self._hero.timeline.set_endpoints("Limit", f"Rent · {last_day} {today.strftime('%b')}")
+        month_abbr = calendar.month_abbr[today.month]  # always English
+        self._hero.timeline.set_endpoints(f"1 {month_abbr}", f"{last_day} {month_abbr}")
 
         if last_sync:
             self._topbar.set_last_sync(last_sync.strftime("%d %b · %H:%M"))
@@ -153,9 +159,8 @@ class MainWindow(QMainWindow):
             self._topbar.set_last_sync(dt.strftime("%d %b · %H:%M"))
 
     def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
-        """Show or hide the heads-up alert strip with the given content."""
-        self._alert.set_data(body_html, amount_str)
-        self._alert.set_visible(visible)
+        """Show or hide the inline heads-up alert inside the hero card."""
+        self._hero.set_alert(body_html, amount_str, visible)
 
     # ── ROOT LAYOUT ───────────────────────────────────────────────────────────
 
@@ -169,11 +174,19 @@ class MainWindow(QMainWindow):
         h.setSpacing(0)
 
         h.addWidget(self._sidebar)
+        sidebar_divider = QFrame()
+        sidebar_divider.setObjectName("sidebarDivider")
+        sidebar_divider.setFixedWidth(1)
+        h.addWidget(sidebar_divider)
         h.addWidget(self._build_main_area(), stretch=1)
 
         root.setStyleSheet(f"""
             QWidget#appRoot {{
                 background: {tokens.BG};
+            }}
+            QFrame#sidebarDivider {{
+                background: {tokens.HAIRLINE_S};
+                border: none;
             }}
         """)
         return root
@@ -231,9 +244,6 @@ class MainWindow(QMainWindow):
             tokens.CONTENT_PAD, 18,
         )
         layout.setSpacing(14)
-
-        # Alert strip (hidden by default, shown when a charge is due soon)
-        layout.addWidget(self._alert)
 
         # Hero row: hero card (stretch) + stat column (fixed)
         # Must use a container widget so child QFrames get a C++ parent
