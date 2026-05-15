@@ -5,9 +5,10 @@ from decimal import Decimal
 from typing import Any
 
 from PyQt6.QtCore import QRectF, Qt, QVariantAnimation, QEasingCurve, pyqtSignal
-from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
+from PyQt6.QtGui import QColor, QPainter, QPainterPath, QPen, QPolygonF
 from PyQt6.QtCore import QPointF
 from PyQt6.QtWidgets import (
+    QFrame,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -70,10 +71,11 @@ class PeriodSegmented(QWidget):
 
     period_changed = pyqtSignal(str)
 
-    _PERIODS = ["W", "M", "Y"]
+    _PERIODS = ["D", "W", "M", "Y"]
 
     def __init__(self) -> None:
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setObjectName("periodSegmented")
         self._active = "M"
         layout = QHBoxLayout(self)
@@ -83,9 +85,9 @@ class PeriodSegmented(QWidget):
 
         for p in self._PERIODS:
             btn = QPushButton(p)
-            btn.setFixedHeight(26)
+            btn.setFixedHeight(24)
             btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-            btn.setFixedWidth(32)
+            btn.setFixedWidth(28)
             btn.setProperty("active", "true" if p == self._active else "false")
             btn.clicked.connect(lambda _c, period=p: self._on_click(period))
             self._btns[p] = btn
@@ -93,28 +95,22 @@ class PeriodSegmented(QWidget):
 
         self.setStyleSheet(f"""
             QWidget#periodSegmented {{
-                border: 1px solid {tokens.HAIRLINE_S};
+                border: 1px solid {tokens.HAIRLINE};
                 border-radius: 999px;
                 background: transparent;
             }}
             QPushButton {{
                 font-family: "DM Mono", Consolas, monospace;
                 font-size: {tokens.T_XS}px;
-                border: 1px solid {tokens.HAIRLINE_S};
-                border-radius: 0px;
+                border: none;
+                border-radius: 0;
                 background: transparent;
                 color: {tokens.MUTED_FG};
-                margin-right: -1px;
-            }}
-            QPushButton:first-child {{
-                border-radius: 999px 0 0 999px;
-            }}
-            QPushButton:last-child {{
-                border-radius: 0 999px 999px 0;
-                margin-right: 0px;
+                padding: 3px 10px;
+                margin: 0;
             }}
             QPushButton[active="true"] {{
-                background: rgba(199,154,57,0.16);
+                background: {tokens.PAPER_WARM};
                 color: {tokens.FG};
                 font-weight: 500;
             }}
@@ -135,7 +131,7 @@ class PeriodSegmented(QWidget):
 
 # ── Pulsing status pill ───────────────────────────────────────────────────────
 
-class StatusPill(QWidget):
+class StatusPill(QFrame):
     """
     Animated status pill: rounded bg + pulsing dot + text label.
     Pulse driven by QVariantAnimation (0→1→0, 2400 ms).
@@ -143,37 +139,33 @@ class StatusPill(QWidget):
 
     _STATES = {
         "green": {
-            "text": "• On track",
+            "text": "On track",
             "color": tokens.GREEN,
             "bg":    tokens.GREEN_BG,
-            "border": "#a8d8c0",
         },
         "yellow": {
-            "text": "• Caution",
+            "text": "Caution",
             "color": tokens.AMBER,
             "bg":    tokens.AMBER_BG,
-            "border": tokens.AMBER_BD,
         },
         "red": {
-            "text": "• Over budget",
+            "text": "Over budget",
             "color": tokens.RED,
             "bg":    "#fce8e8",
-            "border": "#e8b0b0",
         },
         "tight_month": {
-            "text": "• Tight month",
+            "text": "Tight month",
             "color": tokens.MUTED_FG,
             "bg":    tokens.BG,
-            "border": tokens.HAIRLINE,
         },
     }
 
     def __init__(self) -> None:
         super().__init__()
-        self.setFixedHeight(28)
+        self.setObjectName("statusPill")
+        self.setFixedHeight(26)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self._state = "green"
-        self._pulse_alpha: float = 0.0
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 0, 12, 0)
@@ -189,7 +181,7 @@ class StatusPill(QWidget):
         self._anim.setStartValue(0.0)
         self._anim.setEndValue(1.0)
         self._anim.setDuration(2400)
-        self._anim.setLoopCount(-1)  # infinite
+        self._anim.setLoopCount(-1)
         self._anim.setEasingCurve(QEasingCurve.Type.SineCurve)
         self._anim.valueChanged.connect(self._dot_w.set_pulse)
         self._anim.start()
@@ -202,9 +194,11 @@ class StatusPill(QWidget):
         self._label.setText(cfg["text"])
         self._dot_w.set_color(cfg["color"])
         self.setStyleSheet(
-            f"background: {cfg['bg']};"
-            f"border: 1px solid {cfg['border']};"
-            f"border-radius: 999px;"
+            f"QFrame#statusPill {{"
+            f"    background: {cfg['bg']};"
+            f"    border: none;"
+            f"    border-radius: 13px;"
+            f"}}"
         )
         self._label.setStyleSheet(
             f"color: {cfg['color']};"
@@ -214,8 +208,6 @@ class StatusPill(QWidget):
             f"font-family: 'DM Mono', Consolas, monospace;"
             f"background: transparent;"
         )
-        # update fixed width to fit text
-        self.adjustSize()
 
 
 class _PulseDot(QWidget):
@@ -277,26 +269,40 @@ class BellButton(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # Outer box
         p.setPen(QPen(QColor(tokens.HAIRLINE), 1))
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawRoundedRect(QRectF(0.5, 0.5, 27, 27), 7, 7)
 
-        pen = QPen(QColor(tokens.MUTED_FG), 1.4)
+        pen = QPen(QColor(tokens.MUTED_FG), 1.5)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         p.setPen(pen)
-        p.drawArc(QRectF(8, 7, 12, 12), 25 * 16, 130 * 16)
-        p.drawLine(QPointF(9, 13), QPointF(7, 18))
-        p.drawLine(QPointF(19, 13), QPointF(21, 18))
-        p.drawLine(QPointF(7, 18), QPointF(21, 18))
-        p.drawLine(QPointF(14, 6), QPointF(14, 8))
-        p.drawArc(QRectF(11.5, 18, 5, 4), 200 * 16, 140 * 16)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+
+        # Bell dome + sides — smooth bezier silhouette
+        path = QPainterPath()
+        path.moveTo(7.5, 19.5)
+        path.cubicTo(7.5, 10.5, 9.5, 7.0, 14.0, 7.0)
+        path.cubicTo(18.5, 7.0, 20.5, 10.5, 20.5, 19.5)
+        p.drawPath(path)
+
+        # Rim
+        p.drawLine(QPointF(5.5, 19.5), QPointF(22.5, 19.5))
+
+        # Stem
+        p.drawLine(QPointF(14.0, 5.0), QPointF(14.0, 7.0))
+
+        # Clapper
+        p.setBrush(QColor(tokens.MUTED_FG))
+        p.setPen(Qt.PenStyle.NoPen)
+        p.drawEllipse(QPointF(14.0, 22.0), 1.8, 1.8)
 
         # Unread gold dot
         if self._has_unread:
-            p.setPen(QPen(QColor(tokens.SURFACE), 1))
+            p.setPen(QPen(QColor(tokens.SURFACE), 1.5))
             p.setBrush(QColor(tokens.GOLD))
-            p.drawEllipse(QPointF(21, 7), 3, 3)
+            p.drawEllipse(QPointF(20.5, 7.5), 3.0, 3.0)
 
         p.end()
 
@@ -320,12 +326,13 @@ class Topbar(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        self.setObjectName("topbar")
         self.setFixedHeight(tokens.TOPBAR_H)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         self._date_label   = QLabel(self._today_str())
         self._status_pill  = StatusPill()
-        self._sync_label   = QLabel("")
+        self._sync_btn     = QPushButton("↻  —")
         self._sparkline    = Sparkline()
         self._period_seg   = PeriodSegmented()
         self._bell         = BellButton()
@@ -334,7 +341,7 @@ class Topbar(QWidget):
         layout.setContentsMargins(24, 0, 24, 0)
         layout.setSpacing(14)
 
-        layout.addLayout(self._build_breadcrumb())
+        layout.addWidget(self._build_breadcrumb(), alignment=Qt.AlignmentFlag.AlignVCenter)
         layout.addSpacing(8)
         layout.addWidget(self._build_sparkline_group())
         layout.addStretch()
@@ -346,8 +353,13 @@ class Topbar(QWidget):
         self._period_seg.period_changed.connect(self.period_changed.emit)
 
         self.setStyleSheet(f"""
-            QWidget {{
+            QWidget#topbar {{
                 background: {tokens.SURFACE};
+                border-bottom: 1px solid {tokens.HAIRLINE};
+                font-family: "DM Mono", Consolas, monospace;
+            }}
+            QWidget {{
+                background: transparent;
                 font-family: "DM Mono", Consolas, monospace;
             }}
             QLabel#tbBreadcrumb {{
@@ -373,10 +385,6 @@ class Topbar(QWidget):
                 color: {tokens.FG};
                 background: transparent;
             }}
-            QLabel#tbSync {{
-                font-size: {tokens.T_XS}px;
-                color: {tokens.MUTED};
-            }}
             QPushButton#tbSyncBtn {{
                 background: transparent;
                 border: 1px solid {tokens.HAIRLINE};
@@ -398,7 +406,7 @@ class Topbar(QWidget):
         self._status_pill.set_state(state)
 
     def set_last_sync(self, text: str) -> None:
-        self._sync_label.setText(text)
+        self._sync_btn.setText(f"↻  {text}" if text else "↻  —")
 
     def set_sparkline(self, values: list[Decimal]) -> None:
         self._sparkline.set_values(values)
@@ -411,16 +419,18 @@ class Topbar(QWidget):
 
     # ── LAYOUT ────────────────────────────────────────────────────────────────
 
-    def _build_breadcrumb(self) -> QVBoxLayout:
-        stack = QVBoxLayout()
-        stack.setContentsMargins(0, -4, 0, 0)
+    def _build_breadcrumb(self) -> QWidget:
+        w = QWidget()
+        w.setFixedHeight(42)
+        stack = QVBoxLayout(w)
+        stack.setContentsMargins(0, 0, 0, 0)
         stack.setSpacing(0)
         crumb = QLabel("DASHBOARD / 01")
         crumb.setObjectName("tbBreadcrumb")
         self._date_label.setObjectName("tbDate")
         stack.addWidget(crumb)
         stack.addWidget(self._date_label)
-        return stack
+        return w
 
     def _build_sparkline_group(self) -> QWidget:
         w = QWidget()
@@ -443,18 +453,10 @@ class Topbar(QWidget):
         layout.addWidget(cap)
         return w
 
-    def _build_sync_area(self) -> QWidget:
-        w = QWidget()
-        layout = QHBoxLayout(w)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(6)
-        self._sync_label.setObjectName("tbSync")
-        sync_btn = QPushButton("↻  Sync")
-        sync_btn.setObjectName("tbSyncBtn")
-        sync_btn.clicked.connect(self.refresh_requested.emit)
-        layout.addWidget(self._sync_label)
-        layout.addWidget(sync_btn)
-        return w
+    def _build_sync_area(self) -> QPushButton:
+        self._sync_btn.setObjectName("tbSyncBtn")
+        self._sync_btn.clicked.connect(self.refresh_requested.emit)
+        return self._sync_btn
 
     @staticmethod
     def _today_str() -> str:

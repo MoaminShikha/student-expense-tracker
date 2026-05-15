@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QPainter
+from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal
+from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
 from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -18,17 +18,17 @@ from expense_tracker.app.gui.styles.fonts import naskh
 # Navigation structure: (section_label, [(key, display_text), ...])
 _NAV: list[tuple[str, list[tuple[str, str]]]] = [
     ("OVERVIEW", [
-        ("dashboard",    "◆  Dashboard"),
-        ("history",      "○  History"),
+        ("dashboard",    "Dashboard"),
+        ("history",      "History"),
     ]),
     ("MONEY", [
-        ("income",       "+  Income"),
-        ("charges",      "−  Charges"),
-        ("transactions", "•  Transactions"),
+        ("income",       "Income"),
+        ("charges",      "Charges"),
+        ("transactions", "Transactions"),
     ]),
     ("YOU", [
-        ("insights",     "◇  Insights"),
-        ("profile",      "◌  Profile"),
+        ("insights",     "Insights"),
+        ("profile",      "Profile"),
     ]),
 ]
 
@@ -76,6 +76,89 @@ class _AvatarWidget(QWidget):
         p.end()
 
 
+class _NavButton(QPushButton):
+    """Sidebar nav button with dashboard-matching line icon painted at left."""
+
+    def __init__(self, key: str, text: str) -> None:
+        super().__init__(text)
+        self._key = key
+
+    def paintEvent(self, event) -> None:  # type: ignore[override]
+        super().paintEvent(event)
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        active = self.property("active") == "true"
+        color = QColor(tokens.FG if active else tokens.MUTED_FG)
+        pen = QPen(color, 1.6)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        p.setPen(pen)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+
+        x = 20.0
+        y = (self.height() - 15.0) / 2.0
+        self._draw_icon(p, x, y)
+
+        if active:
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(QColor(tokens.GOLD))
+            p.drawEllipse(QPointF(self.width() - 16, self.height() / 2), 2.0, 2.0)
+
+        p.end()
+
+    def _draw_icon(self, p: QPainter, x: float, y: float) -> None:
+        if self._key == "dashboard":
+            size = 4.4
+            gap = 5.6
+            for row in range(2):
+                for col in range(2):
+                    p.drawRoundedRect(QRectF(x + col * gap, y + row * gap, size, size), 1, 1)
+            return
+
+        if self._key == "history":
+            p.drawLine(QPointF(x, y + 2), QPointF(x + 15, y + 2))
+            p.drawLine(QPointF(x, y + 7.5), QPointF(x + 11, y + 7.5))
+            p.drawLine(QPointF(x, y + 13), QPointF(x + 7, y + 13))
+            return
+
+        if self._key == "income":
+            p.drawLine(QPointF(x + 7.5, y + 1), QPointF(x + 7.5, y + 14))
+            p.drawLine(QPointF(x + 1, y + 7.5), QPointF(x + 14, y + 7.5))
+            return
+
+        if self._key == "charges":
+            p.drawEllipse(QRectF(x + 1, y + 1, 13, 13))
+            p.drawLine(QPointF(x + 7.5, y + 4), QPointF(x + 7.5, y + 7.5))
+            p.drawLine(QPointF(x + 7.5, y + 7.5), QPointF(x + 10, y + 10))
+            return
+
+        if self._key == "transactions":
+            p.drawRoundedRect(QRectF(x, y + 2, 15, 11), 2, 2)
+            p.drawLine(QPointF(x, y + 6), QPointF(x + 15, y + 6))
+            return
+
+        if self._key == "insights":
+            pts = [
+                QPointF(x + 7.5, y),
+                QPointF(x + 9.6, y + 5),
+                QPointF(x + 15, y + 5.5),
+                QPointF(x + 10.9, y + 9),
+                QPointF(x + 12, y + 14.5),
+                QPointF(x + 7.5, y + 11.8),
+                QPointF(x + 3, y + 14.5),
+                QPointF(x + 4.1, y + 9),
+                QPointF(x, y + 5.5),
+                QPointF(x + 5.4, y + 5),
+            ]
+            p.drawPolygon(QPolygonF(pts))
+            return
+
+        if self._key == "profile":
+            p.drawEllipse(QRectF(x + 4.2, y + 1, 6.6, 6.6))
+            p.drawArc(QRectF(x + 1.5, y + 8, 12, 9), 25 * 16, 130 * 16)
+
+
 class Sidebar(QWidget):
     """
     Left navigation sidebar — presentation only.
@@ -108,23 +191,23 @@ class Sidebar(QWidget):
                 font-family: "DM Mono", Consolas, monospace;
             }}
             QWidget#sidebarRoot {{
-                border-right: 2px solid {tokens.HAIRLINE_S};
-            }}
+                border-right: 1px solid {tokens.HAIRLINE_S};
+            }}      
             QFrame#sbDivider {{
                 background: {tokens.HAIRLINE};
             }}
             QLabel#sbTag {{
                 font-size: {tokens.T_MICRO}px;
                 letter-spacing: 3px;
-                color: {tokens.MUTED};
+                color: {tokens.AMBER};
                 background: transparent;
                 text-transform: uppercase;
             }}
             QLabel#sbWordmark {{
-                color: {tokens.MUTED};
+                color: {tokens.GOLD_LEAF};
                 font-family: "Noto Naskh Arabic";
                 font-size: 25px;
-                font-weight: 400;
+                font-weight: 700;
                 background: transparent;
             }}
             QLabel#sbSub {{
@@ -142,7 +225,8 @@ class Sidebar(QWidget):
             }}
             QPushButton#sbNavItem {{
                 text-align: left;
-                padding-left: 18px;
+                padding-left: 44px;
+                padding-right: 22px;
                 height: 33px;
                 border: none;
                 border-left: 3px solid transparent;
@@ -158,7 +242,7 @@ class Sidebar(QWidget):
                 border-left: 3px solid {tokens.HAIRLINE_S};
             }}
             QPushButton#sbNavItem[active="true"] {{
-                border-left: 3px solid {tokens.GOLD};
+                border-left: 2px solid {tokens.GOLD};
                 background: rgba(199,154,57,0.16);
                 color: {tokens.FG};
                 font-weight: 500;
@@ -229,9 +313,20 @@ class Sidebar(QWidget):
         top = QHBoxLayout()
         tag = QLabel("M—01")
         tag.setObjectName("sbTag")
+        tag.setStyleSheet(
+            f"QLabel#sbTag {{ color: {tokens.GOLD}; font-size: {tokens.T_MICRO}px;"
+            f"letter-spacing: 3px; background: transparent; }}"
+        )
         wordmark = QLabel("ميزان")
         wordmark.setObjectName("sbWordmark")
         wordmark.setFont(naskh(25))
+        wordmark.setStyleSheet(
+            f"color: {tokens.GOLD_LEAF};"
+            'font-family: "Noto Naskh Arabic";'
+            "font-size: 25px;"
+            "font-weight: 700;"
+            "background: transparent;"
+        )
         wordmark.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         top.addWidget(tag)
         top.addStretch()
@@ -275,13 +370,19 @@ class Sidebar(QWidget):
                 layout.addWidget(btn)
 
         layout.addStretch()
-        layout.addWidget(self._build_streak())
-        layout.addSpacing(6)
+
+        # Streak box with horizontal margin matching HTML (6px top, 14px sides, 8px bottom)
+        streak_wrap = QWidget()
+        streak_wrap_l = QHBoxLayout(streak_wrap)
+        streak_wrap_l.setContentsMargins(14, 6, 14, 8)
+        streak_wrap_l.setSpacing(0)
+        streak_wrap_l.addWidget(self._build_streak())
+        layout.addWidget(streak_wrap)
 
         return w
 
     def _build_nav_btn(self, key: str, text: str) -> QPushButton:
-        btn = QPushButton(text)
+        btn = _NavButton(key, text)
         btn.setObjectName("sbNavItem")
         btn.setProperty("active", "true" if key == self._active else "false")
         btn.clicked.connect(lambda _checked, k=key: self._on_nav_clicked(k))

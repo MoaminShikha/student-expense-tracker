@@ -145,6 +145,18 @@ class ChargeService:
         self._logger.info("Added recurring charge %s for session %s.", charge.charge_id, active_session.session_id)
         return charge
 
+    def get_charges_for_month(self, session_id: UUID, year: int, month: int) -> list:
+        """Return upcoming committed charges due in the given month."""
+        return [
+            c for c in self._charge_repository.list_for_month(session_id, year, month)
+            if c.status == ChargeStatus.UPCOMING
+        ]
+
+    def get_monthly_committed_total(self, session_id: UUID, year: int, month: int) -> Decimal:
+        """Return the sum of upcoming committed charges due in the given month."""
+        charges = self.get_charges_for_month(session_id, year, month)
+        return sum((c.amount for c in charges), Decimal("0"))
+
     @staticmethod
     def _next_recurring_due_date(reference_date: date, day_of_month: int) -> date:
         """

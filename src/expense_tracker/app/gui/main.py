@@ -45,6 +45,7 @@ def main() -> int:
     app = QApplication([])
     load_fonts()
 
+    # Services
     try:
         session_repo = JsonSessionRepository(_DATA_DIR / "session.json")
         income_repo  = JsonIncomeRepository(_DATA_DIR / "income.json")
@@ -60,6 +61,7 @@ def main() -> int:
         fuzzy_charge_service = FuzzyChargeService(session_repo, fuzzy_repo, charge_repo, income_repo)
         spend_service       = SpendService(session_repo, tx_repo)
         balance_service     = BalanceService(engine, income_repo, charge_repo, tx_repo)
+        
     except Exception:
         import traceback
         traceback.print_exc()

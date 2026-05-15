@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 
 
@@ -28,4 +28,6 @@ class BalanceViewModel:
     timeline_fuzzy_left_pct: float
     timeline_fuzzy_width_pct: float
     today_pct: float
+    committed_due_pcts: list[float] = field(default_factory=list)
+    spend_day_pcts: list[float] = field(default_factory=list)
 

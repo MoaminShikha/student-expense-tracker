@@ -77,6 +77,7 @@ class _Panel(QFrame):
         title: str,
         btn_text: str,
         btn_signal,
+        meta: str = "",
     ) -> None:
         super().__init__()
         self.setObjectName("panelCard")
@@ -93,7 +94,7 @@ class _Panel(QFrame):
         outer.setContentsMargins(18, 16, 18, 16)
         outer.setSpacing(10)
 
-        # Header
+        # Header title row
         head = QHBoxLayout()
         head.setContentsMargins(0, 0, 0, 0)
         head.setSpacing(5)
@@ -127,7 +128,22 @@ class _Panel(QFrame):
         head.addStretch()
         head.addWidget(btn)
 
-        outer.addLayout(head)
+        # Meta subtitle (e.g. "April · month-to-date")
+        self._meta_lbl = QLabel(meta)
+        self._meta_lbl.setStyleSheet(
+            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
+            f"font-family: 'DM Mono', Consolas, monospace; background: transparent;"
+        )
+        self._meta_lbl.setVisible(bool(meta))
+
+        hdr_w = QWidget()
+        hdr_l = QVBoxLayout(hdr_w)
+        hdr_l.setContentsMargins(0, 0, 0, 0)
+        hdr_l.setSpacing(1)
+        hdr_l.addLayout(head)
+        hdr_l.addWidget(self._meta_lbl)
+
+        outer.addWidget(hdr_w)
 
         # Body (subclasses fill this)
         self._body = QVBoxLayout()
@@ -145,6 +161,10 @@ class _Panel(QFrame):
         self._fade_anim.setEndValue(1.0)
         self._fade_anim.setEasingCurve(QEasingCurve.Type.OutCubic)
         self._animated = False
+
+    def set_meta(self, text: str) -> None:
+        self._meta_lbl.setText(text)
+        self._meta_lbl.setVisible(bool(text))
 
     def showEvent(self, event: Any) -> None:
         super().showEvent(event)
@@ -175,7 +195,9 @@ class CategoryPanel(_Panel):
     """By Category panel with color-dot rows + thin progress bars."""
 
     def __init__(self, btn_signal) -> None:
-        super().__init__("By Category", "+ Add Income", btn_signal)
+        from datetime import date
+        month = date.today().strftime("%B")
+        super().__init__("By Category", "Details →", btn_signal, meta=f"{month} · month-to-date")
         self._body.addWidget(self._empty_state("Category breakdown will appear here."))
 
     def set_categories(self, rows: list[CategoryRowVM]) -> None:
@@ -184,26 +206,37 @@ class CategoryPanel(_Panel):
             self._body.addWidget(self._empty_state("No spend data yet."))
             return
 
-        total_pct_shown = 0.0
         for row in rows:
             color = tokens.CATEGORY_COLORS.get(row.key, tokens.MUTED)
             self._body.addWidget(self._cat_row(row, color))
-            total_pct_shown += row.pct
 
-        # Total footer
+        # Total footer with sum
+        from decimal import Decimal
+        total_raw = sum(
+            Decimal(r.amount_str.replace("₪", "").replace(",", ""))
+            for r in rows
+            if r.amount_str
+        )
+        total_str = f"₪{total_raw:,.0f}" if total_raw else ""
+
         self._body.addWidget(self._separator())
-        footer = QHBoxLayout()
         footer_w = QWidget()
         footer_l = QHBoxLayout(footer_w)
         footer_l.setContentsMargins(0, 6, 0, 0)
         footer_l.setSpacing(0)
-        lbl = QLabel("Total")
+        lbl = QLabel("Total spent")
         lbl.setStyleSheet(
             f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
             f"font-family: 'DM Mono', Consolas, monospace; background: transparent;"
         )
+        amt = QLabel(total_str)
+        amt.setStyleSheet(
+            f"font-family: 'Playfair Display'; font-size: {tokens.T_MD}px;"
+            f"font-weight: 700; color: {tokens.FG}; background: transparent;"
+        )
         footer_l.addWidget(lbl)
         footer_l.addStretch()
+        footer_l.addWidget(amt)
         self._body.addWidget(footer_w)
         self._body.addStretch()
 
@@ -278,10 +311,12 @@ class UpcomingPanel(_Panel):
     """Upcoming Charges panel with charge rows."""
 
     def __init__(self, btn_signal) -> None:
-        super().__init__("Upcoming Charges", "+ Add Charge", btn_signal)
+        super().__init__("Upcoming", "+ Add Charge", btn_signal, meta="charges due soon")
         self._body.addWidget(self._empty_state("No upcoming charges loaded yet."))
 
     def set_upcoming(self, rows: list[ChargeRowVM]) -> None:
+        count = len(rows)
+        self.set_meta(f"{count} charge{'s' if count != 1 else ''} due soon" if rows else "charges due soon")
         self._clear_body()
         if not rows:
             self._body.addWidget(self._empty_state("No upcoming charges."))
@@ -376,10 +411,12 @@ class RecentPanel(_Panel):
     """Recent Transactions panel."""
 
     def __init__(self, btn_signal) -> None:
-        super().__init__("Recent Transactions", "+ Add Spend", btn_signal)
+        super().__init__("Recent", "+ Add Spend", btn_signal, meta="last entries")
         self._body.addWidget(self._empty_state("No recent transactions loaded yet."))
 
     def set_recent(self, rows: list[TxRowVM]) -> None:
+        count = len(rows)
+        self.set_meta(f"Last {count} {'entry' if count == 1 else 'entries'}" if rows else "last entries")
         self._clear_body()
         if not rows:
             self._body.addWidget(self._empty_state("No transactions yet."))

@@ -1,88 +1,109 @@
 """
-Monthly budget timeline — custom-painted.
+Two-track timeline widget.
 
-Track layout (left → right):
-  [spent — gold-leaf]  [committed — red]  [fuzzy — striped red]  |today|  [remaining]
+Track 1 (top) — Calendar: day 1 → end of month.
+  · Red dots above track = committed charge due dates.
+  · Gold dots above track = days where spending occurred.
+  · Vertical TODAY line.
 
-Supports:
-  - Animated width transitions (1100 ms OutCubic)
-  - Today marker with "TODAY" label above
-  - Event ticks with labels below
-  - Endpoint labels (left / right)
+Track 2 (bottom) — Budget bar: left→right = committed | fuzzy | spent.
+  · Full width = monthly budget.
+  · Red fill   = committed charges (fixed bills).
+  · Amber fill  = fuzzy charges (uncertain amount).
+  · Gold fill   = money already spent.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any
 
-from PyQt6.QtCore import (
-    QEasingCurve,
-    QPropertyAnimation,
-    QRectF,
-    Qt,
-    pyqtProperty,  # type: ignore[attr-defined]
-)
+from PyQt6.QtCore import QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, pyqtProperty
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import QWidget
 
 from expense_tracker.app.gui.styles import tokens
 
 
+@dataclass(frozen=True)
+class TimelineEvent:
+    """One real event positioned on the month timeline (kept for API compat)."""
+    pct: float
+    label: str
+    kind: str  # "spent" | "committed" | "fuzzy" | "generic"
+
+
 @lru_cache(maxsize=1)
 def _fuzzy_brush() -> QBrush:
-    """7×7 diagonal stripe pixmap at 55% red alpha — tiled for the fuzzy zone."""
     pm = QPixmap(7, 7)
     pm.fill(Qt.GlobalColor.transparent)
     p = QPainter(pm)
-    stripe = QColor(tokens.RED)
-    stripe.setAlpha(140)
+    stripe = QColor(tokens.AMBER)
+    stripe.setAlpha(145)
     p.setPen(QPen(stripe, 1.5))
     p.drawLine(0, 7, 7, 0)
     p.end()
     return QBrush(pm)
 
 
+def _micro_font(painter: QPainter):  # type: ignore[return]
+    f = painter.font()
+    f.setFamily("Segoe UI")
+    f.setPixelSize(10)
+    f.setLetterSpacing(f.SpacingType.AbsoluteSpacing, 1)
+    return f
+
+
 class TimelineWidget(QWidget):
     """
-    Monthly budget timeline — presentation only.
-    All percentages are 0–100 of the monthly budget width.
+    Two-track timeline.
+
+    Track 1: calendar month with committed/spend event dots and TODAY marker.
+    Track 2: budget bar — committed | fuzzy | spent (left → right).
     """
+
+    # Layout constants (pixels)
+    _TRACK_H   = 6
+    _TRACK1_Y  = 28   # calendar track top edge (leaves room for dots above)
+    _TRACK2_Y  = 64   # budget bar top edge
+    _MIN_H     = 90
 
     def __init__(self) -> None:
         super().__init__()
-        self.setMinimumHeight(54)
+        self.setMinimumHeight(self._MIN_H)
 
-        # Target values (set externally)
-        self._spent_pct:       float = 0.0
-        self._committed_pct:   float = 0.0
-        self._fuzzy_left_pct:  float = 0.0
-        self._fuzzy_width_pct: float = 0.0
-        self._today_pct:       float = 0.0
+        # Budget bar percentages (0-100, as % of monthly budget)
+        self._spent_pct:     float = 0.0
+        self._committed_pct: float = 0.0
+        self._fuzzy_pct:     float = 0.0  # width of fuzzy zone
 
-        # Animated "display" spent value (drives paintEvent)
-        self._anim_spent: float = 0.0
+        # Calendar track
+        self._today_pct:          float       = 0.0   # day position 0-100
+        self._committed_due_pcts: list[float] = []    # due-date calendar positions
+        self._spend_day_pcts:     list[float] = []    # spending-date calendar positions
 
-        self._ticks:       list[tuple[float, str]] = []  # (pct, label)
+        # Month labels
         self._left_label:  str = ""
         self._right_label: str = ""
 
-        # Property animation for the spent bar width
-        self._animation = QPropertyAnimation(self, b"anim_spent", self)
+        # Animated spent fill
+        self._anim_spent: float = 0.0
+        self._animation = QPropertyAnimation(self, b"anim_spent_prop", self)
         self._animation.setDuration(1100)
         self._animation.setEasingCurve(QEasingCurve.Type.OutCubic)
 
-    # ── Qt property (drives animation) ───────────────────────────────────────
+    # ── Animated property ─────────────────────────────────────────────────────
 
     @pyqtProperty(float)
-    def anim_spent(self) -> float:  # type: ignore[override]
+    def anim_spent_prop(self) -> float:  # type: ignore[override]
         return self._anim_spent
 
-    @anim_spent.setter  # type: ignore[attr-defined]
-    def anim_spent(self, value: float) -> None:
+    @anim_spent_prop.setter  # type: ignore[attr-defined]
+    def anim_spent_prop(self, value: float) -> None:
         self._anim_spent = value
         self.update()
 
-    # ── PUBLIC API ────────────────────────────────────────────────────────────
+    # ── Public setters ────────────────────────────────────────────────────────
 
     def set_percentages(
         self,
@@ -92,150 +113,142 @@ class TimelineWidget(QWidget):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
-        """Update all timeline zones and trigger an animated repaint."""
         clamp = lambda v: max(0.0, min(100.0, float(v)))
-        self._spent_pct       = clamp(spent_pct)
-        self._committed_pct   = clamp(committed_pct)
-        self._fuzzy_left_pct  = clamp(fuzzy_left_pct)
-        self._fuzzy_width_pct = clamp(fuzzy_width_pct)
-        self._today_pct       = clamp(today_pct)
+        self._spent_pct     = clamp(spent_pct)
+        self._committed_pct = clamp(committed_pct)
+        self._fuzzy_pct     = clamp(fuzzy_width_pct)
+        self._today_pct     = clamp(today_pct)
 
-        # Animate spent bar
         self._animation.stop()
         self._animation.setStartValue(self._anim_spent)
         self._animation.setEndValue(self._spent_pct)
         self._animation.start()
-
         self.update()
 
-    def set_ticks(self, ticks: list[tuple[float, str]]) -> None:
-        """Set event ticks: list of (pct, label) pairs."""
-        self._ticks = ticks
+    def set_committed_due_pcts(self, pcts: list[float]) -> None:
+        """Calendar positions (0-100) of committed charge due dates."""
+        self._committed_due_pcts = [max(0.0, min(100.0, p)) for p in pcts]
+        self.update()
+
+    def set_spend_day_pcts(self, pcts: list[float]) -> None:
+        """Calendar positions (0-100) of days where spending occurred."""
+        self._spend_day_pcts = [max(0.0, min(100.0, p)) for p in pcts]
         self.update()
 
     def set_endpoints(self, left_label: str, right_label: str) -> None:
-        """Set the bottom-left and bottom-right labels."""
         self._left_label  = left_label
         self._right_label = right_label
         self.update()
 
-    # ── PAINT ─────────────────────────────────────────────────────────────────
+    # Legacy stubs kept so existing call-sites don't break
+    def set_ticks(self, ticks: list[tuple[float, str]]) -> None:
+        pass
+
+    def set_events(self, events: list[TimelineEvent]) -> None:
+        pass
+
+    # ── Paint ─────────────────────────────────────────────────────────────────
 
     def paintEvent(self, _event: Any) -> None:
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        w  = self.width()
-        h  = self.height()
-        track_y = 20          # pixels from top to track center
-        track_h = 6
-        track_r = track_h / 2
+        total_w = self.width()
+        pad = 4
+        w = max(1, total_w - pad * 2)
+        r = self._TRACK_H / 2
 
-        def pct_x(pct: float) -> int:
-            return int(w * pct / 100.0)
+        t1y = self._TRACK1_Y
+        t2y = self._TRACK2_Y
+        th  = self._TRACK_H
 
-        # ── Background track ─────────────────────────────────────────────────
+        def px(pct: float) -> float:
+            return pad + w * max(0.0, min(100.0, pct)) / 100.0
+
+        # ── TRACK 1: Calendar ─────────────────────────────────────────────────
+
+        # Background track
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QColor(tokens.TRACK))
-        p.drawRoundedRect(QRectF(0, track_y, w, track_h), track_r, track_r)
+        p.drawRoundedRect(QRectF(pad, t1y, w, th), r, r)
 
-        # ── Spent — gold-leaf, left-rounded only ─────────────────────────────
-        spent_w = pct_x(self._anim_spent)
-        if spent_w > 0:
+        # Spend day dots (gold, above track)
+        for sp in self._spend_day_pcts:
+            dx = px(sp)
             p.setBrush(QColor(tokens.GOLD_LEAF))
-            p.drawRoundedRect(
-                QRectF(0, track_y, spent_w, track_h), track_r, track_r
-            )
-            # Cover right rounded corner with a sharp rectangle
-            p.drawRect(QRectF(max(0, spent_w - track_r), track_y, track_r, track_h))
-
-        # ── Committed — red, sharp corners ──────────────────────────────────
-        committed_x = spent_w
-        committed_w = pct_x(self._committed_pct)
-        if committed_w > 0:
-            p.setBrush(QColor(tokens.RED))
-            p.drawRect(QRectF(committed_x, track_y, committed_w, track_h))
-
-        # ── Fuzzy — striped red, right-rounded ───────────────────────────────
-        fx = pct_x(self._fuzzy_left_pct)
-        fw = pct_x(self._fuzzy_width_pct)
-        if fw > 0:
-            # Base translucent fill
-            base = QColor(tokens.RED)
-            base.setAlpha(80)
-            p.setBrush(base)
-            p.drawRoundedRect(
-                QRectF(fx, track_y, fw, track_h), track_r, track_r
-            )
-            # Cover left rounded corner sharp
-            p.drawRect(QRectF(fx, track_y, track_r, track_h))
-            # Diagonal stripes on top
-            p.save()
-            p.setClipRect(QRectF(fx, track_y, fw, track_h))
-            p.setBrush(_fuzzy_brush())
             p.setPen(Qt.PenStyle.NoPen)
-            p.drawRect(QRectF(fx, track_y, fw, track_h))
-            p.restore()
+            p.drawEllipse(QPointF(dx, t1y - 6), 3.5, 3.5)
 
-        # ── Event ticks ──────────────────────────────────────────────────────
-        tick_color = QColor(tokens.FG)
-        tick_color.setAlpha(60)
-        p.setPen(QPen(tick_color, 1.5))
-        for tick_pct, tick_lbl in self._ticks:
-            tx = pct_x(tick_pct)
-            is_rent = "rent" in tick_lbl.lower()
-            active_tick_color = QColor(tokens.RED if is_rent else tokens.FG)
-            active_tick_color.setAlpha(135 if is_rent else 60)
-            p.setPen(QPen(active_tick_color, 1.5))
-            p.drawLine(tx, track_y - 4, tx, track_y + track_h + 4)
-            if tick_lbl:
-                p.setPen(QColor(tokens.RED if is_rent else tokens.MUTED))
-                p.setFont(_micro_font(p))
-                p.drawText(
-                    QRectF(tx - 30, track_y + track_h + 5, 60, 14),
-                    Qt.AlignmentFlag.AlignHCenter,
-                    tick_lbl,
-                )
-                p.setPen(QPen(tick_color, 1.5))
+        # Committed due-date dots (red, above track — drawn on top of gold)
+        for cp in self._committed_due_pcts:
+            dx = px(cp)
+            p.setBrush(QColor(tokens.RED))
+            p.setPen(Qt.PenStyle.NoPen)
+            p.drawEllipse(QPointF(dx, t1y - 6), 3.5, 3.5)
+            # short stem to track
+            p.setPen(QPen(QColor(tokens.RED), 1.0))
+            p.drawLine(QPointF(dx, t1y - 2.5), QPointF(dx, t1y))
+            p.setPen(Qt.PenStyle.NoPen)
 
-        # ── Today marker ─────────────────────────────────────────────────────
-        today_x = pct_x(self._today_pct)
+        # TODAY line
+        tx = px(self._today_pct)
         p.setPen(QPen(QColor(tokens.FG), 2))
-        p.drawLine(today_x, track_y - 6, today_x, track_y + track_h + 6)
+        p.drawLine(QPointF(tx, t1y - 10), QPointF(tx, t1y + th + 4))
 
-        # "TODAY" label above
+        # "TODAY" label
         p.setPen(QColor(tokens.FG))
         p.setFont(_micro_font(p))
         p.drawText(
-            QRectF(today_x - 30, track_y - 20, 60, 14),
+            QRectF(tx - 28, t1y - 22, 56, 12),
             Qt.AlignmentFlag.AlignHCenter,
             "TODAY",
         )
 
-        # ── Bottom endpoint labels ────────────────────────────────────────────
-        if self._left_label or self._right_label:
-            bottom_y = track_y + track_h + 20
-            p.setPen(QColor(tokens.MUTED))
-            p.setFont(_micro_font(p))
-            if self._left_label:
-                p.drawText(
-                    QRectF(0, bottom_y, w / 2, 14),
-                    Qt.AlignmentFlag.AlignLeft,
-                    self._left_label,
-                )
-            if self._right_label:
-                p.drawText(
-                    QRectF(w / 2, bottom_y, w / 2, 14),
-                    Qt.AlignmentFlag.AlignRight,
-                    self._right_label,
-                )
+        # Month labels below track 1
+        lbl_y = t1y + th + 6
+        p.setPen(QColor(tokens.MUTED))
+        p.setFont(_micro_font(p))
+        if self._left_label:
+            p.drawText(QRectF(pad, lbl_y, w / 2, 12), Qt.AlignmentFlag.AlignLeft, self._left_label)
+        if self._right_label:
+            p.drawText(QRectF(pad + w / 2, lbl_y, w / 2, 12), Qt.AlignmentFlag.AlignRight, self._right_label)
+
+        # ── TRACK 2: Budget bar ───────────────────────────────────────────────
+
+        # "BUDGET" micro label above bar
+        p.setPen(QColor(tokens.MUTED))
+        p.setFont(_micro_font(p))
+        p.drawText(
+            QRectF(pad, t2y - 14, w, 12),
+            Qt.AlignmentFlag.AlignLeft,
+            "BUDGET",
+        )
+
+        # Background
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(tokens.TRACK))
+        p.drawRoundedRect(QRectF(pad, t2y, w, th), r, r)
+
+        cursor = float(pad)
+
+        # Committed fill (red, left-most)
+        comm_w = w * self._committed_pct / 100.0
+        if comm_w > 0:
+            p.setBrush(QColor(tokens.RED))
+            p.drawRoundedRect(QRectF(cursor, t2y, comm_w, th), r, r)
+            cursor += comm_w
+
+        # Fuzzy fill (hatched amber, after committed)
+        fuzzy_w = w * self._fuzzy_pct / 100.0
+        if fuzzy_w > 0:
+            p.setBrush(_fuzzy_brush())
+            p.drawRoundedRect(QRectF(cursor, t2y, fuzzy_w, th), 0, 0)
+            cursor += fuzzy_w
+
+        # Spent fill (gold, after fuzzy)
+        spent_w = w * self._anim_spent / 100.0
+        if spent_w > 0:
+            p.setBrush(QColor(tokens.GOLD_LEAF))
+            p.drawRoundedRect(QRectF(cursor, t2y, spent_w, th), 0, 0)
 
         p.end()
-
-
-def _micro_font(painter: QPainter):  # type: ignore[return]
-    f = painter.font()
-    f.setFamily("DM Mono")
-    f.setPointSize(tokens.T_MINI)
-    f.setLetterSpacing(f.SpacingType.AbsoluteSpacing, 1)
-    return f
