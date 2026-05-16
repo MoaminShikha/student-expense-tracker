@@ -42,6 +42,9 @@ class DashboardPage(QWidget):
         super().__init__()
         self.setObjectName("dashboardPage")
 
+        # Panels receive signals from MainWindow (not the raw signal).
+        # Their "Add" buttons emit these signals → MainWindow re-fires them
+        # → DashboardController opens the corresponding dialog.
         self._stat_column = StatColumn()
         self._hero = HeroCard()
         self._cat_panel = CategoryPanel(add_income_signal)

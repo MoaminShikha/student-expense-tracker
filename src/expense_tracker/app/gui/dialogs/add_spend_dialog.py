@@ -42,6 +42,13 @@ _DIALOG_SS = f"""
     QLineEdit:focus, QComboBox:focus, QDateEdit:focus {{
         border: 1px solid {tokens.GOLD};
     }}
+    QComboBox QAbstractItemView {{
+        background: {tokens.SURFACE};
+        color: {tokens.FG};
+        selection-background-color: {tokens.PAPER_WARM};
+        selection-color: {tokens.FG};
+        border: 1px solid {tokens.HAIRLINE};
+    }}
     QDialogButtonBox QPushButton {{
         font-family: "DM Mono", Consolas, monospace;
         font-size: {tokens.T_SM}px;

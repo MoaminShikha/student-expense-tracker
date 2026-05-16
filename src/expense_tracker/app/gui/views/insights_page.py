@@ -134,6 +134,18 @@ class _CategoryBar(QWidget):
 
 
 class InsightsPage(QWidget):
+    """Insights page — financial metrics and budget analysis.
+
+    Sections (top→bottom):
+      KPI row — 4 cards: Daily Burn, Remaining, Committed, Available
+      Tracking — utilization bar (spent vs budget)
+      Daily Burn — burn rate bar (avg daily spend vs daily budget)
+      Encumbrance — stacked budget allocation (utilized / committed / fuzzy / available)
+      Category Breakdown — per-category horizontal bars with % and amount
+
+    Data pushed entirely via set_data() from InsightsController.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.setObjectName("insightsPage")
@@ -153,6 +165,7 @@ class InsightsPage(QWidget):
         body.setContentsMargins(32, 24, 32, 32)
         body.setSpacing(24)
 
+        # ── 4 KPI cards row (populated dynamically by set_data) ──────────────
         self._kpi_row = QHBoxLayout()
         self._kpi_row.setSpacing(16)
         for _ in range(4):
@@ -160,6 +173,7 @@ class InsightsPage(QWidget):
             self._kpi_row.addWidget(card)
         body.addLayout(self._kpi_row)
 
+        # ── Tracking: % of monthly budget utilized ───────────────────────────
         self._tracking_section = QWidget()
         self._tracking_section.setObjectName("trackingSection")
         ts_layout = QVBoxLayout(self._tracking_section)
@@ -172,6 +186,7 @@ class InsightsPage(QWidget):
         ts_layout.addWidget(self._util_progress)
         body.addWidget(self._tracking_section)
 
+        # ── Daily burn rate: avg spend per day vs budgeted daily allowance ───
         self._daily_section = QWidget()
         self._daily_section.setObjectName("dailySection")
         ds_layout = QVBoxLayout(self._daily_section)
@@ -184,6 +199,7 @@ class InsightsPage(QWidget):
         ds_layout.addWidget(self._daily_progress)
         body.addWidget(self._daily_section)
 
+        # ── Encumbrance: stacked bar showing committed/fuzzy/available ───────
         self._encumbrance_section = QWidget()
         self._encumbrance_section.setObjectName("encumbranceSection")
         es_layout = QVBoxLayout(self._encumbrance_section)
@@ -196,6 +212,7 @@ class InsightsPage(QWidget):
         es_layout.addWidget(self._encumbrance_progress)
         body.addWidget(self._encumbrance_section)
 
+        # ── Category breakdown: per-category bars with dot + % + amount ──────
         self._cats_section = QWidget()
         self._cats_section.setObjectName("categorySection")
         cs_layout = QVBoxLayout(self._cats_section)

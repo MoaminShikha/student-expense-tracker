@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mizān · Student Fintech Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:         hsl(36 25% 96%);
+  --paper:      hsl(38 28% 94%);
+  --surface:    hsl(0 0% 100%);
+  --hairline:   hsl(36 16% 86%);
+  --fg:         hsl(240 28% 12%);
+  --muted-fg:   hsl(224 14% 38%);
+  --muted:      hsl(222 12% 55%);
+  --navy:       hsl(240 30% 11%);
+  --gold:       hsl(42 55% 50%);
+  --gold-leaf:  hsl(42 65% 40%);
+  --red:        hsl(0 55% 38%);
+  --green:      hsl(162 60% 26%);
+  --green-bg:   hsl(162 45% 92%);
+  --amber:      hsl(32 80% 38%);
+  --amber-bg:   hsl(38 78% 94%);
+  --cat-food:   hsl(18 88% 50%);
+  --cat-edu:    hsl(217 82% 52%);
+  --cat-trans:  hsl(162 72% 36%);
+  --cat-other:  hsl(268 65% 58%);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:16px; scroll-behavior:smooth; }
+body {
+  font-family:'DM Mono','Courier New',monospace;
+  -webkit-font-smoothing:antialiased;
+  background:var(--navy);
+  color:var(--fg);
+  overflow:hidden;
+  height:100vh;
+}
+
+/* ── PRESENTATION SHELL ── */
+#pres {
+  width:100vw; height:100vh;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+
+/* ── SLIDES CONTAINER ── */
+#slides-wrap {
+  flex:1; overflow:hidden; position:relative;
+}
+.slide {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  opacity:0; pointer-events:none;
+  transform:translateY(24px);
+  transition:opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
+  will-change:opacity,transform;
+}
+.slide.active {
+  opacity:1; pointer-events:auto; transform:translateY(0);
+}
+.slide.exit {
+  opacity:0; transform:translateY(-24px);
+}
+
+/* ── NAV BAR ── */
+#nav {
+  height:48px; flex-shrink:0;
+  background:hsl(240 30% 8%);
+  border-top:1px solid hsl(240 20% 20%);
+  display:flex; align-items:center; justify-content:center;
+  gap:6px; padding:0 24px; position:relative; z-index:100;
+}
+.nav-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:hsl(240 20% 30%);
+  cursor:pointer;
+  transition:background .2s, transform .2s;
+  border:none; padding:0;
+}
+.nav-dot.active { background:var(--gold); transform:scale(1.3); }
+.nav-dot:hover { background:hsl(42 55% 60%); }
+#nav-prev, #nav-next {
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:transparent; border:1px solid hsl(240 20% 28%);
+  color:hsl(222 12% 55%); border-radius:6px;
+  font-family:'DM Mono',monospace; font-size:11px;
+  padding:4px 12px; cursor:pointer; letter-spacing:.05em;
+  transition:background .15s, color .15s, border-color .15s;
+}
+#nav-prev:hover, #nav-next:hover { background:hsl(240 20% 18%); color:var(--bg); border-color:hsl(240 20% 40%); }
+#nav-prev { left:24px; }
+#nav-next { right:24px; }
+#slide-counter {
+  position:absolute; right:110px; top:50%; transform:translateY(-50%);
+  font-size:10px; color:hsl(222 12% 40%); letter-spacing:.1em;
+}
+#kb-hint {
+  position:absolute; left:110px; top:50%; transform:translateY(-50%);
+  font-size:9px; color:hsl(222 12% 32%); letter-spacing:.08em;
+}
+
+/* ═══════════════════════════════
+   SLIDE 0 — HERO / TITLE
+═══════════════════════════════ */
+#s0 {
+  background:var(--navy);
+  align-items:center; justify-content:center;
+  overflow:hidden;
+}
+#s0::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 20%, hsl(42 55% 50%/0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 20% 80%, hsl(162 60% 26%/0.06) 0%, transparent 60%);
+  pointer-events:none;
+}
+#s0::after {
+  content:''; position:absolute; inset:0;
+  background-image:radial-gradient(hsl(42 55% 70%/0.04) 1px, transparent 1px);
+  background-size:28px 28px; pointer-events:none;
+}
+.s0-inner {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center;
+  gap:0; text-align:center; max-width:720px; padding:0 32px;
+}
+.s0-tag {
+  font-size:9px; letter-spacing:.35em; text-transform:uppercase;
+  color:hsl(42 55% 50%/0.6); margin-bottom:20px;
+  border:1px solid hsl(42 55% 50%/0.2); border-radius:999px;
+  padding:5px 16px;
+}
+.s0-wordmark {
+  font-family:'Noto Naskh Arabic',serif;
+  font-size:88px; color:var(--gold); direction:rtl;
+  line-height:1; margin-bottom:4px;
+  text-shadow:0 0 60px hsl(42 55% 50%/0.3);
+}
+.s0-roman {
+  font-family:'Playfair Display',serif; font-weight:700; font-style:italic;
+  font-size:18px; color:hsl(42 55% 65%/0.55); letter-spacing:.18em;
+  margin-bottom:28px;
+}
+.s0-headline {
+  font-family:'Playfair Display',serif; font-weight:700;
+  font-size:32px; color:var(--bg); line-height:1.25;
+  margin-bottom:14px;
+}
+.s0-headline em { color:var(--gold); font-style:normal; }
+.s0-sub {
+  font-size:12px; color:hsl(222 12% 55%); line-height:1.7;
+  max-width:520px; margin-bottom:36px;
+}
+.s0-meta {
+  display:flex; align-items:center; gap:24px;
+  border-top:1px solid hsl(240 20% 22%);
+  padding-top:24px; width:100%;
+  justify-content:center;
+}
+.s0-meta-item { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.s0-meta-val {
+  font-family:'Playfair Display',serif; font-weight:900; font-size:24px;
+  color:var(--bg);
+}
+.s0-meta-lbl { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:hsl(222 12% 45%); }
+.s0-meta-sep { width:1px; height:36px; background:hsl(240 20% 22%); }
+.s0-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:hsl(162 60% 26%/0.15); border:1px solid hsl(162 60% 26%/0.3);
+  color:hsl(162 55% 55%); border-radius:4px; padding:4px 12px;
+  font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  margin-bottom:20px;
+}
+.s0-badge-dot { width:6px; height:6px; border-radius:50%; background:hsl(162 55% 55%); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+/* ═══════════════════════════════
+   SLIDE 1 — THE PROBLEM
+═══════════════════════════════ */
+#s1 { background:var(--bg); }
+.slide-layout {
+  flex:1; display:flex; flex-direction:column;
+  padding:40px 56px 32px;
+  overflow:hidden;
+}
+.slide-tag {
+  font-size:9px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:8px;
+}
+.slide-tag::after { content:''; flex:0 0 32px; height:1px; background:var(--hairline); }
+.slide-title {
+  font-family:'Playfair Display',serif; font-weight:900;
+  font-size:40px; color:var(--fg); line-height:1.1;
+  margin-bottom:32px;
+}
+.slide-title em { color:var(--red); font-style:normal; }
+.problem-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px; flex:1;
+}
+.problem-card {
+  background:var(--surface); border-radius:14px;
+  border:1px solid var(--hairline);
+  padding:22px 24px; display:flex; flex-direction:column; gap:10px;
+  position:relative; overflow:hidden;
+}
+.problem-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+}
+.problem-card.p1::before { background:var(--red); }
+.problem-card.p2::before { background:var(--amber); }
+.problem-card.p3::before { background:var(--gold); }
+.problem-card.p4::before { background:var(--cat-other); }
+.problem-card-icon { font-size:24px; margin-bottom:4px; }
+.problem-card-title {
+  font-size:13px; font-weight:500; color:var(--fg); letter-spacing:.02em;
+}
+.problem-card-body { font-size:11px; color:var(--muted-fg); line-height:1.65; }
+.problem-card-quote {
+  font-family:'Playfair Display',serif; font-style:italic;
+  font-size:13px; color:var(--muted-fg); line-height:1.55;
+  border-left:2px solid var(--hairline); padding-left:12px; margin-top:4px;
+}
+
+/* ═══════════════════════════════
+   SLIDE 2 — THE INSIGHT
+═══════════════════════════════ */
+#s2 { background:var(--navy); overflow:hidden; }
+#s2::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 60% at 60% 40%, hsl(42 55% 50%/0.07) 0%, transparent 65%);
+  pointer-events:none;
+}
+.insight-inner {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:40px 56px; gap:64px; position:relative; z-index:1;
+}
+.insight-left { flex:0 0 340px; }
+.insight-tag { font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:hsl(42 55% 50%/0.6); margin-bottom:12px; }
+.insight-title {
+  font-family:'Playfair Display',serif; font-weight:900; font-size:38px;
+  color:var(--bg); line-height:1.15; margin-bottom:16px;
+}
+.insight-title em { color:var(--gold); font-style:normal; }
+.insight-body { font-size:11.5px; color:hsl(222 12% 60%); line-height:1.75; }
+.insight-formula {
+  flex:1; display:flex; flex-direction:column; gap:0;
+}
+.formula-card {
+  background:hsl(240 28% 16%); border-radius:14px;
+  border:1px solid hsl(240 20% 24%); padding:28px 32px;
+}
+.formula-label {
+  font-size:9px; letter-spacing:.22em; text-transform:uppercase;
+  color:hsl(42 55% 50%/0.55); margin-bottom:18px;
+}
+.formula-row {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0; border-bottom:1px solid hsl(240 20% 20%);
+  font-size:12px; color:hsl(222 12% 55%);
+}
+.formula-row:last-child { border-bottom:none; padding-bottom:0; }
+.formula-op {
+  width:20px; text-align:center;
+  font-family:'Playfair Display',serif; font-size:18px; font-weight:700;
+  flex-shrink:0;
+}
+.formula-op.add { color:var(--green); }
+.formula-op.sub { color:var(--red); }
+.formula-name { flex:1; }
+.formula-val {
+  font-family:'Playfair Display',serif; font-weight:700; font-size:16px;
+}
+.formula-val.opening { color:var(--bg); }
+.formula-val.income { color:hsl(162 55% 55%); }
+.formula-val.committed { color:hsl(0 55% 60%); }
+.formula-val.spent { color:var(--gold); }
+.formula-result {
+  margin-top:14px; padding:16px 20px; border-radius:10px;
+  background:hsl(42 55% 50%/0.1); border:1px solid hsl(42 55% 50%/0.25);
+  display:flex; align-items:baseline; gap:8px;
+}
+.formula-result-lbl { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:hsl(42 55% 50%/0.7); }
+.formula-result-val {
+  font-family:'Playfair Display',serif; font-weight:900; font-size:36px;
+  color:var(--gold); letter-spacing:-.02em;
+}
+.formula-result-sym { font-family:'Playfair Display',serif; font-style:italic; font-size:18px; color:var(--gold); opacity:.5; }
+
+/* ═══════════════════════════════
+   SLIDE 3 — LIVE DASHBOARD
+═══════════════════════════════ */
+#s3 { background:var(--bg); flex-direction:column; }
+.dash-header {
+  padding:16px 24px 0; flex-shrink:0; display:flex; align-items:center; gap:16px;
+}
+.dash-header-text { flex:1; }
+.dash-header-tag { font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+.dash-header-title { font-family:'Playfair Display',serif; font-weight:700; font-size:22px; color:var(--fg); }
+.dash-header-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+.state-select {
+  font-family:'DM Mono',monospace; font-size:10px;
+  border:1px solid var(--hairline); border-radius:6px;
+  padding:5px 10px; background:var(--surface); color:var(--fg); cursor:pointer;
+}
+.dash-app {
+  flex:1; display:flex; overflow:hidden; margin:12px 12px 12px;
+  border-radius:12px; border:1px solid var(--hairline);
+  box-shadow:0 8px 40px hsl(240 28% 12%/0.12);
+  overflow:hidden;
+  min-height:0;
+}
+
+/* SIDEBAR */
+.d-sidebar {
+  width:190px; flex-shrink:0;
+  background:var(--surface); border-right:1px solid var(--hairline);
+  display:flex; flex-direction:column;
+}
+.d-sb-brand { padding:14px 16px 12px; border-bottom:1px solid var(--hairline); }
+.d-sb-app-tag { font-size:8px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+.d-sb-wordmark { font-family:'Noto Naskh Arabic',serif; font-size:22px; color:var(--gold-leaf); direction:rtl; line-height:1; }
+.d-sb-sub { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:1px; }
+.d-nav { padding:6px 0; flex:1; }
+.d-nav-section { font-size:7.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); padding:8px 16px 2px; }
+.d-nav-item {
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 10px 0 14px;
+  border:none; border-left:2px solid transparent; cursor:pointer;
+  width:100%; background:transparent; color:var(--muted-fg);
+  font-family:'DM Mono',monospace; font-size:10px; text-align:left;
+  transition:background .12s; position:relative;
+}
+.d-nav-item:hover { background:hsl(36 20% 95%); color:var(--fg); }
+.d-nav-item.active { border-left-color:var(--gold); background:hsl(36 20% 94%); color:var(--fg); }
+.d-nav-dot { width:4px; height:4px; border-radius:50%; background:var(--gold); margin-left:auto; }
+.d-streak { margin:4px 12px 6px; border-radius:8px; background:var(--paper); padding:8px 10px; }
+.d-streak-hdr { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+.d-streak-lbl { font-size:7.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.d-streak-val { font-family:'Playfair Display',serif; font-size:13px; font-weight:700; color:var(--fg); }
+.d-streak-segs { display:flex; gap:2px; }
+.d-streak-seg { flex:1; height:5px; border-radius:2px; }
+.d-streak-seg.on { background:var(--gold); }
+.d-streak-seg.off { background:var(--hairline); }
+.d-sb-user { padding:10px 14px; border-top:1px solid var(--hairline); display:flex; align-items:center; gap:9px; }
+.d-av {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--navy); display:flex; align-items:center; justify-content:center;
+  font-size:9px; letter-spacing:.04em; color:var(--gold); flex-shrink:0; position:relative;
+}
+.d-av-dot { position:absolute; bottom:0; right:0; width:7px; height:7px; border-radius:50%; background:var(--green); border:1.5px solid var(--surface); }
+.d-user-name { font-size:10px; color:var(--fg); }
+.d-user-sub { font-size:8.5px; color:var(--muted); }
+
+/* MAIN CONTENT */
+.d-main { flex:1; display:flex; flex-direction:column; min-width:0; background:var(--bg); }
+.d-topbar {
+  height:44px; flex-shrink:0; background:var(--surface);
+  border-bottom:1px solid var(--hairline); padding:0 18px;
+  display:flex; align-items:center; gap:10px;
+}
+.d-tb-bc { display:flex; flex-direction:column; gap:0; }
+.d-tb-bc-lbl { font-size:7.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.d-tb-date { font-size:11px; font-weight:500; color:var(--fg); }
+.d-tb-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.d-tb-pill {
+  display:flex; align-items:center; gap:5px; border-radius:999px; padding:3px 10px; border:1px solid;
+  font-size:9.5px; font-weight:500; letter-spacing:.06em; transition:all .4s;
+}
+.d-tb-pill.green { background:var(--green-bg); border-color:hsl(162 40% 76%); color:var(--green); }
+.d-tb-pill.amber { background:var(--amber-bg); border-color:hsl(38 60% 70%); color:var(--amber); }
+.d-tb-pill.red   { background:hsl(0 55% 94%); border-color:hsl(0 55% 70%); color:var(--red); }
+.d-tb-pulse { width:5px; height:5px; border-radius:50%; animation:pulse 2.4s ease-out infinite; }
+.d-tb-pill.green .d-tb-pulse { background:var(--green); }
+.d-tb-pill.amber .d-tb-pulse { background:var(--amber); }
+.d-tb-pill.red   .d-tb-pulse { background:var(--red); }
+.d-tb-sync { display:flex; align-items:center; gap:4px; padding:3px 8px; border-radius:5px; border:1px solid var(--hairline); background:transparent; color:var(--muted-fg); font-family:'DM Mono',monospace; font-size:9px; cursor:pointer; }
+.d-tb-sync:hover { background:var(--paper); }
+.d-content { flex:1; overflow-y:auto; padding:12px 16px 16px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+
+/* ALERT */
+.d-alert { border-radius:8px; background:var(--amber-bg); border:1px solid hsl(38 60% 70%); display:flex; align-items:center; gap:10px; padding:7px 12px; }
+.d-alert-badge { font-size:8px; letter-spacing:.1em; text-transform:uppercase; background:hsl(38 50% 86%); color:var(--amber); padding:2px 7px; border-radius:3px; white-space:nowrap; flex-shrink:0; }
+.d-alert-body { flex:1; font-size:10px; color:var(--fg); }
+.d-alert-body strong { font-weight:700; }
+.d-alert-amt { font-family:'Playfair Display',serif; font-size:12px; font-weight:700; color:var(--red); white-space:nowrap; }
+
+/* HERO ROW */
+.d-hero-row { display:grid; grid-template-columns:1fr 230px; gap:10px; }
+.d-hero-card {
+  border-radius:12px; padding:16px 18px 14px; position:relative; overflow:hidden;
+  border:2px solid var(--hero-outline, hsl(42 55% 50%));
+  background:
+    radial-gradient(ellipse 80% 60% at 88% 0%, hsl(42 65% 90%/0.85) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 60% at 8% 100%, hsl(36 40% 90%/0.75) 0%, transparent 60%),
+    linear-gradient(155deg, hsl(42 60% 97%) 0%, hsl(36 35% 93%) 100%);
+  display:flex; flex-direction:column;
+  transition:border-color .5s;
+}
+.d-hero-card::after {
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:12px;
+  background-image:radial-gradient(hsl(36 20% 40%/0.04) 1px, transparent 1px);
+  background-size:3px 3px;
+}
+.d-hero-card.state-amber { --hero-outline: hsl(32 80% 50%); }
+.d-hero-card.state-red   { --hero-outline: hsl(0 55% 45%); }
+.d-hero-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:6px; }
+.d-hero-lbl-row { display:flex; align-items:baseline; gap:6px; margin-bottom:1px; }
+.d-hero-lbl { font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-fg); font-weight:500; }
+.d-hero-arabic { font-family:'Noto Naskh Arabic',serif; font-size:11px; color:var(--gold-leaf); opacity:.7; direction:rtl; }
+.money-big { display:flex; align-items:baseline; gap:2px; line-height:1; }
+.money-sym { font-family:'Playfair Display',serif; font-style:italic; font-size:17px; color:var(--fg); opacity:.38; }
+.money-fig { font-family:'Playfair Display',serif; font-weight:900; font-size:44px; color:var(--fg); letter-spacing:-.03em; transition:all .5s; }
+.state-badge {
+  display:inline-flex; align-items:center; gap:5px; font-size:8px;
+  letter-spacing:.1em; text-transform:uppercase; font-weight:500;
+  padding:3px 8px; border-radius:3px; margin-top:6px; margin-bottom:8px;
+  transition:background .4s, color .4s;
+}
+.state-badge.green { background:hsl(42 55% 50%/0.12); color:var(--gold-leaf); }
+.state-badge.amber { background:hsl(32 80% 38%/0.12); color:var(--amber); }
+.state-badge.red   { background:hsl(0 55% 38%/0.12); color:var(--red); }
+.state-badge-dot { width:5px; height:5px; border-radius:50%; }
+.state-badge.green .state-badge-dot { background:var(--gold); }
+.state-badge.amber .state-badge-dot { background:var(--amber); }
+.state-badge.red   .state-badge-dot { background:var(--red); }
+.d-legend { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+.d-leg { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--muted-fg); }
+.d-leg-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.d-leg-dot.spent { background:var(--gold-leaf); }
+.d-leg-dot.committed { background:var(--red); }
+.d-leg-dot.fuzzy { background:repeating-linear-gradient(45deg,hsl(0 55% 38%/0.55) 0 2px,transparent 2px 4px); border:1.5px solid hsl(0 55% 38%/0.4); }
+.d-leg-val { font-family:'Playfair Display',serif; font-size:10px; font-weight:700; }
+/* Timeline */
+.d-tl { position:relative; }
+.d-tl-track { height:5px; background:hsl(36 16% 92%); border-radius:999px; position:relative; overflow:hidden; }
+.d-tl-spent { height:100%; position:absolute; top:0; left:0; background:var(--gold-leaf); transition:width 1.1s cubic-bezier(.4,0,.2,1); border-radius:999px 0 0 999px; }
+.d-tl-committed { height:100%; position:absolute; top:0; background:var(--red); transition:all .6s; }
+.d-tl-fuzzy { height:100%; position:absolute; top:0; border-radius:0 999px 999px 0; background:repeating-linear-gradient(45deg,hsl(0 55% 38%/0.55) 0 2px,transparent 2px 5px); }
+.d-tl-lbl { display:flex; justify-content:space-between; margin-top:4px; }
+.d-tl-lbl span { font-size:8px; color:var(--muted); }
+/* Daily allowance */
+.d-daily { margin-top:auto; padding-top:8px; border-top:1px solid hsl(36 20% 70%/0.3); display:flex; align-items:baseline; gap:6px; }
+.d-daily-lbl { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.d-daily-val { font-family:'Playfair Display',serif; font-size:14px; font-weight:700; color:var(--fg); }
+.d-daily-sub { font-size:9px; color:var(--muted); }
+
+/* STAT COLUMN */
+.d-stat-col { display:flex; flex-direction:column; gap:8px; }
+.d-stat-card {
+  flex:1; background:var(--surface); border-radius:10px; border:1px solid var(--hairline);
+  padding:10px 14px; display:flex; flex-direction:column; justify-content:space-between;
+}
+.d-stat-lbl { font-size:7.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.d-stat-val { font-family:'Playfair Display',serif; font-weight:700; font-size:20px; }
+.d-stat-val.gold { color:var(--gold-leaf); }
+.d-stat-val.red { color:var(--red); }
+.d-stat-val.green { color:var(--green); }
+.d-burn-bar { height:3px; background:var(--hairline); border-radius:999px; margin-top:6px; overflow:hidden; }
+.d-burn-fill { height:100%; border-radius:999px; background:var(--green); transition:width 1s ease; }
+
+/* PANELS ROW */
+.d-panels { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.d-panel { background:var(--surface); border-radius:10px; border:1px solid var(--hairline); overflow:hidden; }
+.d-panel-hdr { padding:8px 12px 6px; border-bottom:1px solid var(--hairline); display:flex; justify-content:space-between; align-items:baseline; }
+.d-panel-title { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.d-panel-add { font-size:9px; color:var(--gold-leaf); cursor:pointer; background:none; border:none; font-family:'DM Mono',monospace; letter-spacing:.04em; }
+.d-panel-add:hover { text-decoration:underline; }
+.d-panel-body { padding:4px 0; }
+/* Category rows */
+.cat-row { display:flex; align-items:center; gap:8px; padding:5px 12px; }
+.cat-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.cat-name { font-size:9px; color:var(--fg); flex:1; }
+.cat-bar-wrap { flex:1.2; height:3px; background:var(--hairline); border-radius:999px; overflow:hidden; }
+.cat-bar { height:100%; border-radius:999px; }
+.cat-pct { font-size:8.5px; color:var(--muted); width:26px; text-align:right; }
+.cat-amt { font-family:'Playfair Display',serif; font-size:10px; font-weight:700; color:var(--fg); }
+/* Charge rows */
+.charge-row { display:flex; align-items:center; gap:0; padding:5px 0; margin:0 12px; border-bottom:1px solid var(--hairline); }
+.charge-row:last-child { border-bottom:none; }
+.charge-stripe { width:3px; height:32px; border-radius:2px; background:var(--red); flex-shrink:0; margin-right:8px; }
+.charge-info { flex:1; }
+.charge-name { font-size:9.5px; color:var(--fg); }
+.charge-due { font-size:8px; color:var(--muted); margin-top:1px; }
+.charge-amt { font-family:'Playfair Display',serif; font-size:11px; font-weight:700; color:var(--red); }
+/* Transaction rows */
+.tx-row { display:flex; align-items:center; gap:8px; padding:5px 12px; border-bottom:1px solid var(--hairline); }
+.tx-row:last-child { border-bottom:none; }
+.tx-icon { width:22px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.tx-info { flex:1; }
+.tx-desc { font-size:9.5px; color:var(--fg); }
+.tx-date { font-size:8px; color:var(--muted); margin-top:1px; }
+.tx-amt { font-family:'Playfair Display',serif; font-size:11px; font-weight:700; }
+.tx-amt.neg { color:var(--red); }
+.tx-amt.pos { color:var(--green); }
+
+/* ADD BUTTONS ROW */
+.d-add-row { display:flex; gap:8px; }
+.d-add-btn {
+  flex:1; padding:7px 12px; border-radius:7px;
+  border:1px solid var(--hairline); background:var(--surface);
+  font-family:'DM Mono',monospace; font-size:10px; color:var(--muted-fg);
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;
+  transition:background .12s, border-color .12s, color .12s;
+}
+.d-add-btn:hover { background:var(--paper); border-color:hsl(36 16% 78%); color:var(--fg); }
+.d-add-btn-plus { font-size:14px; line-height:1; color:var(--gold); }
+
+/* ═══════════════════════════════
+   SLIDE 4 — FEATURES
+═══════════════════════════════ */
+#s4 { background:var(--bg); }
+.features-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+  flex:1; align-content:start;
+}
+.feature-card {
+  background:var(--surface); border-radius:14px;
+  border:1px solid var(--hairline); padding:22px 22px 18px;
+  display:flex; flex-direction:column; gap:10px;
+  position:relative; overflow:hidden;
+}
+.feature-num {
+  font-family:'Playfair Display',serif; font-weight:900; font-size:48px;
+  color:hsl(36 16% 88%); line-height:1; position:absolute; top:12px; right:16px;
+  pointer-events:none; user-select:none;
+}
+.feature-icon { font-size:22px; }
+.feature-title { font-size:13px; font-weight:500; color:var(--fg); }
+.feature-body { font-size:10.5px; color:var(--muted-fg); line-height:1.65; }
+.feature-tag {
+  display:inline-block; padding:2px 8px; border-radius:3px;
+  font-size:8.5px; letter-spacing:.1em; text-transform:uppercase;
+  align-self:flex-start; margin-top:auto;
+}
+.feature-tag.done { background:var(--green-bg); color:var(--green); }
+.feature-tag.wip  { background:var(--amber-bg); color:var(--amber); }
+.feature-tag.next { background:hsl(217 82% 52%/0.1); color:hsl(217 82% 52%); }
+
+/* ═══════════════════════════════
+   SLIDE 5 — ARCHITECTURE
+═══════════════════════════════ */
+#s5 { background:var(--navy); overflow:hidden; }
+#s5::before {
+  content:''; position:absolute; inset:0;
+  background-image:radial-gradient(hsl(42 55% 70%/0.03) 1px, transparent 1px);
+  background-size:24px 24px; pointer-events:none;
+}
+.arch-inner { flex:1; padding:32px 56px; display:flex; gap:48px; position:relative; z-index:1; }
+.arch-left { flex:0 0 300px; display:flex; flex-direction:column; justify-content:center; }
+.arch-title {
+  font-family:'Playfair Display',serif; font-weight:900; font-size:36px;
+  color:var(--bg); line-height:1.15; margin-bottom:14px;
+}
+.arch-title em { color:var(--gold); font-style:normal; }
+.arch-body { font-size:11px; color:hsl(222 12% 60%); line-height:1.75; margin-bottom:20px; }
+.arch-pills { display:flex; flex-wrap:wrap; gap:7px; }
+.arch-pill {
+  padding:4px 12px; border-radius:999px; font-size:9.5px; letter-spacing:.06em;
+  border:1px solid; text-transform:uppercase;
+}
+.arch-pill.py { background:hsl(217 82% 52%/0.12); border-color:hsl(217 82% 52%/0.3); color:hsl(217 82% 65%); }
+.arch-pill.qt { background:hsl(162 60% 26%/0.12); border-color:hsl(162 60% 26%/0.3); color:hsl(162 55% 55%); }
+.arch-pill.hex { background:hsl(42 55% 50%/0.12); border-color:hsl(42 55% 50%/0.3); color:hsl(42 55% 65%); }
+.arch-pill.dec { background:hsl(268 65% 58%/0.12); border-color:hsl(268 65% 58%/0.3); color:hsl(268 65% 72%); }
+.arch-pill.test { background:hsl(0 55% 38%/0.12); border-color:hsl(0 55% 38%/0.3); color:hsl(0 55% 65%); }
+
+.arch-diagram { flex:1; display:flex; flex-direction:column; justify-content:center; gap:0; }
+.arch-layer {
+  display:flex; align-items:center; gap:12px; padding:14px 20px;
+  border-radius:10px; border:1px solid;
+  margin-bottom:6px; position:relative;
+}
+.arch-layer-icon { font-size:18px; flex-shrink:0; }
+.arch-layer-content { flex:1; }
+.arch-layer-title { font-size:12px; color:var(--bg); font-weight:500; margin-bottom:2px; }
+.arch-layer-sub { font-size:9.5px; color:hsl(222 12% 55%); }
+.arch-layer-tag { font-size:8px; letter-spacing:.1em; text-transform:uppercase; padding:2px 8px; border-radius:3px; }
+.arch-arrow { text-align:center; color:hsl(240 20% 35%); font-size:16px; line-height:1; margin:0 0 6px; }
+
+.l-pres  { background:hsl(42 55% 50%/0.06); border-color:hsl(42 55% 50%/0.2); }
+.l-pres .arch-layer-tag  { background:hsl(42 55% 50%/0.15); color:hsl(42 55% 65%); }
+.l-app   { background:hsl(217 82% 52%/0.06); border-color:hsl(217 82% 52%/0.2); }
+.l-app .arch-layer-tag   { background:hsl(217 82% 52%/0.15); color:hsl(217 82% 65%); }
+.l-domain{ background:hsl(162 60% 26%/0.06); border-color:hsl(162 60% 26%/0.2); }
+.l-domain .arch-layer-tag{ background:hsl(162 60% 26%/0.15); color:hsl(162 55% 55%); }
+.l-infra { background:hsl(268 65% 58%/0.06); border-color:hsl(268 65% 58%/0.2); }
+.l-infra .arch-layer-tag { background:hsl(268 65% 58%/0.15); color:hsl(268 65% 72%); }
+
+/* ═══════════════════════════════
+   SLIDE 6 — ROADMAP
+═══════════════════════════════ */
+#s6 { background:var(--bg); }
+.roadmap-wrap { flex:1; display:flex; flex-direction:column; gap:10px; }
+.roadmap-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; flex:1; }
+.rm-card {
+  border-radius:12px; border:1px solid var(--hairline);
+  padding:16px 16px 14px; display:flex; flex-direction:column; gap:8px;
+  position:relative; overflow:hidden;
+}
+.rm-card.done { background:var(--surface); }
+.rm-card.active { background:hsl(42 55% 50%/0.04); border-color:hsl(42 55% 50%/0.4); }
+.rm-card.future { background:hsl(36 16% 95%); opacity:.7; }
+.rm-stage { font-size:8px; letter-spacing:.2em; text-transform:uppercase; }
+.rm-card.done .rm-stage   { color:var(--green); }
+.rm-card.active .rm-stage { color:var(--gold-leaf); }
+.rm-card.future .rm-stage { color:var(--muted); }
+.rm-title { font-family:'Playfair Display',serif; font-weight:700; font-size:14px; color:var(--fg); }
+.rm-body { font-size:9.5px; color:var(--muted-fg); line-height:1.6; flex:1; }
+.rm-status {
+  display:inline-flex; align-items:center; gap:5px; align-self:flex-start;
+  padding:3px 8px; border-radius:3px; font-size:8px; letter-spacing:.08em; text-transform:uppercase;
+}
+.rm-card.done .rm-status   { background:var(--green-bg); color:var(--green); }
+.rm-card.active .rm-status { background:hsl(42 55% 50%/0.12); color:var(--gold-leaf); }
+.rm-card.future .rm-status { background:hsl(36 16% 90%); color:var(--muted); }
+.rm-tests {
+  font-size:9px; color:var(--muted);
+}
+.rm-tests strong { color:var(--green); }
+
+/* ═══════════════════════════════
+   SLIDE 7 — ABOUT / CLOSE
+═══════════════════════════════ */
+#s7 { background:var(--navy); align-items:center; justify-content:center; overflow:hidden; }
+#s7::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 30% 60%, hsl(42 55% 50%/0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 30%, hsl(162 60% 26%/0.05) 0%, transparent 60%);
+  pointer-events:none;
+}
+.about-inner {
+  position:relative; z-index:1; max-width:780px; padding:0 56px;
+  display:flex; gap:72px; align-items:center;
+}
+.about-left { flex:0 0 260px; display:flex; flex-direction:column; align-items:center; gap:16px; }
+.about-avatar {
+  width:96px; height:96px; border-radius:50%; background:hsl(240 28% 18%);
+  border:2px solid hsl(42 55% 50%/0.3);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display',serif; font-weight:700; font-size:28px; color:var(--gold);
+}
+.about-name { font-family:'Playfair Display',serif; font-weight:700; font-size:22px; color:var(--bg); text-align:center; }
+.about-role { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:hsl(222 12% 55%); text-align:center; }
+.about-wordmark { font-family:'Noto Naskh Arabic',serif; font-size:52px; color:var(--gold); direction:rtl; line-height:1; text-align:center; margin-top:8px; }
+.about-right { flex:1; }
+.about-title { font-family:'Playfair Display',serif; font-weight:700; font-size:30px; color:var(--bg); line-height:1.2; margin-bottom:16px; }
+.about-title em { color:var(--gold); font-style:normal; }
+.about-body { font-size:11.5px; color:hsl(222 12% 60%); line-height:1.75; margin-bottom:20px; }
+.about-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.about-stat { background:hsl(240 28% 16%); border-radius:10px; border:1px solid hsl(240 20% 24%); padding:12px 14px; }
+.about-stat-val { font-family:'Playfair Display',serif; font-weight:900; font-size:22px; color:var(--bg); }
+.about-stat-lbl { font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:hsl(222 12% 45%); margin-top:2px; }
+.about-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:10px; color:var(--gold); letter-spacing:.06em;
+  border:1px solid hsl(42 55% 50%/0.3); border-radius:6px; padding:6px 14px;
+}
+
+/* ── KEYBOARD INDICATOR ── */
+#keys-indicator {
+  position:fixed; bottom:60px; right:20px;
+  display:flex; gap:6px; z-index:200; opacity:0;
+  transition:opacity .3s;
+}
+#keys-indicator.show { opacity:1; }
+.key-badge {
+  background:hsl(240 28% 16%); border:1px solid hsl(240 20% 28%);
+  border-radius:5px; padding:4px 10px;
+  font-family:'DM Mono',monospace; font-size:10px; color:hsl(222 12% 55%);
+}
+
+/* ── SCROLLBAR ── */
+.d-content::-webkit-scrollbar { width:4px; }
+.d-content::-webkit-scrollbar-track { background:transparent; }
+.d-content::-webkit-scrollbar-thumb { background:var(--hairline); border-radius:2px; }
+</style>
+</head>
+<body>
+<div id="pres">
+
+<!-- ───────── SLIDES ───────── -->
+<div id="slides-wrap">
+
+<!-- SLIDE 0: TITLE -->
+<div class="slide active" id="s0">
+  <div class="s0-inner">
+    <div class="s0-badge"><span class="s0-badge-dot"></span>Student Fintech Project</div>
+    <div class="s0-tag">Personal Finance Management · Israel</div>
+    <div class="s0-wordmark">ميزان</div>
+    <div class="s0-roman">Mizān</div>
+    <div class="s0-headline">Your bank balance is <em>lying</em> to you.</div>
+    <div class="s0-sub">Mizān shows one honest number — the money you can actually spend — by separating your real balance from upcoming committed charges before they hit.</div>
+    <div class="s0-meta">
+      <div class="s0-meta-item">
+        <div class="s0-meta-val">208</div>
+        <div class="s0-meta-lbl">Tests Passing</div>
+      </div>
+      <div class="s0-meta-sep"></div>
+      <div class="s0-meta-item">
+        <div class="s0-meta-val">2</div>
+        <div class="s0-meta-lbl">Stages Complete</div>
+      </div>
+      <div class="s0-meta-sep"></div>
+      <div class="s0-meta-item">
+        <div class="s0-meta-val">6</div>
+        <div class="s0-meta-lbl">Stage Roadmap</div>
+      </div>
+      <div class="s0-meta-sep"></div>
+      <div class="s0-meta-item">
+        <div class="s0-meta-val">PyQt6</div>
+        <div class="s0-meta-lbl">Desktop GUI</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 1: THE PROBLEM -->
+<div class="slide" id="s1">
+  <div class="slide-layout">
+    <div class="slide-tag">The Problem</div>
+    <div class="slide-title">Students go broke <em>by surprise.</em></div>
+    <div class="problem-grid">
+      <div class="problem-card p1">
+        <div class="problem-card-icon">💸</div>
+        <div class="problem-card-title">The Balance Illusion</div>
+        <div class="problem-card-body">Your bank shows ₪2,400. Looks safe. But rent (₪1,800), electricity (₪200), and a subscription (₪60) haven't cleared yet. Real spendable: ₪340.</div>
+        <div class="problem-card-quote">"I had money, then suddenly I didn't."</div>
+      </div>
+      <div class="problem-card p2">
+        <div class="problem-card-icon">📅</div>
+        <div class="problem-card-title">Invisible Upcoming Charges</div>
+        <div class="problem-card-body">Rent, tuition installments, utilities, subscriptions — they're all committed costs that don't show up in your balance until it's too late to act.</div>
+        <div class="problem-card-quote">"I forgot the internet bill was coming out."</div>
+      </div>
+      <div class="problem-card p3">
+        <div class="problem-card-icon">🤷</div>
+        <div class="problem-card-title">No Daily Budget Signal</div>
+        <div class="problem-card-body">Even students who track expenses have no idea how much they can spend today without compromising the rest of the month. Spreadsheets don't give you a number.</div>
+        <div class="problem-card-quote">"I track my spending but I still overspend."</div>
+      </div>
+      <div class="problem-card p4">
+        <div class="problem-card-icon">🌫️</div>
+        <div class="problem-card-title">Fuzzy Unknowns</div>
+        <div class="problem-card-body">Variable bills — electricity, groceries — have no fixed amount. You know they're coming but can't plan. Most apps ignore this; they only track what you've already spent.</div>
+        <div class="problem-card-quote">"My electric bill changes every month."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: THE INSIGHT -->
+<div class="slide" id="s2">
+  <div class="insight-inner">
+    <div class="insight-left">
+      <div class="insight-tag">The Solution</div>
+      <div class="insight-title">One honest number: <em>Free Money.</em></div>
+      <div class="insight-body">
+        Mizān borrows a concept from corporate treasury — separating committed funds from available funds — and applies it to student budgeting.<br><br>
+        Every charge you log is immediately deducted from your free money, even before it clears. This means you always see what you can actually spend, not what your bank balance appears to say.<br><br>
+        Fuzzy charges (variable amounts, known dates) hold a reservation in your budget without locking in a number — resolved to real amounts when the bill arrives.
+      </div>
+    </div>
+    <div class="insight-formula">
+      <div class="formula-card">
+        <div class="formula-label">Free Money Formula</div>
+        <div class="formula-row">
+          <div class="formula-op" style="color:hsl(222 12% 55%);">=</div>
+          <div class="formula-name">Opening Balance</div>
+          <div class="formula-val opening">₪4,200</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op add">+</div>
+          <div class="formula-name">Total Income Logged</div>
+          <div class="formula-val income">₪1,500</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op sub">−</div>
+          <div class="formula-name">Committed Charges</div>
+          <div class="formula-val committed">₪2,060</div>
+        </div>
+        <div class="formula-row">
+          <div class="formula-op sub">−</div>
+          <div class="formula-name">Already Spent</div>
+          <div class="formula-val spent">₪834</div>
+        </div>
+        <div class="formula-result">
+          <div class="formula-result-lbl">Free Money</div>
+          <div style="margin-left:auto; display:flex; align-items:baseline; gap:2px;">
+            <div class="formula-result-sym">₪</div>
+            <div class="formula-result-val" id="fm-val">2,806</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: LIVE DASHBOARD -->
+<div class="slide" id="s3">
+  <div class="dash-header">
+    <div class="dash-header-text">
+      <div class="dash-header-tag">Live Demo</div>
+      <div class="dash-header-title">The Dashboard</div>
+      <div class="dash-header-sub">Interactive — change the state to see the system respond</div>
+    </div>
+    <select class="state-select" id="state-picker" onchange="setDashState(this.value)">
+      <option value="green">State: ON TRACK</option>
+      <option value="amber">State: CAUTION</option>
+      <option value="red">State: CRISIS</option>
+    </select>
+  </div>
+  <div class="dash-app">
+    <!-- Sidebar -->
+    <div class="d-sidebar">
+      <div class="d-sb-brand">
+        <div class="d-sb-app-tag">Personal Finance</div>
+        <div class="d-sb-wordmark">ميزان</div>
+        <div class="d-sb-sub">Mizān · v0.9</div>
+      </div>
+      <div class="d-nav">
+        <div class="d-nav-section">Main</div>
+        <button class="d-nav-item active">⊞ Dashboard <span class="d-nav-dot"></span></button>
+        <button class="d-nav-item">≡ Activity</button>
+        <button class="d-nav-item">✦ Insights</button>
+        <div class="d-nav-section">System</div>
+        <button class="d-nav-item">⚙ Settings</button>
+      </div>
+      <div class="d-streak">
+        <div class="d-streak-hdr">
+          <div class="d-streak-lbl">Logging Streak</div>
+          <div class="d-streak-val">9d</div>
+        </div>
+        <div class="d-streak-segs">
+          <div class="d-streak-seg on"></div><div class="d-streak-seg on"></div>
+          <div class="d-streak-seg on"></div><div class="d-streak-seg on"></div>
+          <div class="d-streak-seg on"></div><div class="d-streak-seg on"></div>
+          <div class="d-streak-seg on"></div><div class="d-streak-seg on"></div>
+          <div class="d-streak-seg on"></div><div class="d-streak-seg off"></div>
+          <div class="d-streak-seg off"></div><div class="d-streak-seg off"></div>
+          <div class="d-streak-seg off"></div><div class="d-streak-seg off"></div>
+        </div>
+      </div>
+      <div class="d-sb-user">
+        <div class="d-av">DK<div class="d-av-dot"></div></div>
+        <div>
+          <div class="d-user-name">Dark K.</div>
+          <div class="d-user-sub">Ben-Gurion Univ.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="d-main">
+      <div class="d-topbar">
+        <div class="d-tb-bc">
+          <div class="d-tb-bc-lbl">Dashboard</div>
+          <div class="d-tb-date">May 16, 2026</div>
+        </div>
+        <div class="d-tb-right">
+          <div class="d-tb-pill green" id="top-pill">
+            <div class="d-tb-pulse"></div>
+            <span id="top-pill-lbl">ON TRACK</span>
+          </div>
+          <button class="d-tb-sync">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div class="d-content">
+        <!-- Alert -->
+        <div class="d-alert">
+          <div class="d-alert-badge">⚑ Heads Up</div>
+          <div class="d-alert-body">Rent due in <strong>3 days</strong> · May 19</div>
+          <div class="d-alert-amt"><em style="font-style:italic;font-size:9px;opacity:.5;">₪</em> 1,800</div>
+        </div>
+
+        <!-- Hero row -->
+        <div class="d-hero-row">
+          <div class="d-hero-card" id="hero-card">
+            <div class="d-hero-top">
+              <div>
+                <div class="d-hero-lbl-row">
+                  <div class="d-hero-lbl">Free Money</div>
+                  <div class="d-hero-arabic">ميزان</div>
+                </div>
+                <div style="font-size:8px;color:var(--muted);margin-bottom:8px;">Safe to spend · after all known charges</div>
+                <div class="money-big">
+                  <div class="money-sym">₪</div>
+                  <div class="money-fig" id="hero-amount">2,806</div>
+                </div>
+                <div class="state-badge green" id="state-badge">
+                  <span class="state-badge-dot"></span>
+                  <span id="state-badge-lbl">ON TRACK</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Period</div>
+                <div style="font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--fg);">May 2026</div>
+              </div>
+            </div>
+            <div class="d-legend">
+              <div class="d-leg"><div class="d-leg-dot spent"></div><span class="d-leg-val" style="color:var(--gold-leaf);">834</span>&nbsp;spent</div>
+              <div class="d-leg"><div class="d-leg-dot committed"></div><span class="d-leg-val" style="color:var(--red);">2,060</span>&nbsp;committed</div>
+              <div class="d-leg"><div class="d-leg-dot fuzzy"></div><span class="d-leg-val" style="color:var(--muted-fg);">~200</span>&nbsp;fuzzy</div>
+            </div>
+            <div class="d-tl">
+              <div class="d-tl-track">
+                <div class="d-tl-spent" id="tl-spent" style="width:15%;"></div>
+                <div class="d-tl-committed" id="tl-committed" style="left:15%;width:37%;"></div>
+                <div class="d-tl-fuzzy" id="tl-fuzzy" style="left:52%;width:4%;"></div>
+              </div>
+              <div class="d-tl-lbl"><span>May 1</span><span>Today (16)</span><span>May 31</span></div>
+            </div>
+            <div class="d-daily">
+              <div class="d-daily-lbl">Daily allowance</div>
+              <div class="d-daily-val" id="daily-val">₪186</div>
+              <div class="d-daily-sub">for 15 days left</div>
+            </div>
+          </div>
+
+          <!-- Stat column -->
+          <div class="d-stat-col">
+            <div class="d-stat-card">
+              <div>
+                <div class="d-stat-lbl">Spent MTD</div>
+                <div class="d-stat-val gold" id="stat-spent">₪834</div>
+              </div>
+              <div class="d-burn-bar"><div class="d-burn-fill" id="burn-spent" style="width:33%;background:var(--gold-leaf);"></div></div>
+            </div>
+            <div class="d-stat-card">
+              <div>
+                <div class="d-stat-lbl">Committed</div>
+                <div class="d-stat-val red" id="stat-committed">₪2,060</div>
+              </div>
+              <div class="d-burn-bar"><div class="d-burn-fill" id="burn-committed" style="width:60%;background:var(--red);"></div></div>
+            </div>
+            <div class="d-stat-card">
+              <div>
+                <div class="d-stat-lbl">Monthly Left</div>
+                <div class="d-stat-val green" id="stat-left">₪2,806</div>
+              </div>
+              <div class="d-burn-bar"><div class="d-burn-fill" id="burn-left" style="width:51%;background:var(--green);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panels -->
+        <div class="d-panels">
+          <div class="d-panel">
+            <div class="d-panel-hdr">
+              <span class="d-panel-title">By Category</span>
+              <button class="d-panel-add">+ Add Spend</button>
+            </div>
+            <div class="d-panel-body">
+              <div class="cat-row">
+                <div class="cat-dot" style="background:var(--cat-food);"></div>
+                <div class="cat-name">Food</div>
+                <div class="cat-bar-wrap"><div class="cat-bar" style="width:52%;background:var(--cat-food);"></div></div>
+                <div class="cat-pct">52%</div>
+                <div class="cat-amt">₪434</div>
+              </div>
+              <div class="cat-row">
+                <div class="cat-dot" style="background:var(--cat-trans);"></div>
+                <div class="cat-name">Transport</div>
+                <div class="cat-bar-wrap"><div class="cat-bar" style="width:28%;background:var(--cat-trans);"></div></div>
+                <div class="cat-pct">28%</div>
+                <div class="cat-amt">₪233</div>
+              </div>
+              <div class="cat-row">
+                <div class="cat-dot" style="background:var(--cat-edu);"></div>
+                <div class="cat-name">Education</div>
+                <div class="cat-bar-wrap"><div class="cat-bar" style="width:12%;background:var(--cat-edu);"></div></div>
+                <div class="cat-pct">12%</div>
+                <div class="cat-amt">₪100</div>
+              </div>
+              <div class="cat-row">
+                <div class="cat-dot" style="background:var(--cat-other);"></div>
+                <div class="cat-name">Other</div>
+                <div class="cat-bar-wrap"><div class="cat-bar" style="width:8%;background:var(--cat-other);"></div></div>
+                <div class="cat-pct">8%</div>
+                <div class="cat-amt">₪67</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-panel">
+            <div class="d-panel-hdr">
+              <span class="d-panel-title">Upcoming Charges</span>
+              <button class="d-panel-add">+ Add Charge</button>
+            </div>
+            <div class="d-panel-body">
+              <div class="charge-row">
+                <div class="charge-stripe"></div>
+                <div class="charge-info">
+                  <div class="charge-name">Rent</div>
+                  <div class="charge-due">Due May 19 · 3 days</div>
+                </div>
+                <div class="charge-amt">₪1,800</div>
+              </div>
+              <div class="charge-row">
+                <div class="charge-stripe"></div>
+                <div class="charge-info">
+                  <div class="charge-name">Internet</div>
+                  <div class="charge-due">Due May 22 · 6 days</div>
+                </div>
+                <div class="charge-amt">₪149</div>
+              </div>
+              <div class="charge-row">
+                <div class="charge-stripe" style="background:var(--amber);"></div>
+                <div class="charge-info">
+                  <div class="charge-name">Electricity <em style="font-style:normal;font-size:8px;color:var(--amber);">(fuzzy)</em></div>
+                  <div class="charge-due">Due May 28 · ~₪200</div>
+                </div>
+                <div class="charge-amt" style="color:var(--amber);">~₪200</div>
+              </div>
+              <div class="charge-row">
+                <div class="charge-stripe"></div>
+                <div class="charge-info">
+                  <div class="charge-name">Spotify</div>
+                  <div class="charge-due">Due May 30 · recurring</div>
+                </div>
+                <div class="charge-amt">₪29</div>
+              </div>
+            </div>
+          </div>
+          <div class="d-panel">
+            <div class="d-panel-hdr">
+              <span class="d-panel-title">Recent Transactions</span>
+              <button class="d-panel-add">+ Add Income</button>
+            </div>
+            <div class="d-panel-body">
+              <div class="tx-row">
+                <div class="tx-icon" style="background:hsl(18 88% 50%/0.12);">🍕</div>
+                <div class="tx-info">
+                  <div class="tx-desc">Hummus Bar</div>
+                  <div class="tx-date">May 15</div>
+                </div>
+                <div class="tx-amt neg">−₪48</div>
+              </div>
+              <div class="tx-row">
+                <div class="tx-icon" style="background:hsl(162 60% 26%/0.12);">💰</div>
+                <div class="tx-info">
+                  <div class="tx-desc">Scholarship</div>
+                  <div class="tx-date">May 14</div>
+                </div>
+                <div class="tx-amt pos">+₪1,500</div>
+              </div>
+              <div class="tx-row">
+                <div class="tx-icon" style="background:hsl(162 72% 36%/0.12);">🚌</div>
+                <div class="tx-info">
+                  <div class="tx-desc">Bus Pass</div>
+                  <div class="tx-date">May 13</div>
+                </div>
+                <div class="tx-amt neg">−₪160</div>
+              </div>
+              <div class="tx-row">
+                <div class="tx-icon" style="background:hsl(18 88% 50%/0.12);">🛒</div>
+                <div class="tx-info">
+                  <div class="tx-desc">Supermarket</div>
+                  <div class="tx-date">May 12</div>
+                </div>
+                <div class="tx-amt neg">−₪214</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add buttons -->
+        <div class="d-add-row">
+          <button class="d-add-btn"><span class="d-add-btn-plus">+</span> Add Income</button>
+          <button class="d-add-btn"><span class="d-add-btn-plus">+</span> Add Spend</button>
+          <button class="d-add-btn"><span class="d-add-btn-plus">+</span> Add Charge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: FEATURES -->
+<div class="slide" id="s4">
+  <div class="slide-layout">
+    <div class="slide-tag">What It Does</div>
+    <div class="slide-title">Built for the whole picture.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-num">1</div>
+        <div class="feature-icon">💰</div>
+        <div class="feature-title">Free Money Engine</div>
+        <div class="feature-body">Real-time calculation of spendable cash accounting for all committed charges. Uses Decimal arithmetic throughout — no floats, no rounding errors.</div>
+        <div class="feature-tag done">✓ Live</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">2</div>
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Budget On-Track Signal</div>
+        <div class="feature-body">Three-state system (ON TRACK / CAUTION / CRISIS) with daily allowance calculation. Tells you exactly how much you can spend today.</div>
+        <div class="feature-tag done">✓ Live</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">3</div>
+        <div class="feature-icon">🌫️</div>
+        <div class="feature-title">Fuzzy Charges</div>
+        <div class="feature-body">Log charges where the date is known but the amount isn't. Holds a placeholder in your budget. Resolves to a real CommittedCharge when the bill arrives.</div>
+        <div class="feature-tag done">✓ Live</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">4</div>
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">Recurring Charges</div>
+        <div class="feature-body">Rent, subscriptions, tuition — log once and the next occurrence auto-generates when you mark one paid. Never manually re-enter a monthly charge.</div>
+        <div class="feature-tag done">✓ Live</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">5</div>
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">Insights & Burn Rate</div>
+        <div class="feature-body">Daily burn rate vs allowance, encumbrance breakdown, category analysis, and runway days. Built as a second page in the PyQt6 GUI.</div>
+        <div class="feature-tag wip">In Progress</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">6</div>
+        <div class="feature-icon">🏦</div>
+        <div class="feature-title">Bank Connectivity</div>
+        <div class="feature-body">Planned Stage 6 — automatic transaction import from Israeli bank APIs (Open Banking). Auto-reconcile spend logs against cleared transactions.</div>
+        <div class="feature-tag next">Stage 6</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: ARCHITECTURE -->
+<div class="slide" id="s5">
+  <div class="arch-inner">
+    <div class="arch-left">
+      <div class="slide-tag" style="color:hsl(42 55% 50%/0.6);font-size:9px;letter-spacing:.28em;text-transform:uppercase;margin-bottom:10px;">Engineering</div>
+      <div class="arch-title">Built to <em>last.</em></div>
+      <div class="arch-body">
+        Mizān uses a strict Hexagonal architecture — presentation, application, domain, and infrastructure layers with enforced one-way dependency flow.<br><br>
+        Swapping JSON persistence for PostgreSQL in Stage 3 requires zero changes to the service layer. Every repository is a typed Protocol.
+      </div>
+      <div class="arch-pills">
+        <div class="arch-pill py">Python 3.14</div>
+        <div class="arch-pill qt">PyQt6</div>
+        <div class="arch-pill hex">Hexagonal Arch</div>
+        <div class="arch-pill dec">Decimal Money</div>
+        <div class="arch-pill test">208 Tests</div>
+      </div>
+    </div>
+    <div class="arch-diagram">
+      <div class="arch-layer l-pres">
+        <div class="arch-layer-icon">🖥</div>
+        <div class="arch-layer-content">
+          <div class="arch-layer-title">Presentation Layer</div>
+          <div class="arch-layer-sub">PyQt6 GUI · DashboardPage · ActivityPage · InsightsPage · Dialogs</div>
+        </div>
+        <div class="arch-layer-tag">Views &amp; Controllers</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer l-app">
+        <div class="arch-layer-icon">⚙</div>
+        <div class="arch-layer-content">
+          <div class="arch-layer-title">Application Layer</div>
+          <div class="arch-layer-sub">Services · BalanceEngine · BalanceViewModel · Use cases</div>
+        </div>
+        <div class="arch-layer-tag">Business Logic</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer l-domain">
+        <div class="arch-layer-icon">🏛</div>
+        <div class="arch-layer-content">
+          <div class="arch-layer-title">Domain Layer</div>
+          <div class="arch-layer-sub">Entities (frozen dataclasses) · Enums · Repository Protocols · Value objects</div>
+        </div>
+        <div class="arch-layer-tag">Pure Domain</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer l-infra">
+        <div class="arch-layer-icon">💾</div>
+        <div class="arch-layer-content">
+          <div class="arch-layer-title">Infrastructure Layer</div>
+          <div class="arch-layer-sub">JSON adapters (now) → PostgreSQL (Stage 3) → FastAPI + React (Stage 5)</div>
+        </div>
+        <div class="arch-layer-tag">Swappable Adapters</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: ROADMAP -->
+<div class="slide" id="s6">
+  <div class="slide-layout">
+    <div class="slide-tag">Roadmap</div>
+    <div class="slide-title">Six stages to a full fintech product.</div>
+    <div class="roadmap-wrap">
+      <div class="roadmap-row">
+        <div class="rm-card done">
+          <div class="rm-stage">Stage 1</div>
+          <div class="rm-title">CLI + JSON</div>
+          <div class="rm-body">Full domain layer, BalanceEngine, 10 CLI commands, protocol-based JSON repos, all domain entities.</div>
+          <div class="rm-tests"><strong>208/208</strong> tests ✓</div>
+          <div class="rm-status">✓ Complete</div>
+        </div>
+        <div class="rm-card active">
+          <div class="rm-stage">Stage 2</div>
+          <div class="rm-title">PyQt6 Desktop</div>
+          <div class="rm-body">Custom-painted GUI: Dashboard, Activity ledger, Insights, dialogs, animations, full design system.</div>
+          <div class="rm-tests">Substantially built</div>
+          <div class="rm-status">⟳ Active</div>
+        </div>
+        <div class="rm-card future">
+          <div class="rm-stage">Stage 3</div>
+          <div class="rm-title">PostgreSQL</div>
+          <div class="rm-body">Swap JSON adapters for a real DB. Zero service-layer changes thanks to Protocol-based repos.</div>
+          <div class="rm-status">Planned</div>
+        </div>
+        <div class="rm-card future">
+          <div class="rm-stage">Stage 4</div>
+          <div class="rm-title">Smart Alerts</div>
+          <div class="rm-body">ReminderScheduler + PatternDetector — recurring pattern detection, push reminders, behavioral nudges.</div>
+          <div class="rm-status">Planned</div>
+        </div>
+        <div class="rm-card future">
+          <div class="rm-stage">Stage 5</div>
+          <div class="rm-title">Web / API</div>
+          <div class="rm-body">FastAPI backend + React or Streamlit frontend. Multi-device access, REST API for mobile.</div>
+          <div class="rm-status">Planned</div>
+        </div>
+        <div class="rm-card future">
+          <div class="rm-stage">Stage 6</div>
+          <div class="rm-title">Bank Connect</div>
+          <div class="rm-body">Israeli Open Banking APIs — auto-import transactions, reconcile spend logs, real-time sync.</div>
+          <div class="rm-status">Vision</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: ABOUT -->
+<div class="slide" id="s7">
+  <div class="about-inner">
+    <div class="about-left">
+      <div class="about-avatar">DK</div>
+      <div class="about-name">Dark K.</div>
+      <div class="about-role">Computer Science Student</div>
+      <div class="about-wordmark">ميزان</div>
+    </div>
+    <div class="about-right">
+      <div class="about-title">Built because I <em>ran out of money</em> without seeing it coming.</div>
+      <div class="about-body">
+        Mizān started as a personal frustration — my bank showed ₪2,000 and I felt fine. Two days later my rent cleared and I was at ₪200. The balance had never been the right number to look at.<br><br>
+        I built this as a CS student side project applying real software engineering — hexagonal architecture, typed domain entities, protocol-based dependency injection, and comprehensive test coverage. Every architectural decision is deliberate and documented.
+      </div>
+      <div class="about-stats">
+        <div class="about-stat">
+          <div class="about-stat-val">208</div>
+          <div class="about-stat-lbl">Unit Tests, All Passing</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">6</div>
+          <div class="about-stat-lbl">Stage Product Roadmap</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">4</div>
+          <div class="about-stat-lbl">Architecture Layers</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">0</div>
+          <div class="about-stat-lbl">Floats Used for Money</div>
+        </div>
+      </div>
+      <div class="about-tag">
+        <span>ميزان</span> · Student Fintech Project · 2026
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides-wrap -->
+
+<!-- NAV BAR -->
+<div id="nav">
+  <span id="kb-hint">← → or arrow keys</span>
+  <button id="nav-prev" onclick="go(-1)">← Prev</button>
+  <button class="nav-dot active" onclick="goto(0)" data-i="0"></button>
+  <button class="nav-dot" onclick="goto(1)" data-i="1"></button>
+  <button class="nav-dot" onclick="goto(2)" data-i="2"></button>
+  <button class="nav-dot" onclick="goto(3)" data-i="3"></button>
+  <button class="nav-dot" onclick="goto(4)" data-i="4"></button>
+  <button class="nav-dot" onclick="goto(5)" data-i="5"></button>
+  <button class="nav-dot" onclick="goto(6)" data-i="6"></button>
+  <button class="nav-dot" onclick="goto(7)" data-i="7"></button>
+  <button id="nav-next" onclick="go(1)">Next →</button>
+  <span id="slide-counter">1 / 8</span>
+</div>
+
+</div><!-- /pres -->
+
+<script>
+const TOTAL = 8;
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.nav-dot');
+const counter = document.getElementById('slide-counter');
+
+function goto(n) {
+  if (n < 0 || n >= TOTAL) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  setTimeout(() => slides[current < TOTAL ? current : 0].classList.remove('exit'), 500);
+  const prev = current;
+  current = n;
+  slides[current].classList.add('active');
+  setTimeout(() => slides[prev].classList.remove('exit'), 480);
+  dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  counter.textContent = `${current + 1} / ${TOTAL}`;
+  document.getElementById('nav-prev').disabled = current === 0;
+  document.getElementById('nav-next').disabled = current === TOTAL - 1;
+
+  // Trigger animations for dashboard slide
+  if (current === 2) {
+    setTimeout(animateDashboard, 300);
+  }
+}
+
+function go(dir) { goto(current + dir); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+});
+
+// Swipe support
+let touchX = 0;
+document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+});
+
+// ── DASHBOARD STATE SWITCHER ──
+const states = {
+  green: {
+    amount:'2,806', badge:'ON TRACK', daily:'₪186',
+    statSpent:'₪834', statCommitted:'₪2,060', statLeft:'₪2,806',
+    burnSpent:33, burnCommitted:60, burnLeft:51,
+    pillClass:'green', pillLbl:'ON TRACK',
+    heroClass:'', badgeClass:'green',
+    heroAmt:'2,806'
+  },
+  amber: {
+    amount:'680', badge:'CAUTION', daily:'₪45',
+    statSpent:'₪1,940', statCommitted:'₪2,060', statLeft:'₪680',
+    burnSpent:72, burnCommitted:76, burnLeft:12,
+    pillClass:'amber', pillLbl:'CAUTION',
+    heroClass:'state-amber', badgeClass:'amber',
+    heroAmt:'680'
+  },
+  red: {
+    amount:'-320', badge:'CRISIS', daily:'₪0',
+    statSpent:'₪2,680', statCommitted:'₪2,060', statLeft:'−₪320',
+    burnSpent:99, burnCommitted:76, burnLeft:0,
+    pillClass:'red', pillLbl:'CRISIS',
+    heroClass:'state-red', badgeClass:'red',
+    heroAmt:'-320'
+  }
+};
+
+function setDashState(s) {
+  const d = states[s];
+  // hero amount
+  document.getElementById('hero-amount').textContent = d.amount;
+  document.getElementById('hero-amount').style.color = s==='red' ? 'var(--red)' : 'var(--fg)';
+  // badge
+  const badge = document.getElementById('state-badge');
+  badge.className = 'state-badge ' + d.badgeClass;
+  document.getElementById('state-badge-lbl').textContent = d.badge;
+  // hero card border
+  const hc = document.getElementById('hero-card');
+  hc.className = 'd-hero-card ' + d.heroClass;
+  // pill
+  const pill = document.getElementById('top-pill');
+  pill.className = 'd-tb-pill ' + d.pillClass;
+  document.getElementById('top-pill-lbl').textContent = d.pillLbl;
+  // stats
+  document.getElementById('stat-spent').textContent = d.statSpent;
+  document.getElementById('stat-committed').textContent = d.statCommitted;
+  document.getElementById('stat-left').textContent = d.statLeft;
+  document.getElementById('stat-left').style.color = s==='red' ? 'var(--red)' : 'var(--green)';
+  document.getElementById('daily-val').textContent = d.daily;
+  // burn bars
+  document.getElementById('burn-spent').style.width = d.burnSpent + '%';
+  document.getElementById('burn-committed').style.width = d.burnCommitted + '%';
+  document.getElementById('burn-left').style.width = d.burnLeft + '%';
+  document.getElementById('burn-left').style.background = s==='red' ? 'var(--red)' : 'var(--green)';
+  // timeline
+  if (s === 'amber') {
+    document.getElementById('tl-spent').style.width = '35%';
+    document.getElementById('tl-committed').style.cssText = 'left:35%;width:37%;';
+  } else if (s === 'red') {
+    document.getElementById('tl-spent').style.width = '48%';
+    document.getElementById('tl-committed').style.cssText = 'left:48%;width:37%;';
+  } else {
+    document.getElementById('tl-spent').style.width = '15%';
+    document.getElementById('tl-committed').style.cssText = 'left:15%;width:37%;';
+  }
+}
+
+function animateDashboard() {
+  // Animate timeline on slide entry
+  const tl = document.getElementById('tl-spent');
+  tl.style.width = '0%';
+  setTimeout(() => { tl.style.width = '15%'; }, 100);
+}
+
+// init
+document.getElementById('nav-prev').disabled = true;
+</script>
+</body>
+</html>

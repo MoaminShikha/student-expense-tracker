@@ -77,7 +77,7 @@ class PeriodSegmented(QWidget):
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setObjectName("periodSegmented")
-        self._active = "M"
+        self._active = "W"
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -351,6 +351,7 @@ class Topbar(QWidget):
         layout.addWidget(self._build_sync_area())
         layout.addWidget(self._bell)
 
+        # Forward sub-widget signals up to Topbar level (MainWindow connects here)
         self._period_seg.period_changed.connect(self.period_changed.emit)
 
         self.setStyleSheet(f"""

@@ -103,11 +103,37 @@ class _LedgerRow(QWidget):
 
 
 class ActivityPage(QWidget):
-    def __init__(self) -> None:
+    """
+    General ledger view — all transactions for the month with running balance.
+
+    Input comes from ActivityController calling set_ledger().
+    Filter pills (All/Income/Spend/Charges) are client-side only.
+
+    Action signals (add_income/spend/charge) are forwarded up to MainWindow
+    so DashboardController can open dialogs — same wiring as DashboardPage.
+    """
+
+    add_income_requested = pyqtSignal()
+    add_spend_requested  = pyqtSignal()
+    add_charge_requested = pyqtSignal()
+
+    def __init__(
+        self,
+        add_income_signal: pyqtSignal | None = None,
+        add_spend_signal: pyqtSignal | None = None,
+        add_charge_signal: pyqtSignal | None = None,
+    ) -> None:
         super().__init__()
         self.setObjectName("activityPage")
         self._filter = "all"
         self._all_entries: list[LedgerEntryVM] = []
+
+        if add_income_signal is not None:
+            self.add_income_requested = add_income_signal
+        if add_spend_signal is not None:
+            self.add_spend_requested = add_spend_signal
+        if add_charge_signal is not None:
+            self.add_charge_requested = add_charge_signal
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -154,10 +180,54 @@ class ActivityPage(QWidget):
         layout.addWidget(period_lbl)
         layout.addWidget(self._net_lbl)
         layout.addStretch()
+
+        # Action buttons grouped in a bordered container to visually separate
+        # them from the filter pills.
+        action_box = QFrame()
+        action_box.setObjectName("actionBox")
+        action_box.setStyleSheet(f"""
+            QFrame#actionBox {{
+                background: {tokens.SURFACE};
+                border: 1px solid {tokens.HAIRLINE};
+                border-radius: 8px;
+                padding: 2px;
+            }}
+        """)
+        action_row = QHBoxLayout(action_box)
+        action_row.setContentsMargins(4, 2, 4, 2)
+        action_row.setSpacing(2)
+        action_row.addWidget(self._action_btn("+ Income", self.add_income_requested))
+        action_row.addWidget(self._action_btn("+ Spend", self.add_spend_requested))
+        action_row.addWidget(self._action_btn("+ Charge", self.add_charge_requested))
+        layout.addWidget(action_box)
+
         layout.addLayout(filter_row)
         outer.addWidget(summary)
 
+    @staticmethod
+    def _action_btn(text: str, signal: pyqtSignal) -> QPushButton:
+        btn = QPushButton(text)
+        btn.setStyleSheet(f"""
+            QPushButton {{
+                font-family: "DM Mono", Consolas, monospace;
+                font-size: {tokens.T_SM}px;
+                background: transparent;
+                border: none;
+                border-radius: 5px;
+                padding: 4px 10px;
+                color: {tokens.MUTED_FG};
+            }}
+            QPushButton:hover {{
+                background: {tokens.PAPER_WARM};
+                color: {tokens.FG};
+            }}
+        """)
+        btn.clicked.connect(signal.emit)
+        return btn
+
     def _on_filter(self, key: str) -> None:
+        # Client-side filtering: just re-render with the selected type.
+        # No controller call — all data is already in self._all_entries.
         self._filter = key
         for k, btn in self._filter_btns.items():
             btn.setChecked(k == key)

@@ -15,7 +15,9 @@ from PyQt6.QtWidgets import (
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.styles.fonts import naskh
 
-# Navigation structure: (section_label, [(key, display_text), ...])
+# Navigation structure: (section_label, [(nav_key, display_text), ...]).
+# nav_key is emitted via nav_changed signal when clicked. MainWindow maps it
+# to a QStackedWidget index in _on_nav_changed.
 _NAV: list[tuple[str, list[tuple[str, str]]]] = [
     ("OVERVIEW", [
         ("dashboard", "Dashboard"),
@@ -105,6 +107,9 @@ class _NavButton(QPushButton):
         p.end()
 
     def _draw_icon(self, p: QPainter, x: float, y: float) -> None:
+        # Each nav key paints a different icon: dashboard=4-dot grid,
+        # activity=3 horizontal lines, insights=5-point star polygon,
+        # settings=gear with 6 teeth. Color inverts when active.
         active = self.property("active") == "true"
         color = QColor(tokens.FG if active else tokens.MUTED_FG)
         if self._key == "dashboard":
@@ -156,6 +161,9 @@ class Sidebar(QWidget):
     Left navigation sidebar — presentation only.
 
     Emits nav_changed(key) when a nav item is clicked.
+    MainWindow.main_window connects this to _on_nav_changed
+    which switches the QStackedWidget page.
+
     Call set_streak(days) to light up the segment bar.
     """
 
@@ -377,6 +385,7 @@ class Sidebar(QWidget):
         btn = _NavButton(key, text)
         btn.setObjectName("sbNavItem")
         btn.setProperty("active", "true" if key == self._active else "false")
+        # Capture key in default arg so the lambda closes over the right value
         btn.clicked.connect(lambda _checked, k=key: self._on_nav_clicked(k))
         return btn
 
@@ -461,9 +470,12 @@ class Sidebar(QWidget):
     # ── NAV STATE ─────────────────────────────────────────────────────────────
 
     def _on_nav_clicked(self, key: str) -> None:
+        # Update active state on all buttons, then emit the nav key.
+        # MainWindow._on_nav_changed receives this and switches pages.
         self._active = key
         for k, btn in self._nav_btns.items():
             btn.setProperty("active", "true" if k == key else "false")
+            # Force stylesheet re-evaluation so the [active="true"] QSS applies
             btn.style().unpolish(btn)
             btn.style().polish(btn)
         self.nav_changed.emit(key)
