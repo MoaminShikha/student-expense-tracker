@@ -45,6 +45,8 @@ class InsightsController:
         days_elapsed = today.day
 
         try:
+            # ── Core snapshot from BalanceService ────────────────────────────
+            # This gives us monthly_budget, monthly_spent, monthly_left, free_money
             snapshot = None
             if self._balance_service:
                 snapshot = self._balance_service.aggregate_and_build_snapshot(session.session_id, Decimal("100"), session.opening_balance)
@@ -54,6 +56,9 @@ class InsightsController:
             remaining = snapshot.monthly_left if snapshot else Decimal("0")
             free_money = snapshot.free_money if snapshot else Decimal("0")
 
+            # ── Category breakdown ───────────────────────────────────────────
+            # Aggregates spend by category for the current month, computes each
+            # as a percentage of total monthly budget.
             cat_spend: dict[str, Decimal] = {}
             if self._spend_service:
                 for tx in self._spend_service.list_for_month(session.session_id, year, month):
@@ -68,11 +73,19 @@ class InsightsController:
 
             total_utilized_pct = float(spent / budget * 100) if budget > 0 else 0.0
 
+            # ── Daily burn rate ──────────────────────────────────────────────
+            # Average spend per elapsed day vs budgeted daily allowance.
+            # Runway = how many days until remaining budget runs out at current burn.
             daily_burn = spent / Decimal(max(days_elapsed, 1))
             daily_budget = budget / Decimal(max(days_in_month, 1))
             daily_pct = float(daily_burn / daily_budget * 100) if daily_budget > 0 else 0.0
             runway_days = int(remaining / daily_burn) if daily_burn > 0 else days_in_month - days_elapsed
 
+            # ── Encumbrance split ────────────────────────────────────────────
+            # Committed charges = locked obligations (deduct from free money).
+            # Fuzzy charges = estimated liabilities (not yet deducted).
+            # Visualized as stacked percentages of total monthly budget:
+            # [utilized | encumbered | fuzzy | available]
             committed_total = Decimal("0")
             if self._charge_service:
                 committed_total = self._charge_service.get_monthly_committed_total(session.session_id, year, month)

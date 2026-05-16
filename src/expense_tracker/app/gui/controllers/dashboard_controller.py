@@ -50,6 +50,9 @@ class DashboardController:
         self._caution_threshold = Decimal("100") if caution_threshold is None else caution_threshold
         self._logger = logger or logging.getLogger(__name__)
 
+        # Wire MainWindow signals → controller action handlers.
+        # DashboardPage's "Add" buttons emit these signals through the
+        # MainWindow proxy (see main_window.py signal declarations).
         self._view.refresh_requested.connect(self._on_refresh_requested)
         self._view.add_income_requested.connect(self._on_add_income_requested)
         self._view.add_spend_requested.connect(self._on_add_spend_requested)
@@ -122,7 +125,12 @@ class DashboardController:
     # ── Presentation mapping ──────────────────────────────────────────────────
 
     def _build_view_model(self, snapshot: BalanceSnapshot, session_id=None) -> BalanceViewModel:
-        """Convert a domain BalanceSnapshot into a UI-shaped BalanceViewModel."""
+        """Convert a domain BalanceSnapshot into a UI-shaped BalanceViewModel.
+        
+        Adds extra computations that don't live in the domain layer:
+        timeline percentages, committed/fuzzy charges breakdown for the
+        month, and committed/fuzzy timeline widths for the dual-track widget.
+        """
 
         def fmt(amount: Decimal) -> str:
             return f"₪{amount:,.0f}"
@@ -144,6 +152,10 @@ class DashboardController:
         fuzzy_left_pct = 0.0
         fuzzy_width_pct = 0.0
 
+        # ── Committed charges for timeline ─────────────────────────────────
+        # Sum all upcoming charges due this month. committed_pct is the
+        # width of the RED segment on the budget bar — it starts at the
+        # right edge of the spent (gold) segment.
         if session_id is not None and self._charge_service is not None and budget > Decimal("0"):
             try:
                 charges = self._charge_service.get_charges_for_month(
@@ -161,6 +173,9 @@ class DashboardController:
             except Exception:
                 self._logger.debug("Could not compute committed data", exc_info=True)
 
+        # ── Fuzzy charges for timeline ────────────────────────────────────
+        # Fuzzy charges (known date, unknown amount) appear as a hatched
+        # segment on the budget bar, placed right after committed.
         if session_id is not None and self._fuzzy_charge_service is not None and budget > Decimal("0"):
             try:
                 fuzzy_list = self._fuzzy_charge_service.list_pending_for_month(

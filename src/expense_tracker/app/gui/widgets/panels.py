@@ -167,6 +167,8 @@ class _Panel(QFrame):
         self._meta_lbl.setVisible(bool(text))
 
     def showEvent(self, event: Any) -> None:
+        # First show triggers a 280ms fade-up opacity animation.
+        # Subsequent shows skip it — the panel stays at full opacity.
         super().showEvent(event)
         if not self._animated:
             self._animated = True

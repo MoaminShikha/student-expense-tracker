@@ -10,8 +10,15 @@ from expense_tracker.app.gui.styles.textures import dot_grain
 
 class PaperWidget(QWidget):
     """
-    Scroll-content background: solid BG fill + dot-grain texture overlay.
-    Uses paintEvent so the QScrollArea viewport cannot override it.
+    Scroll-content background used by every page inside its QScrollArea.
+
+    Two layers painted in paintEvent:
+      1. Solid cream fill (tokens.BG)
+      2. Dot-grain texture at 50% opacity (matching the HTML mockup's paper feel)
+
+    paintEvent is used instead of QSS because QScrollArea's viewport widget
+    would override a stylesheet background. WA_OpaquePaintEvent prevents
+    flicker by telling Qt the widget fully paints its own background.
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:

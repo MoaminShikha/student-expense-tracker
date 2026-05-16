@@ -437,6 +437,12 @@ class HeroCard(QWidget):
     # ── PAINT ─────────────────────────────────────────────────────────────────
 
     def paintEvent(self, _event: Any) -> None:
+        # ── Background layers (bottom to top) ─────────────────────────────
+        # 1. Linear gradient base (cream→warm)
+        # 2. Radial warm glow (bottom-left)
+        # 3. Radial gold tint (top-right) — matches HTML .hero-card
+        # 4. Dot-grain texture at 18% opacity
+        # 5. State-colored 2px rounded border (animates on state change)
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 

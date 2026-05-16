@@ -40,6 +40,10 @@ class ActivityController:
         year, month = today.year, today.month
 
         try:
+            # Collect all entries for the current month from 3 sources into a
+            # unified list of (date, desc, type, signed_amount, category).
+            # Income is positive, spend and charges are negative (they reduce
+            # the running balance — matching general ledger convention).
             raw: list[tuple[date, str, str, Decimal, str]] = []
 
             if self._income_service:
@@ -54,6 +58,7 @@ class ActivityController:
                 for ch in self._charge_service.list_all_for_month(session.session_id, year, month):
                     raw.append((ch.due_date, ch.name, "charge", -ch.amount, "Encumbrance"))
 
+            # Sort chronologically, then compute running balance
             raw.sort(key=lambda r: r[0])
 
             running = session.opening_balance

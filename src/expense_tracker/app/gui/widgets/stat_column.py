@@ -57,6 +57,7 @@ class BurnBars(QWidget):
         self.update()
 
     def paintEvent(self, _event: Any) -> None:
+        # Draw a rounded track with green spent-fill portion (width = _spent_pct%)
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         w, h = self.width(), self.height()

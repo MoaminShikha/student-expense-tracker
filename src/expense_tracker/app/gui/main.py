@@ -66,6 +66,12 @@ def main() -> int:
 
     window = MainWindow()
 
+    # Each controller gets its page's view (public attribute on MainWindow) and
+    # the services it needs. Storing them as locals keeps them alive (no GC).
+    # register_page_enter(index, fn) makes the MainWindow call that function
+    # every time the user navigates to that page, so data refreshes on nav.
+    # The initial .refresh() call populates data for first render.
+
     dashboard_ctrl = DashboardController(
         view=window,
         session_service=session_service,

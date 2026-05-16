@@ -51,33 +51,44 @@ class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Mizān")
-        self.setMinimumSize(1100, 720)
+        self.setMinimumSize(1280, 720)
 
         self._sidebar = Sidebar()
         self._topbar  = Topbar()
         self._stack   = QStackedWidget()
+
+        # Dict[page_index, callback] — callback fires when nav switches to that page.
+        # Registered in main.py via register_page_enter() so each page's controller
+        # can call .refresh() automatically on navigation.
         self._on_page_enter: dict[int, callable] = {}
 
-        # Create pages (public so controllers can access them)
+        # Pages are public attributes so controllers (wired in main.py) can
+        # call their set_* methods (e.g. activity_page.set_ledger(...)).
+        # Signals from DashboardPage's "Add" buttons are forwarded up through
+        # MainWindow signals, where controllers can connect to them.
         self.dashboard_page = DashboardPage(
             add_income_signal=self.add_income_requested,
             add_spend_signal=self.add_spend_requested,
             add_charge_signal=self.add_charge_requested,
         )
-        self.activity_page  = ActivityPage()
+        self.activity_page  = ActivityPage(
+            add_income_signal=self.add_income_requested,
+            add_spend_signal=self.add_spend_requested,
+            add_charge_signal=self.add_charge_requested,
+        )
         self.insights_page  = InsightsPage()
         self.settings_page  = SettingsPage()
 
-        # Add to stack: index 0=Dashboard, 1=Activity, 2=Insights, 3=Settings
+        # Stack index: 0=Dashboard, 1=Activity, 2=Insights, 3=Settings
         self._stack.addWidget(self.dashboard_page)
         self._stack.addWidget(self.activity_page)
         self._stack.addWidget(self.insights_page)
         self._stack.addWidget(self.settings_page)
 
-        # Wire sidebar nav → page switching
+        # Sidebar nav click → switch page in stack
         self._sidebar.nav_changed.connect(self._on_nav_changed)
 
-        # Wire topbar sync button
+        # Topbar sync button → re-fires as MainWindow-level signal
         self._topbar.refresh_requested.connect(self.refresh_requested.emit)
 
         self.setCentralWidget(self._build_root())
@@ -85,15 +96,22 @@ class MainWindow(QMainWindow):
     # ── PAGE SWITCHING ─────────────────────────────────────────────────────────
 
     def _on_nav_changed(self, key: str) -> None:
+        # Map nav key → QStackedWidget index, switch page, update breadcrumb
         mapping = {"dashboard": 0, "activity": 1, "insights": 2, "settings": 3}
         idx = mapping.get(key, 0)
         self._stack.setCurrentIndex(idx)
         self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
+        # Fire the page-enter callback (registered by controllers in main.py) so
+        # data refreshes every time the user navigates to that page.
         cb = self._on_page_enter.get(idx)
         if cb:
             cb()
 
     # ── PUBLIC SETTERS (delegate to DashboardPage) ────────────────────────────
+    # DashboardController calls these on the MainWindow. Most proxy straight
+    # through to dashboard_page.* so the controller doesn't need to know about
+    # the QStackedWidget extraction. Topbar state (on_track, last_sync) is
+    # updated here since it lives outside the stacked pages.
 
     def set_snapshot(
         self,
@@ -123,7 +141,8 @@ class MainWindow(QMainWindow):
             self._topbar.set_last_sync(dt.strftime("%d %b · %H:%M"))
 
     def register_page_enter(self, index: int, callback: callable) -> None:
-        """Register a callback to fire when a page becomes visible."""
+        """Register a callback (typically a controller's .refresh) to fire when
+        the user navigates to the page at the given stack index."""
         self._on_page_enter[index] = callback
 
     def update_timeline(
