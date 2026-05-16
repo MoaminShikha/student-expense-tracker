@@ -60,3 +60,6 @@ class SpendService:
         self._transaction_repository.add(transaction)
         self._logger.info("Added transaction %s for session %s.", transaction.transaction_id, active_session.session_id)
         return transaction
+
+    def list_for_month(self, session_id, year: int, month: int) -> list:
+        return self._transaction_repository.list_for_month(session_id, year, month)

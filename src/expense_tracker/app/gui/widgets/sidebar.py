@@ -18,17 +18,14 @@ from expense_tracker.app.gui.styles.fonts import naskh
 # Navigation structure: (section_label, [(key, display_text), ...])
 _NAV: list[tuple[str, list[tuple[str, str]]]] = [
     ("OVERVIEW", [
-        ("dashboard",    "Dashboard"),
-        ("history",      "History"),
+        ("dashboard", "Dashboard"),
+        ("activity",  "Activity"),
     ]),
-    ("MONEY", [
-        ("income",       "Income"),
-        ("charges",      "Charges"),
-        ("transactions", "Transactions"),
+    ("INSIGHTS", [
+        ("insights", "Insights"),
     ]),
-    ("YOU", [
-        ("insights",     "Insights"),
-        ("profile",      "Profile"),
+    ("ACCOUNT", [
+        ("settings", "Settings"),
     ]),
 ]
 
@@ -89,8 +86,8 @@ class _NavButton(QPushButton):
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         active = self.property("active") == "true"
-        color = QColor(tokens.FG if active else tokens.MUTED_FG)
-        pen = QPen(color, 1.6)
+        active_color = QColor(tokens.FG if active else tokens.MUTED_FG)
+        pen = QPen(active_color, 1.6)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         p.setPen(pen)
@@ -108,6 +105,8 @@ class _NavButton(QPushButton):
         p.end()
 
     def _draw_icon(self, p: QPainter, x: float, y: float) -> None:
+        active = self.property("active") == "true"
+        color = QColor(tokens.FG if active else tokens.MUTED_FG)
         if self._key == "dashboard":
             size = 4.4
             gap = 5.6
@@ -116,26 +115,10 @@ class _NavButton(QPushButton):
                     p.drawRoundedRect(QRectF(x + col * gap, y + row * gap, size, size), 1, 1)
             return
 
-        if self._key == "history":
+        if self._key == "activity":
             p.drawLine(QPointF(x, y + 2), QPointF(x + 15, y + 2))
             p.drawLine(QPointF(x, y + 7.5), QPointF(x + 11, y + 7.5))
             p.drawLine(QPointF(x, y + 13), QPointF(x + 7, y + 13))
-            return
-
-        if self._key == "income":
-            p.drawLine(QPointF(x + 7.5, y + 1), QPointF(x + 7.5, y + 14))
-            p.drawLine(QPointF(x + 1, y + 7.5), QPointF(x + 14, y + 7.5))
-            return
-
-        if self._key == "charges":
-            p.drawEllipse(QRectF(x + 1, y + 1, 13, 13))
-            p.drawLine(QPointF(x + 7.5, y + 4), QPointF(x + 7.5, y + 7.5))
-            p.drawLine(QPointF(x + 7.5, y + 7.5), QPointF(x + 10, y + 10))
-            return
-
-        if self._key == "transactions":
-            p.drawRoundedRect(QRectF(x, y + 2, 15, 11), 2, 2)
-            p.drawLine(QPointF(x, y + 6), QPointF(x + 15, y + 6))
             return
 
         if self._key == "insights":
@@ -154,9 +137,18 @@ class _NavButton(QPushButton):
             p.drawPolygon(QPolygonF(pts))
             return
 
-        if self._key == "profile":
-            p.drawEllipse(QRectF(x + 4.2, y + 1, 6.6, 6.6))
-            p.drawArc(QRectF(x + 1.5, y + 8, 12, 9), 25 * 16, 130 * 16)
+        if self._key == "settings":
+            # Gear: outer rim + inner hub + 6 teeth at 60° intervals
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawEllipse(QRectF(x + 4, y + 3, 7, 7))
+            p.drawEllipse(QRectF(x + 6, y + 5, 3, 3))
+            p.setBrush(color)
+            cx, cy = x + 7.5, y + 6.5
+            for tx, ty in [
+                (cx + 4, cy), (cx + 2, cy - 3.5), (cx - 2, cy - 3.5),
+                (cx - 4, cy), (cx - 2, cy + 3.5), (cx + 2, cy + 3.5),
+            ]:
+                p.drawEllipse(QRectF(tx - 1.5, ty - 1.5, 3, 3))
 
 
 class Sidebar(QWidget):

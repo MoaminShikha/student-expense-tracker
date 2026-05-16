@@ -52,3 +52,6 @@ class IncomeService:
         self._income_repository.add(entry)
         self._logger.info("Added income entry %s for session %s.", entry.income_id, active_session.session_id)
         return entry
+
+    def list_for_month(self, session_id, year: int, month: int) -> list:
+        return self._income_repository.list_for_month(session_id, year, month)

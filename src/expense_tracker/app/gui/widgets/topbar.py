@@ -71,7 +71,7 @@ class PeriodSegmented(QWidget):
 
     period_changed = pyqtSignal(str)
 
-    _PERIODS = ["D", "W", "M", "Y"]
+    _PERIODS = ["W", "M", "Y"]
 
     def __init__(self) -> None:
         super().__init__()
@@ -336,6 +336,7 @@ class Topbar(QWidget):
         self._sparkline    = Sparkline()
         self._period_seg   = PeriodSegmented()
         self._bell         = BellButton()
+        self._crumb_label  = QLabel("DASHBOARD / 01")
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(24, 0, 24, 0)
@@ -417,6 +418,9 @@ class Topbar(QWidget):
     def set_bell_unread(self, value: bool) -> None:
         self._bell.set_has_unread(value)
 
+    def set_breadcrumb(self, text: str) -> None:
+        self._crumb_label.setText(text)
+
     # ── LAYOUT ────────────────────────────────────────────────────────────────
 
     def _build_breadcrumb(self) -> QWidget:
@@ -425,10 +429,9 @@ class Topbar(QWidget):
         stack = QVBoxLayout(w)
         stack.setContentsMargins(0, 0, 0, 0)
         stack.setSpacing(0)
-        crumb = QLabel("DASHBOARD / 01")
-        crumb.setObjectName("tbBreadcrumb")
+        self._crumb_label.setObjectName("tbBreadcrumb")
         self._date_label.setObjectName("tbDate")
-        stack.addWidget(crumb)
+        stack.addWidget(self._crumb_label)
         stack.addWidget(self._date_label)
         return w
 
