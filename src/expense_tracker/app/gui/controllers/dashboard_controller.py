@@ -137,17 +137,22 @@ class DashboardController:
         else:
             spent_pct = 0.0
 
+        monthly_committed = Decimal("0")
         committed_pct = 0.0
         committed_due_pcts: list[float] = []
+        fuzzy_total = Decimal("0")
+        fuzzy_left_pct = 0.0
+        fuzzy_width_pct = 0.0
+
         if session_id is not None and self._charge_service is not None and budget > Decimal("0"):
             try:
                 charges = self._charge_service.get_charges_for_month(
                     session_id, today.year, today.month
                 )
-                committed_total = sum(c.amount for c in charges)
+                monthly_committed = sum((c.amount for c in charges), Decimal("0"))
                 committed_pct = float(min(
                     Decimal("100") - Decimal(str(spent_pct)),
-                    committed_total / budget * Decimal("100"),
+                    monthly_committed / budget * Decimal("100"),
                 ))
                 committed_due_pcts = [
                     float(c.due_date.day / days_in_month * 100)
@@ -156,8 +161,24 @@ class DashboardController:
             except Exception:
                 self._logger.debug("Could not compute committed data", exc_info=True)
 
-        fuzzy_left_pct = 0.0
-        fuzzy_width_pct = 0.0
+        if session_id is not None and self._fuzzy_charge_service is not None and budget > Decimal("0"):
+            try:
+                fuzzy_list = self._fuzzy_charge_service.list_pending_for_month(
+                    session_id, today.year, today.month
+                )
+                # Sum of estimated amounts; default to 0 if no estimate
+                fuzzy_estimates = [
+                    f.estimated_amount for f in fuzzy_list
+                    if f.estimated_amount is not None
+                ]
+                fuzzy_total = sum(fuzzy_estimates, Decimal("0"))
+                fuzzy_left_pct = committed_pct  # fuzzy zone starts after committed
+                fuzzy_width_pct = float(min(
+                    Decimal("100") - Decimal(str(committed_pct)),
+                    fuzzy_total / budget * Decimal("100"),
+                ))
+            except Exception:
+                self._logger.debug("Could not compute fuzzy data", exc_info=True)
 
         return BalanceViewModel(
             free_money=snapshot.free_money,
@@ -167,6 +188,10 @@ class DashboardController:
             monthly_budget_str=fmt(snapshot.monthly_budget),
             monthly_spent=snapshot.monthly_spent,
             monthly_spent_str=fmt(snapshot.monthly_spent),
+            monthly_committed=monthly_committed,
+            monthly_committed_str=fmt(monthly_committed),
+            monthly_fuzzy_estimated=fuzzy_total,
+            monthly_fuzzy_estimated_str=fmt(fuzzy_total),
             monthly_left=snapshot.monthly_left,
             monthly_left_str=fmt(snapshot.monthly_left),
             on_track_state_value=snapshot.on_track_state.value,

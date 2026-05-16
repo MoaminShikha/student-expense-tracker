@@ -251,11 +251,11 @@ class StatColumn(QWidget):
 
     def set_snapshot(self, vm: "BalanceViewModel") -> None:
         from decimal import Decimal
-        _, spent_num  = _split_amount(vm.monthly_spent_str)
-        _, budget_num = _split_amount(vm.monthly_budget_str)
-        _, left_num   = _split_amount(vm.monthly_left_str)
+        _, spent_num       = _split_amount(vm.monthly_spent_str)
+        _, committed_num   = _split_amount(vm.monthly_committed_str)
+        _, left_num        = _split_amount(vm.monthly_left_str)
         self._spent_val.setText(spent_num)
-        self._committed_val.setText(budget_num)
+        self._committed_val.setText(committed_num)
         self._left_val.setText(left_num)
 
         # Burn bar

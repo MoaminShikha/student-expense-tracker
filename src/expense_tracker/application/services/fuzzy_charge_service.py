@@ -135,6 +135,23 @@ class FuzzyChargeService:
                           income_entry.income_id)
         return updated_entry
 
+    def list_pending_for_month(self, session_id: UUID, year: int, month: int) -> list[FuzzyCharge]:
+        """
+        List pending fuzzy entries whose expected_date falls in the given month.
+
+        :param session_id: The session identifier.
+        :param year: Target year.
+        :param month: Target month (1–12).
+        :return: Pending fuzzy entries for that month.
+        """
+        pending = self._fuzzy_charge_repository.list_pending(session_id)
+        return [
+            f for f in pending
+            if f.expected_date is not None
+            and f.expected_date.year == year
+            and f.expected_date.month == month
+        ]
+
     def discard(self, fuzzy_id: UUID) -> FuzzyCharge:
         """
         Discard one fuzzy entry without creating a concrete record.

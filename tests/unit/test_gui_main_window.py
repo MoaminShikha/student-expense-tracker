@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from expense_tracker.app.gui.views.main_window import MainWindow, TimelineWidget
+from expense_tracker.app.gui.views.main_window import MainWindow
+from expense_tracker.app.gui.widgets.timeline_widget import TimelineWidget
 from expense_tracker.app.gui.view_models.balance_view_model import BalanceViewModel
 
 

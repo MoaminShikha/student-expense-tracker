@@ -42,6 +42,7 @@ CAT_FOOD   = "#ee6815"   # hsl(18 88% 50%)   — food / orange
 CAT_EDU    = "#256de7"   # hsl(217 82% 52%)  — education / blue
 CAT_TRANS  = "#199f6e"   # hsl(162 72% 36%)  — transport / teal
 CAT_OTHER  = "#9456db"   # hsl(268 65% 58%)  — entertainment / other / purple
+VIOLET     = "#713fc2"   # hsl(262 52% 50%)  — daily burn accent
 
 # Keys match TransactionCategory.value exactly
 CATEGORY_COLORS: dict[str, str] = {

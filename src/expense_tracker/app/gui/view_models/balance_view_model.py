@@ -20,6 +20,10 @@ class BalanceViewModel:
     monthly_budget_str: str
     monthly_spent: Decimal
     monthly_spent_str: str
+    monthly_committed: Decimal
+    monthly_committed_str: str
+    monthly_fuzzy_estimated: Decimal
+    monthly_fuzzy_estimated_str: str
     monthly_left: Decimal
     monthly_left_str: str
     on_track_state_value: str  # "green" | "yellow" | "red" | "tight_month"

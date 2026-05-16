@@ -152,6 +152,10 @@ class ChargeService:
             if c.status == ChargeStatus.UPCOMING
         ]
 
+    def list_all_for_month(self, session_id: UUID, year: int, month: int) -> list:
+        """Return all committed charges due in the given month (any status)."""
+        return self._charge_repository.list_for_month(session_id, year, month)
+
     def get_monthly_committed_total(self, session_id: UUID, year: int, month: int) -> Decimal:
         """Return the sum of upcoming committed charges due in the given month."""
         charges = self.get_charges_for_month(session_id, year, month)

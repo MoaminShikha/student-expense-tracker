@@ -19,3 +19,6 @@ Docs/visuals/design_file_2.html
 # Runtime data (JSON storage)
 data/
 
+# Stale build plan (replaced by AGENTS.md)
+GUI_BUILD_PLAN.md
+
