@@ -5,6 +5,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from PyQt6.QtCore import Qt, QDate
+from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
     QComboBox,
     QDateEdit,
@@ -99,6 +100,11 @@ class AddIncomeDialog(QDialog):
         # ── Form ──────────────────────────────────────────────────────────────
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 500")
+        # Allow numeric input for amount field
+        validator = QDoubleValidator(0.0, 999999.0, 2)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        self._amount_edit.setValidator(validator)
+        self._amount_edit.setFocus()  # Focus on first field for faster input
 
         self._source_combo = QComboBox()
         for label in _SOURCE_LABELS:
@@ -137,6 +143,8 @@ class AddIncomeDialog(QDialog):
                 raise ValueError
         except (InvalidOperation, ValueError):
             ErrorDialog.show_error("Invalid Amount", "Enter a positive number (e.g. 500).", self)
+            self._amount_edit.setFocus()
+            self._amount_edit.selectAll()
             return
 
         self.amount     = amount

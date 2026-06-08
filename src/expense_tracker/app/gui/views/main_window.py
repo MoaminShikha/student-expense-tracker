@@ -92,7 +92,33 @@ class MainWindow(QMainWindow):
         # Topbar sync button → re-fires as MainWindow-level signal
         self._topbar.refresh_requested.connect(self.refresh_requested.emit)
 
+        # Set focus policy for keyboard navigation
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         self.setCentralWidget(self._build_root())
+
+    def keyPressEvent(self, event) -> None:  # type: ignore[override]
+        """Handle keyboard navigation between pages."""
+        # Alt+1/2/3/4 for quick navigation
+        if event.modifiers() == Qt.KeyboardModifier.AltModifier:
+            key_map = {
+                Qt.Key.Key_1: PageIndex.DASHBOARD,
+                Qt.Key.Key_2: PageIndex.ACTIVITY,
+                Qt.Key.Key_3: PageIndex.INSIGHTS,
+                Qt.Key.Key_4: PageIndex.SETTINGS,
+            }
+            if event.key() in key_map:
+                self._stack.setCurrentIndex(key_map[event.key()])
+                event.accept()
+                return
+
+        # Ctrl+R for refresh
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_R:
+            self.refresh_requested.emit()
+            event.accept()
+            return
+
+        super().keyPressEvent(event)
 
     # ── PAGE SWITCHING ─────────────────────────────────────────────────────────
 

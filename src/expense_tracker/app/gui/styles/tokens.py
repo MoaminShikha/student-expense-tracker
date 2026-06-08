@@ -3,17 +3,48 @@
 
 from __future__ import annotations
 
+# ── THEME CONTROL ─────────────────────────────────────────────────────────────
+# Set DARK_MODE = True to switch all tokens to dark palette
+DARK_MODE = False
+
+# ── LIGHT THEME TOKENS ─────────────────────────────────────────────────────────
+_LIGHT = {
+    "BG": "#f7f3ec",          # hsl(36 25% 96%)   — warm cream body
+    "PAPER_WARM": "#f3ede0",  # hsl(38 28% 94%)   — slightly deeper warm surface
+    "SURFACE": "#ffffff",     # card / panel / topbar / sidebar background
+    "HAIRLINE": "#e2dccd",    # hsl(36 16% 86%)   — standard border
+    "HAIRLINE_S": "#cdc4ae",  # hsl(36 14% 76%)   — stronger border
+    "FG": "#181a2c",          # hsl(240 28% 12%)  — primary text
+    "MUTED_FG": "#475569",    # hsl(215 20% 32%)  — secondary text (improved contrast)
+    "MUTED": "#838897",       # hsl(222 12% 55%)  — disabled / micro-labels
+}
+
+# ── DARK THEME TOKENS ──────────────────────────────────────────────────────────
+_DARK = {
+    "BG": "#020617",          # near-black background
+    "PAPER_WARM": "#0f172a",  # slate-900
+    "SURFACE": "#1e293b",     # slate-800
+    "HAIRLINE": "#334155",    # slate-700
+    "HAIRLINE_S": "#475569",  # slate-600
+    "FG": "#f8fafc",          # near-white text
+    "MUTED_FG": "#cbd5e1",    # slate-300
+    "MUTED": "#94a3b8",       # slate-400
+}
+
+# ── APPLY THEME ────────────────────────────────────────────────────────────────
+_theme = _DARK if DARK_MODE else _LIGHT
+
 # ── BACKGROUND & SURFACE ──────────────────────────────────────────────────────
-BG         = "#f7f3ec"   # hsl(36 25% 96%)   — warm cream body
-PAPER_WARM = "#f3ede0"   # hsl(38 28% 94%)   — slightly deeper warm surface
-SURFACE    = "#ffffff"   # card / panel / topbar / sidebar background
-HAIRLINE   = "#e2dccd"   # hsl(36 16% 86%)   — standard border
-HAIRLINE_S = "#cdc4ae"   # hsl(36 14% 76%)   — stronger border
+BG         = _theme["BG"]
+PAPER_WARM = _theme["PAPER_WARM"]
+SURFACE    = _theme["SURFACE"]
+HAIRLINE   = _theme["HAIRLINE"]
+HAIRLINE_S = _theme["HAIRLINE_S"]
 
 # ── TEXT ──────────────────────────────────────────────────────────────────────
-FG         = "#181a2c"   # hsl(240 28% 12%)  — primary text
-MUTED_FG   = "#56586c"   # hsl(224 14% 38%)  — secondary text
-MUTED      = "#838897"   # hsl(222 12% 55%)  — disabled / micro-labels
+FG         = _theme["FG"]
+MUTED_FG   = _theme["MUTED_FG"]
+MUTED      = _theme["MUTED"]
 
 # ── BRAND ─────────────────────────────────────────────────────────────────────
 NAVY       = "#16172a"   # hsl(240 30% 11%)  — action buttons, avatar bg
@@ -23,18 +54,18 @@ FOCUS      = "#f1b619"   # hsl(42 90% 50%)   — focus ring
 
 # ── SEMANTIC ──────────────────────────────────────────────────────────────────
 RED        = "#962e2e"   # hsl(0 55% 38%)    — committed charges, crisis
-GREEN      = "#1b6a4f"   # hsl(162 60% 26%)  — income, safe money
-GREEN_BG   = "#dff1ea"   # hsl(162 45% 92%)  — green tinted background
-AMBER      = "#a05712"   # hsl(32 80% 38%)   — caution / fuzzy charges
-AMBER_BG   = "#fbeed4"   # hsl(38 78% 94%)   — amber tinted background
+GREEN      = "#22c55e"   # hsl(142 71% 45%)  — income, positive actions
+GREEN_BG   = "#dff1ea" if not DARK_MODE else "#064e3b"   # green tinted background
+AMBER      = "#f59e0b"   # hsl(38 92% 50%)   — caution / fuzzy charges
+AMBER_BG   = "#fbeed4" if not DARK_MODE else "#7c2d12"   # amber tinted background
 AMBER_BD   = "#dcb476"   # hsl(38 60% 70%)   — amber border
 
 # ── HERO CARD STATES ──────────────────────────────────────────────────────────
 HERO_OUTLINE_GREEN = GOLD          # on-track state border
 HERO_OUTLINE_AMBER = AMBER         # caution state border
 HERO_OUTLINE_RED   = RED           # crisis state border
-HERO_BG1           = "#fbf7ea"     # hsl(42 60% 97%) — gradient start
-HERO_BG2           = "#efe9da"     # hsl(36 35% 93%) — gradient end
+HERO_BG1           = "#fbf7ea" if not DARK_MODE else "#0f172a"  # gradient start
+HERO_BG2           = "#efe9da" if not DARK_MODE else "#1e293b"  # gradient end
 # Note: HERO_TINT (rgba) lives in widgets/hero_card.py to avoid breaking hex-only token tests
 
 # ── CATEGORY COLORS ───────────────────────────────────────────────────────────
@@ -54,7 +85,7 @@ CATEGORY_COLORS: dict[str, str] = {
 }
 
 # ── TIMELINE ──────────────────────────────────────────────────────────────────
-TRACK      = "#ece6da"   # hsl(36 16% 92%)   — timeline background track
+TRACK      = "#ece6da" if not DARK_MODE else "#334155"  # timeline background track
 
 # ── TYPE SCALE (px) ───────────────────────────────────────────────────────────
 T_MICRO = 8

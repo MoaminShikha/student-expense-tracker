@@ -5,6 +5,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from PyQt6.QtCore import QDate
+from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDateEdit,
@@ -99,6 +100,11 @@ class AddChargeDialog(QDialog):
 
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 400")
+        # Allow numeric input for amount field
+        validator = QDoubleValidator(0.0, 999999.0, 2)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        self._amount_edit.setValidator(validator)
+        self._name_edit.setFocus()  # Focus on name field for faster input
 
         self._date_edit = QDateEdit()
         self._date_edit.setCalendarPopup(True)
@@ -160,6 +166,7 @@ class AddChargeDialog(QDialog):
         name = self._name_edit.text().strip()
         if not name:
             ErrorDialog.show_error("Missing Name", "Please enter a charge name.", self)
+            self._name_edit.setFocus()
             return
 
         raw = self._amount_edit.text().strip()
@@ -169,6 +176,8 @@ class AddChargeDialog(QDialog):
                 raise ValueError
         except (InvalidOperation, ValueError):
             ErrorDialog.show_error("Invalid Amount", "Enter a positive number.", self)
+            self._amount_edit.setFocus()
+            self._amount_edit.selectAll()
             return
 
         self.name          = name
