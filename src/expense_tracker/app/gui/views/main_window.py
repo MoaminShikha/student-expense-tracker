@@ -109,8 +109,7 @@ class MainWindow(QMainWindow):
             }
             if event.key() in key_map:
                 nav_key = key_map[event.key()]
-                self._on_nav_changed(nav_key)
-                self._sidebar._update_nav_buttons(nav_key)
+                self._sidebar._on_nav_clicked(nav_key)
                 event.accept()
                 return
 
