@@ -1,0 +1,3 @@
+[console_scripts]
+mizaan = expense_tracker.app.gui.main:main
+student-expense-tracker = expense_tracker.app.cli:main

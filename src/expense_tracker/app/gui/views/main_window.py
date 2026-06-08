@@ -102,13 +102,15 @@ class MainWindow(QMainWindow):
         # Alt+1/2/3/4 for quick navigation
         if event.modifiers() == Qt.KeyboardModifier.AltModifier:
             key_map = {
-                Qt.Key.Key_1: PageIndex.DASHBOARD,
-                Qt.Key.Key_2: PageIndex.ACTIVITY,
-                Qt.Key.Key_3: PageIndex.INSIGHTS,
-                Qt.Key.Key_4: PageIndex.SETTINGS,
+                Qt.Key.Key_1: "dashboard",
+                Qt.Key.Key_2: "activity",
+                Qt.Key.Key_3: "insights",
+                Qt.Key.Key_4: "settings",
             }
             if event.key() in key_map:
-                self._stack.setCurrentIndex(key_map[event.key()])
+                nav_key = key_map[event.key()]
+                self._on_nav_changed(nav_key)
+                self._sidebar._update_nav_buttons(nav_key)
                 event.accept()
                 return
 

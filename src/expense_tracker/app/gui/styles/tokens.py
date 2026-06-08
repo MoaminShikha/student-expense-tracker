@@ -5,7 +5,7 @@ from __future__ import annotations
 
 # ── THEME CONTROL ─────────────────────────────────────────────────────────────
 # Set DARK_MODE = True to switch all tokens to dark palette
-DARK_MODE = False
+DARK_MODE = True
 
 # ── LIGHT THEME TOKENS ─────────────────────────────────────────────────────────
 _LIGHT = {
@@ -54,8 +54,8 @@ FOCUS      = "#f1b619"   # hsl(42 90% 50%)   — focus ring
 
 # ── SEMANTIC ──────────────────────────────────────────────────────────────────
 RED        = "#962e2e"   # hsl(0 55% 38%)    — committed charges, crisis
-GREEN      = "#22c55e"   # hsl(142 71% 45%)  — income, positive actions
-GREEN_BG   = "#dff1ea" if not DARK_MODE else "#064e3b"   # green tinted background
+GREEN      = "#1b6a4f"   # hsl(162 60% 26%)  — income, safe money
+GREEN_BG   = "#dff1ea"   # hsl(162 45% 92%)  — green tinted background
 AMBER      = "#f59e0b"   # hsl(38 92% 50%)   — caution / fuzzy charges
 AMBER_BG   = "#fbeed4" if not DARK_MODE else "#7c2d12"   # amber tinted background
 AMBER_BD   = "#dcb476"   # hsl(38 60% 70%)   — amber border
