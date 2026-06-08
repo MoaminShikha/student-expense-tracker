@@ -39,8 +39,12 @@ def parse_amount(raw_value: str) -> Decimal:
     except (InvalidOperation, ValueError) as exc:
         raise ValidationError("Amount must be a valid decimal value.") from exc
 
-    if amount < 0:
-        raise ValidationError("Amount cannot be negative.")
+    if amount <= 0:
+        raise ValidationError("Amount must be greater than zero.")
+
+    # Validate currency precision (max 2 decimal places)
+    if amount.as_tuple().exponent < -2:
+        raise ValidationError("Amount cannot have more than 2 decimal places.")
 
     return amount
 
