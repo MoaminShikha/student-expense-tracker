@@ -5,7 +5,7 @@
 # GUI Framework
 PyQt6==6.7.0
 PyQt6-Qt6==6.7.0
-PyQt6-sip==13.7.0
+PyQt6-sip==13.11.1
 
 # Development & Testing
 pytest==7.4.3
@@ -13,4 +13,3 @@ pytest-cov==4.1.0
 
 # Optional: Type checking
 mypy==1.7.1
-types-PyQt6==6.7.0
