@@ -82,12 +82,12 @@ def application_stylesheet() -> str:
 
         /* Global focus indicators for keyboard navigation */
         QPushButton:focus {{
-            outline: 2px solid {tokens.FOCUS};
-            outline-offset: 2px;
+            outline: 1px solid {tokens.GOLD};
+            outline-offset: 8px;
         }}
 
         QLineEdit:focus {{
-            border: 2px solid {tokens.FOCUS};
+            border: 1px solid {tokens.GOLD};
             outline: none;
             background-color: {tokens.SURFACE};
         }}
