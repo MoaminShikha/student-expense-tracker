@@ -9,6 +9,14 @@ from .models.income import IncomeSourceTag
 from ..shared.exceptions import ValidationError
 
 
+def _parse_decimal(raw_value: str, field_name: str) -> Decimal:
+    """Parse a decimal string with proper error handling."""
+    try:
+        return Decimal(raw_value)
+    except (InvalidOperation, ValueError) as exc:
+        raise ValidationError(f"{field_name} must be a valid decimal value.") from exc
+
+
 def parse_opening_balance(raw_value: str) -> Decimal:
     """
     Parse an opening balance string into Decimal.
@@ -16,10 +24,7 @@ def parse_opening_balance(raw_value: str) -> Decimal:
     :param raw_value: Raw balance value from user input.
     :return: Parsed Decimal opening balance.
     """
-    try:
-        opening_balance = Decimal(raw_value)
-    except (InvalidOperation, ValueError) as exc:
-        raise ValidationError("Opening balance must be a valid decimal value.") from exc
+    opening_balance = _parse_decimal(raw_value, "Opening balance")
 
     if opening_balance < 0:
         raise ValidationError("Opening balance cannot be negative.")
@@ -34,10 +39,7 @@ def parse_amount(raw_value: str) -> Decimal:
     :param raw_value: Raw amount value from user input.
     :return: Parsed Decimal amount.
     """
-    try:
-        amount = Decimal(raw_value)
-    except (InvalidOperation, ValueError) as exc:
-        raise ValidationError("Amount must be a valid decimal value.") from exc
+    amount = _parse_decimal(raw_value, "Amount")
 
     if amount <= 0:
         raise ValidationError("Amount must be greater than zero.")
@@ -45,6 +47,10 @@ def parse_amount(raw_value: str) -> Decimal:
     # Validate currency precision (max 2 decimal places)
     if amount.as_tuple().exponent < -2:
         raise ValidationError("Amount cannot have more than 2 decimal places.")
+
+    # Validate max amount (₪1,000,000)
+    if amount > Decimal("1000000"):
+        raise ValidationError("Amount cannot exceed ₪1,000,000.")
 
     return amount
 

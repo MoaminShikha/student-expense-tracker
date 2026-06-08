@@ -10,6 +10,14 @@ from PyQt6.QtWidgets import (
 )
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.styles.stylesheet import (
+    filter_pill_stylesheet,
+    ledger_date_label_stylesheet,
+    ledger_description_label_stylesheet,
+    ledger_badge_stylesheet,
+    ledger_amount_label_stylesheet,
+    ledger_balance_label_stylesheet,
+)
 from expense_tracker.app.gui.widgets.paper_widget import PaperWidget
 
 if TYPE_CHECKING:
@@ -22,26 +30,7 @@ class _FilterPill(QPushButton):
         self.setCheckable(True)
         self.setChecked(active)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setStyleSheet(f"""
-            QPushButton {{
-                font-family: "DM Mono", Consolas, monospace;
-                font-size: {tokens.T_XS}px;
-                border: 1px solid {tokens.HAIRLINE};
-                border-radius: 999px;
-                padding: 4px 14px;
-                background: transparent;
-                color: {tokens.MUTED_FG};
-            }}
-            QPushButton:checked {{
-                background: {tokens.NAVY};
-                color: {tokens.GOLD};
-                border-color: {tokens.NAVY};
-                font-weight: 500;
-            }}
-            QPushButton:hover:!checked {{
-                background: {tokens.PAPER_WARM};
-            }}
-        """)
+        self.setStyleSheet(filter_pill_stylesheet())
 
 
 class _LedgerRow(QWidget):
@@ -55,14 +44,10 @@ class _LedgerRow(QWidget):
 
         date_lbl = QLabel(entry.date.strftime("%d %b"))
         date_lbl.setFixedWidth(60)
-        date_lbl.setStyleSheet(
-            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
-            f"font-family: 'DM Mono', Consolas, monospace; background: transparent;")
+        date_lbl.setStyleSheet(ledger_date_label_stylesheet())
 
         desc_lbl = QLabel(entry.description)
-        desc_lbl.setStyleSheet(
-            f"font-size: {tokens.T_BASE}px; color: {tokens.FG};"
-            f"font-family: 'DM Mono', Consolas, monospace; font-weight: 500; background: transparent;")
+        desc_lbl.setStyleSheet(ledger_description_label_stylesheet())
         desc_lbl.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         badge_colors = {
@@ -74,24 +59,18 @@ class _LedgerRow(QWidget):
         badge = QLabel(f" {symbol} ")
         badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
         badge.setFixedWidth(28)
-        badge.setStyleSheet(
-            f"font-size: {tokens.T_SM}px; color: {fg}; background: {bg_color};"
-            f"border-radius: 4px; font-weight: 700; font-family: 'DM Mono', Consolas, monospace;")
+        badge.setStyleSheet(ledger_badge_stylesheet(fg, bg_color))
 
         amt_color = tokens.GREEN if entry.entry_type == "income" else tokens.RED
         amt_lbl = QLabel(entry.amount_str)
         amt_lbl.setAlignment(Qt.AlignmentFlag.AlignRight)
         amt_lbl.setFixedWidth(100)
-        amt_lbl.setStyleSheet(
-            f"font-family: 'Playfair Display'; font-size: {tokens.T_MD}px;"
-            f"font-weight: 700; color: {amt_color}; background: transparent;")
+        amt_lbl.setStyleSheet(ledger_amount_label_stylesheet(amt_color))
 
         bal_lbl = QLabel(entry.running_balance_str)
         bal_lbl.setAlignment(Qt.AlignmentFlag.AlignRight)
         bal_lbl.setFixedWidth(100)
-        bal_lbl.setStyleSheet(
-            f"font-family: 'Playfair Display'; font-size: {tokens.T_MD}px;"
-            f"font-weight: 700; color: {tokens.FG}; background: transparent;")
+        bal_lbl.setStyleSheet(ledger_balance_label_stylesheet())
 
         layout.addWidget(date_lbl)
         layout.addWidget(desc_lbl, stretch=1)
