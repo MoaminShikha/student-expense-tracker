@@ -13,13 +13,13 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.widgets.error_dialog import ErrorDialog
 
 _DIALOG_SS = f"""
     QDialog {{
@@ -159,7 +159,7 @@ class AddChargeDialog(QDialog):
     def _on_accept(self) -> None:
         name = self._name_edit.text().strip()
         if not name:
-            QMessageBox.warning(self, "Missing name", "Please enter a charge name.")
+            ErrorDialog.show_error("Missing Name", "Please enter a charge name.", self)
             return
 
         raw = self._amount_edit.text().strip()
@@ -168,7 +168,7 @@ class AddChargeDialog(QDialog):
             if amount <= 0:
                 raise ValueError
         except (InvalidOperation, ValueError):
-            QMessageBox.warning(self, "Invalid amount", "Enter a positive number.")
+            ErrorDialog.show_error("Invalid Amount", "Enter a positive number.", self)
             return
 
         self.name          = name
