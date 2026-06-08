@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from expense_tracker.app.gui.constants import STREAK_DAYS_TARGET
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.styles.fonts import naskh
 
@@ -30,8 +31,6 @@ _NAV: list[tuple[str, list[tuple[str, str]]]] = [
         ("settings", "Settings"),
     ]),
 ]
-
-_STREAK_TOTAL = 14
 
 
 class _AvatarWidget(QWidget):
@@ -419,7 +418,7 @@ class Sidebar(QWidget):
 
         segs = QHBoxLayout()
         segs.setSpacing(3)
-        for _ in range(_STREAK_TOTAL):
+        for _ in range(STREAK_DAYS_TARGET):
             seg = QFrame()
             seg.setObjectName("sbStreakSegOff")
             seg.setFixedHeight(6)

@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from expense_tracker.app.gui.constants import PageIndex
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.views.dashboard_page import DashboardPage
 from expense_tracker.app.gui.views.activity_page import ActivityPage
@@ -79,7 +80,7 @@ class MainWindow(QMainWindow):
         self.insights_page  = InsightsPage()
         self.settings_page  = SettingsPage()
 
-        # Stack index: 0=Dashboard, 1=Activity, 2=Insights, 3=Settings
+        # Add pages to stack in PageIndex order
         self._stack.addWidget(self.dashboard_page)
         self._stack.addWidget(self.activity_page)
         self._stack.addWidget(self.insights_page)
@@ -97,8 +98,13 @@ class MainWindow(QMainWindow):
 
     def _on_nav_changed(self, key: str) -> None:
         # Map nav key → QStackedWidget index, switch page, update breadcrumb
-        mapping = {"dashboard": 0, "activity": 1, "insights": 2, "settings": 3}
-        idx = mapping.get(key, 0)
+        mapping = {
+            "dashboard": PageIndex.DASHBOARD,
+            "activity": PageIndex.ACTIVITY,
+            "insights": PageIndex.INSIGHTS,
+            "settings": PageIndex.SETTINGS,
+        }
+        idx = mapping.get(key, PageIndex.DASHBOARD)
         self._stack.setCurrentIndex(idx)
         self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
         # Fire the page-enter callback (registered by controllers in main.py) so

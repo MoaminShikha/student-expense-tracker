@@ -31,7 +31,9 @@ from expense_tracker.infrastructure.json.repositories import (
     JsonSessionRepository,
     JsonTransactionRepository,
 )
+from expense_tracker.app.gui.constants import PageIndex
 from expense_tracker.app.gui.styles.fonts import load_fonts
+from expense_tracker.app.gui.styles.stylesheet import application_stylesheet
 from expense_tracker.app.gui.controllers.activity_controller import ActivityController
 from expense_tracker.app.gui.controllers.dashboard_controller import DashboardController
 from expense_tracker.app.gui.controllers.insights_controller import InsightsController
@@ -42,6 +44,7 @@ _CAUTION_THRESHOLD = Decimal("100")
 
 def main() -> int:
     app = QApplication([])
+    app.setStyleSheet(application_stylesheet())
     load_fonts()
 
     try:
@@ -82,7 +85,7 @@ def main() -> int:
         spend_service=spend_service,
         caution_threshold=_CAUTION_THRESHOLD,
     )
-    window.register_page_enter(0, dashboard_ctrl.refresh)
+    window.register_page_enter(PageIndex.DASHBOARD, dashboard_ctrl.refresh)
     dashboard_ctrl.refresh()
 
     activity_ctrl = ActivityController(
@@ -92,7 +95,7 @@ def main() -> int:
         spend_service=spend_service,
         charge_service=charge_service,
     )
-    window.register_page_enter(1, activity_ctrl.refresh)
+    window.register_page_enter(PageIndex.ACTIVITY, activity_ctrl.refresh)
     activity_ctrl.refresh()
 
     insights_ctrl = InsightsController(
@@ -103,7 +106,7 @@ def main() -> int:
         charge_service=charge_service,
         fuzzy_charge_service=fuzzy_charge_service,
     )
-    window.register_page_enter(2, insights_ctrl.refresh)
+    window.register_page_enter(PageIndex.INSIGHTS, insights_ctrl.refresh)
     insights_ctrl.refresh()
 
     window.show()
