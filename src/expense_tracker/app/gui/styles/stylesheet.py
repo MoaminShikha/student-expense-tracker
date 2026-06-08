@@ -70,19 +70,48 @@ def ledger_balance_label_stylesheet() -> str:
 def application_stylesheet() -> str:
     """Generate global stylesheet for the application with accessibility improvements."""
     return f"""
-        /* Global focus indicators for keyboard navigation */
-        QWidget:focus {{
-            outline: 2px solid {tokens.GOLD};
-            outline-offset: 2px;
+        /* Global properties */
+        QWidget {{
+            background-color: {tokens.BG};
+            color: {tokens.FG};
         }}
 
+        QMainWindow {{
+            background-color: {tokens.BG};
+        }}
+
+        /* Global focus indicators for keyboard navigation */
         QPushButton:focus {{
-            outline: 2px solid {tokens.GOLD};
+            outline: 2px solid {tokens.FOCUS};
             outline-offset: 2px;
         }}
 
         QLineEdit:focus {{
-            border: 1px solid {tokens.GOLD};
+            border: 2px solid {tokens.FOCUS};
             outline: none;
+            background-color: {tokens.SURFACE};
+        }}
+
+        QLineEdit {{
+            border: 1px solid {tokens.HAIRLINE};
+            border-radius: 4px;
+            padding: 4px 8px;
+            background-color: {tokens.SURFACE};
+            color: {tokens.FG};
+            selection-background-color: {tokens.GOLD};
+        }}
+
+        /* Scrollbar styling for dark mode */
+        QScrollBar:vertical {{
+            width: 10px;
+            background-color: {tokens.BG};
+        }}
+        QScrollBar::handle:vertical {{
+            background-color: {tokens.HAIRLINE};
+            border-radius: 5px;
+            min-height: 20px;
+        }}
+        QScrollBar::handle:vertical:hover {{
+            background-color: {tokens.HAIRLINE_S};
         }}
     """

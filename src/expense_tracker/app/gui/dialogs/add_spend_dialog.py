@@ -4,7 +4,8 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, Qt
+from PyQt6.QtGui import QValidator, QDoubleValidator
 from PyQt6.QtWidgets import (
     QComboBox,
     QDateEdit,
@@ -98,6 +99,11 @@ class AddSpendDialog(QDialog):
 
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 45")
+        # Allow numeric input for amount field
+        validator = QDoubleValidator(0.0, 999999.0, 2)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        self._amount_edit.setValidator(validator)
+        self._amount_edit.setFocus()  # Focus on first field for faster input
 
         self._desc_edit = QLineEdit()
         self._desc_edit.setPlaceholderText("e.g. Lunch at campus")
@@ -140,11 +146,14 @@ class AddSpendDialog(QDialog):
                 raise ValueError
         except (InvalidOperation, ValueError):
             ErrorDialog.show_error("Invalid Amount", "Enter a positive number (e.g. 45).", self)
+            self._amount_edit.setFocus()
+            self._amount_edit.selectAll()
             return
 
         desc = self._desc_edit.text().strip()
         if not desc:
             ErrorDialog.show_error("Missing Description", "Please enter a description.", self)
+            self._desc_edit.setFocus()
             return
 
         self.amount      = amount
