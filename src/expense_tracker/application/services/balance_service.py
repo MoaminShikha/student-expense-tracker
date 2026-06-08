@@ -5,7 +5,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from ...domain.models import BalanceSnapshot
+from ...domain.models import BalanceSnapshot, ChargeStatus
 from ...ports.repositories import ChargeRepository, IncomeRepository, TransactionRepository
 from ..calculations import BalanceEngine
 
@@ -96,7 +96,7 @@ class BalanceService:
 
         charges = self._charge_repository.list_upcoming(session_id)
         total_committed = sum((charge.amount for charge in charges), Decimal("0"))
-        charges_this_month = sum((charge.amount for charge in self._charge_repository.list_for_month(session_id, year, month)), Decimal("0"))
+        charges_this_month = sum((charge.amount for charge in self._charge_repository.list_for_month(session_id, year, month) if charge.status == ChargeStatus.UPCOMING), Decimal("0"))
 
         all_transactions = self._transaction_repository.list_for_session(session_id)
         total_spent = sum((tx.amount for tx in all_transactions), Decimal("0"))

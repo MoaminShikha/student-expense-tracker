@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from expense_tracker.app.gui.views.activity_page import ActivityPage
 
 from expense_tracker.app.gui.view_models.ledger_view_model import LedgerEntryVM
+from expense_tracker.shared.exceptions import ApplicationError, ValidationError
 
 
 class ActivityController:
@@ -74,5 +75,7 @@ class ActivityController:
                 ))
 
             self._view.set_ledger(entries, session.opening_balance)
+        except (ValidationError, ApplicationError) as e:
+            self._logger.warning("Could not refresh activity ledger: %s", e)
         except Exception:
-            self._logger.exception("Failed to refresh activity ledger")
+            self._logger.exception("Unexpected error refreshing activity ledger")

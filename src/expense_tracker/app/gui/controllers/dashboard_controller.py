@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from expense_tracker.app.gui.views.main_window import MainWindow
 
 from expense_tracker.app.gui.view_models.balance_view_model import BalanceViewModel
+from expense_tracker.shared.exceptions import ApplicationError, ValidationError
 
 
 class DashboardController:
@@ -75,8 +76,10 @@ class DashboardController:
             view_model = self._build_view_model(snapshot, session_id=session.session_id)
             self._view.set_snapshot(view_model, last_sync=None)
             self._logger.debug("Dashboard refreshed")
+        except (ValidationError, ApplicationError) as e:
+            self._logger.warning("Failed to refresh dashboard: %s", e)
         except Exception:
-            self._logger.exception("Failed to refresh dashboard")
+            self._logger.exception("Unexpected error refreshing dashboard")
 
     # ── Signal handlers ───────────────────────────────────────────────────────
 
@@ -92,8 +95,12 @@ class DashboardController:
             try:
                 self._income_service.add_income(dlg.amount, dlg.source_tag, dlg.entry_date)
                 self.refresh()
+            except ValidationError as e:
+                self._logger.warning("Invalid income entry: %s", e)
+            except ApplicationError as e:
+                self._logger.warning("Could not add income: %s", e)
             except Exception:
-                self._logger.exception("Failed to add income")
+                self._logger.exception("Unexpected error adding income")
 
     def _on_add_spend_requested(self) -> None:
         if self._spend_service is None:
@@ -104,8 +111,12 @@ class DashboardController:
             try:
                 self._spend_service.add_transaction(dlg.amount, dlg.description, dlg.category, dlg.spent_on)
                 self.refresh()
+            except ValidationError as e:
+                self._logger.warning("Invalid spend entry: %s", e)
+            except ApplicationError as e:
+                self._logger.warning("Could not add spend: %s", e)
             except Exception:
-                self._logger.exception("Failed to add spend")
+                self._logger.exception("Unexpected error adding spend")
 
     def _on_add_charge_requested(self) -> None:
         if self._charge_service is None:
@@ -119,8 +130,12 @@ class DashboardController:
                 else:
                     self._charge_service.add_charge(dlg.name, dlg.amount, dlg.due_date)
                 self.refresh()
+            except ValidationError as e:
+                self._logger.warning("Invalid charge entry: %s", e)
+            except ApplicationError as e:
+                self._logger.warning("Could not add charge: %s", e)
             except Exception:
-                self._logger.exception("Failed to add charge")
+                self._logger.exception("Unexpected error adding charge")
 
     # ── Presentation mapping ──────────────────────────────────────────────────
 
