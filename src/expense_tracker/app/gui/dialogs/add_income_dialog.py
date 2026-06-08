@@ -13,12 +13,12 @@ from PyQt6.QtWidgets import (
     QFormLayout,
     QLabel,
     QLineEdit,
-    QMessageBox,
     QVBoxLayout,
     QWidget,
 )
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.widgets.error_dialog import ErrorDialog
 from expense_tracker.domain.models.income import IncomeSourceTag
 
 _DIALOG_SS = f"""
@@ -136,7 +136,7 @@ class AddIncomeDialog(QDialog):
             if amount <= 0:
                 raise ValueError
         except (InvalidOperation, ValueError):
-            QMessageBox.warning(self, "Invalid amount", "Enter a positive number (e.g. 500).")
+            ErrorDialog.show_error("Invalid Amount", "Enter a positive number (e.g. 500).", self)
             return
 
         self.amount     = amount

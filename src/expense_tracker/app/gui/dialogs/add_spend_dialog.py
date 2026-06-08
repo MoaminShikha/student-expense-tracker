@@ -12,12 +12,12 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QLineEdit,
-    QMessageBox,
     QVBoxLayout,
     QWidget,
 )
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.widgets.error_dialog import ErrorDialog
 from expense_tracker.domain.models.transaction import TransactionCategory
 
 _DIALOG_SS = f"""
@@ -139,12 +139,12 @@ class AddSpendDialog(QDialog):
             if amount <= 0:
                 raise ValueError
         except (InvalidOperation, ValueError):
-            QMessageBox.warning(self, "Invalid amount", "Enter a positive number (e.g. 45).")
+            ErrorDialog.show_error("Invalid Amount", "Enter a positive number (e.g. 45).", self)
             return
 
         desc = self._desc_edit.text().strip()
         if not desc:
-            QMessageBox.warning(self, "Missing description", "Please enter a description.")
+            ErrorDialog.show_error("Missing Description", "Please enter a description.", self)
             return
 
         self.amount      = amount
