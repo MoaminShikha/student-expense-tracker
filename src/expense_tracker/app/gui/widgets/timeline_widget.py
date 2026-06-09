@@ -23,6 +23,7 @@ from PyQt6.QtGui import QBrush, QColor, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import QWidget
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
 
 
 @dataclass(frozen=True)
@@ -153,6 +154,11 @@ class TimelineWidget(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # Get theme-aware colors
+        theme_mgr = get_theme_manager()
+        track_color = theme_mgr.get_color(tokens.TRACK)
+        gold_leaf_color = theme_mgr.get_color(tokens.GOLD_LEAF)
+
         total_w = self.width()
         pad = 4
         w = max(1, total_w - pad * 2)
@@ -169,13 +175,13 @@ class TimelineWidget(QWidget):
 
         # Background track
         p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(QColor(tokens.TRACK))
+        p.setBrush(QColor(track_color))
         p.drawRoundedRect(QRectF(pad, t1y, w, th), r, r)
 
         # Spend day dots (gold, above track)
         for sp in self._spend_day_pcts:
             dx = px(sp)
-            p.setBrush(QColor(tokens.GOLD_LEAF))
+            p.setBrush(QColor(gold_leaf_color))
             p.setPen(Qt.PenStyle.NoPen)
             p.drawEllipse(QPointF(dx, t1y - 6), 3.5, 3.5)
 
@@ -226,7 +232,7 @@ class TimelineWidget(QWidget):
 
         # Background
         p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(QColor(tokens.TRACK))
+        p.setBrush(QColor(track_color))
         p.drawRoundedRect(QRectF(pad, t2y, w, th), r, r)
 
         cursor = float(pad)
