@@ -287,6 +287,9 @@ class HeroCard(QWidget):
 
     def _apply_styles(self) -> None:
         self.setStyleSheet(f"""
+            QWidget {{
+                background: transparent;
+            }}
             QLabel#heroMicro {{
                 color: {tokens.MUTED_FG};
                 font-size: {tokens.T_MINI}px;

@@ -97,6 +97,9 @@ def _stat_card(
             border: 1px solid {tokens.HAIRLINE};
             border-radius: {tokens.CARD_RADIUS}px;
         }}
+        QWidget {{
+            background: transparent;
+        }}
         QLabel#sMicro {{
             font-size: {tokens.T_MICRO}px;
             letter-spacing: 3px;
