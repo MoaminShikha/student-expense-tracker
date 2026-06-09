@@ -1,5 +1,6 @@
 # The one place that holds all visual values in the app, changes are only done here
 # Hex values are direct conversions of the HTML :root hsl() block.
+# LIGHT theme is the default; DARK theme colors defined below.
 
 from __future__ import annotations
 
@@ -89,3 +90,21 @@ Z_DROPDOWN   = 10
 Z_STICKY     = 20
 Z_MODAL      = 100
 Z_TOAST      = 1000
+
+# ── DARK MODE THEME ───────────────────────────────────────────────────────────
+# Dark theme color overrides — use these when dark mode is enabled.
+# Light mode is the current standard defined above.
+
+DARK_BG              = "#1a1a2e"   # hsl(240 25% 12%) — dark background
+DARK_PAPER_WARM      = "#242442"   # hsl(240 20% 16%) — slightly lighter surface
+DARK_SURFACE         = "#2d2d47"   # hsl(240 18% 19%) — card/panel background
+DARK_HAIRLINE        = "#3d3d57"   # hsl(240 15% 26%) — subtle dividers
+DARK_HAIRLINE_S      = "#4d4d67"   # hsl(240 12% 33%) — stronger dividers
+DARK_FG              = "#e8e8f0"   # hsl(240 12% 93%) — primary text
+DARK_MUTED_FG        = "#a8a8b8"   # hsl(240 8% 68%)  — secondary text
+DARK_MUTED           = "#767686"   # hsl(240 8% 53%)  — disabled / micro-labels
+DARK_DISABLED        = "#535363"   # hsl(240 6% 38%)  — disabled interactive
+DARK_RED             = "#ff6b6b"   # hsl(0 100% 68%)  — brighter red for dark
+DARK_GREEN           = "#51cf66"   # hsl(135 70% 65%) — brighter green for dark
+DARK_GOLD            = "#ffd93d"   # hsl(42 100% 65%) — brighter gold for dark
+DARK_AMBER           = "#ffb347"   # hsl(32 100% 65%) — brighter amber for dark

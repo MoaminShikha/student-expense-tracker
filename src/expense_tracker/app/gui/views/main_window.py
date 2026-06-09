@@ -4,9 +4,11 @@ from collections.abc import Iterable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
+from PyQt6.QtGui import QGraphicsOpacityEffect
 from PyQt6.QtWidgets import (
     QFrame,
+    QGraphicsOpacityEffect,
     QHBoxLayout,
     QMainWindow,
     QStackedWidget,
@@ -99,6 +101,20 @@ class MainWindow(QMainWindow):
         # Map nav key → QStackedWidget index, switch page, update breadcrumb
         mapping = {"dashboard": 0, "activity": 1, "insights": 2, "settings": 3}
         idx = mapping.get(key, 0)
+
+        # Add fade-in animation to the page
+        current_page = self._stack.currentWidget()
+        if current_page:
+            effect = QGraphicsOpacityEffect()
+            effect.setOpacity(0.0)
+            current_page.setGraphicsEffect(effect)
+            anim = QPropertyAnimation(effect, b"opacity", self)
+            anim.setDuration(150)
+            anim.setStartValue(0.0)
+            anim.setEndValue(1.0)
+            anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+            anim.start()
+
         self._stack.setCurrentIndex(idx)
         self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
         # Fire the page-enter callback (registered by controllers in main.py) so

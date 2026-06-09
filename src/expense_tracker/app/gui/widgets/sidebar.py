@@ -176,6 +176,7 @@ class Sidebar(QWidget):
         self._active = "dashboard"
         self._nav_btns: dict[str, QPushButton] = {}
         self._streak_segs: list[QFrame] = []
+        self._streak_count_lbl: QLabel | None = None
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -295,11 +296,14 @@ class Sidebar(QWidget):
     # ── PUBLIC ────────────────────────────────────────────────────────────────
 
     def set_streak(self, days: int) -> None:
-        """Light up the first `days` segments in gold, rest in hairline."""
+        """Light up the first `days` segments in gold, rest in hairline. Update count display."""
+        capped_days = max(0, min(14, days))
         for i, seg in enumerate(self._streak_segs):
-            seg.setObjectName("sbStreakSegOn" if i < days else "sbStreakSegOff")
+            seg.setObjectName("sbStreakSegOn" if i < capped_days else "sbStreakSegOff")
             seg.style().unpolish(seg)
             seg.style().polish(seg)
+        if self._streak_count_lbl:
+            self._streak_count_lbl.setText(str(capped_days) if days > 0 else "—")
 
     # ── SECTIONS ──────────────────────────────────────────────────────────────
 
@@ -409,6 +413,7 @@ class Sidebar(QWidget):
         count_row.setContentsMargins(0, 0, 0, 0)
         num = QLabel("—")
         num.setObjectName("sbStreakCount")
+        self._streak_count_lbl = num
         unit = QLabel("days")
         unit.setObjectName("sbStreakUnit")
         count_row.addWidget(num)
