@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from PyQt6.QtCore import Qt, QDate
+from PyQt6.QtCore import Qt, QDate, QTimer
 from PyQt6.QtWidgets import (
     QComboBox,
     QDateEdit,
@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QProgressBar,
     QVBoxLayout,
     QWidget,
 )
@@ -120,14 +121,21 @@ class AddIncomeDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
-        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Add")
+        self._ok_btn = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        self._ok_btn.setText("Add")
         buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancel")
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
 
+        # Progress bar (hidden by default)
+        self._progress = QProgressBar()
+        self._progress.setMaximum(0)
+        self._progress.setVisible(False)
+
         layout = QVBoxLayout(self)
         layout.setSpacing(16)
         layout.addLayout(form)
+        layout.addWidget(self._progress)
         layout.addWidget(buttons)
 
     def _on_accept(self) -> None:
@@ -139,6 +147,18 @@ class AddIncomeDialog(QDialog):
         except (InvalidOperation, ValueError):
             QMessageBox.warning(self, "Invalid amount", "Enter a positive number (e.g. 500).")
             return
+
+        # Show loading state
+        self._progress.setVisible(True)
+        self._ok_btn.setEnabled(False)
+        self.repaint()
+
+        # Simulate processing delay
+        QTimer.singleShot(200, self._complete_accept)
+
+    def _complete_accept(self) -> None:
+        raw = self._amount_edit.text().strip()
+        amount = Decimal(raw)
 
         self.amount     = amount
         self.source_tag = _SOURCE_LABELS[self._source_combo.currentText()]
