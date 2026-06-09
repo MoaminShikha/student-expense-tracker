@@ -97,7 +97,7 @@ def show_toast(message: str, kind: str = "info", parent: QWidget | None = None) 
         parent: Parent widget for positioning
     """
     toast = Toast(message, kind, parent)
-    # Position at bottom-right
+    toast.adjustSize()  # compute real size before we need its dimensions
     if parent:
         pos = parent.mapToGlobal(parent.rect().bottomRight())
         toast.move(pos.x() - toast.width() - 20, pos.y() - toast.height() - 20)

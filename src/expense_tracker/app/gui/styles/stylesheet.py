@@ -59,6 +59,70 @@ def ledger_amount_label_stylesheet(color: str) -> str:
     )
 
 
+def dialog_stylesheet() -> str:
+    """Shared QSS for all Add* dialogs (charge, income, spend).
+
+    Covers QDialog, QLabel, all input widgets, focus states, checkbox,
+    and button box. Dialogs must not define their own _DIALOG_SS — call
+    this instead so theme changes only need to land here.
+    """
+    return f"""
+    QDialog {{
+        background: {tokens.SURFACE};
+        font-family: "DM Mono", Consolas, monospace;
+    }}
+    QLabel {{
+        font-size: {tokens.T_SM}px;
+        color: {tokens.FG};
+        background: transparent;
+    }}
+    QLineEdit, QComboBox, QDateEdit, QSpinBox {{
+        border: 2px solid {tokens.HAIRLINE};
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: {tokens.T_SM}px;
+        font-family: "DM Mono", Consolas, monospace;
+        color: {tokens.FG};
+        background: {tokens.SURFACE};
+    }}
+    QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QSpinBox:focus {{
+        border: 2px solid {tokens.FOCUS};
+    }}
+    QComboBox QAbstractItemView {{
+        background: {tokens.SURFACE};
+        color: {tokens.FG};
+        selection-background-color: {tokens.PAPER_WARM};
+        selection-color: {tokens.FG};
+        border: 1px solid {tokens.HAIRLINE};
+    }}
+    QCheckBox {{
+        font-size: {tokens.T_SM}px;
+        color: {tokens.FG};
+        background: transparent;
+        spacing: 6px;
+    }}
+    QDialogButtonBox QPushButton {{
+        font-family: "DM Mono", Consolas, monospace;
+        font-size: {tokens.T_SM}px;
+        padding: 7px 18px;
+        border-radius: 6px;
+    }}
+    QDialogButtonBox QPushButton[text="Add"] {{
+        background: {tokens.NAVY};
+        color: {tokens.GOLD};
+        border: none;
+    }}
+    QDialogButtonBox QPushButton[text="Add"]:hover {{
+        background: {tokens.FG};
+    }}
+    QDialogButtonBox QPushButton[text="Cancel"] {{
+        background: transparent;
+        border: 1px solid {tokens.HAIRLINE};
+        color: {tokens.MUTED_FG};
+    }}
+    """
+
+
 def ledger_balance_label_stylesheet() -> str:
     """Generate stylesheet for ledger balance labels."""
     return (
@@ -82,13 +146,11 @@ def application_stylesheet() -> str:
 
         /* Global focus indicators for keyboard navigation */
         QPushButton:focus {{
-            outline: 1px solid {tokens.GOLD};
-            outline-offset: 8px;
+            border: 2px solid {tokens.FOCUS};
         }}
 
         QLineEdit:focus {{
-            border: 1px solid {tokens.GOLD};
-            outline: none;
+            border: 2px solid {tokens.FOCUS};
             background-color: {tokens.SURFACE};
         }}
 

@@ -21,58 +21,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.styles.stylesheet import dialog_stylesheet
 from expense_tracker.app.gui.widgets.error_dialog import ErrorDialog
-
-_DIALOG_SS = f"""
-    QDialog {{
-        background: {tokens.SURFACE};
-        font-family: "DM Mono", Consolas, monospace;
-    }}
-    QLabel {{
-        font-size: {tokens.T_SM}px;
-        color: {tokens.FG};
-        background: transparent;
-    }}
-    QLineEdit, QComboBox, QDateEdit, QSpinBox {{
-        border: 2px solid {tokens.HAIRLINE};
-        border-radius: 6px;
-        padding: 6px 10px;
-        font-size: {tokens.T_SM}px;
-        font-family: "DM Mono", Consolas, monospace;
-        color: {tokens.FG};
-        background: {tokens.SURFACE};
-    }}
-    QLineEdit:focus, QDateEdit:focus, QSpinBox:focus {{
-        border: 2px solid {tokens.FOCUS};
-        outline: none;
-    }}
-    QCheckBox {{
-        font-size: {tokens.T_SM}px;
-        color: {tokens.FG};
-        background: transparent;
-        spacing: 6px;
-    }}
-    QDialogButtonBox QPushButton {{
-        font-family: "DM Mono", Consolas, monospace;
-        font-size: {tokens.T_SM}px;
-        padding: 7px 18px;
-        border-radius: 6px;
-    }}
-    QDialogButtonBox QPushButton[text="Add"] {{
-        background: {tokens.NAVY};
-        color: {tokens.GOLD};
-        border: none;
-    }}
-    QDialogButtonBox QPushButton[text="Add"]:hover {{
-        background: {tokens.FG};
-    }}
-    QDialogButtonBox QPushButton[text="Cancel"] {{
-        background: transparent;
-        border: 1px solid {tokens.HAIRLINE};
-        color: {tokens.MUTED_FG};
-    }}
-"""
 
 
 class AddChargeDialog(QDialog):
@@ -89,7 +39,7 @@ class AddChargeDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Add Charge")
         self.setMinimumWidth(360)
-        self.setStyleSheet(_DIALOG_SS)
+        self.setStyleSheet(dialog_stylesheet())
 
         self.name:          str      = ""
         self.amount:        Decimal  = Decimal("0")

@@ -6,43 +6,31 @@ from expense_tracker.app.gui.styles import tokens
 
 
 def get_global_stylesheet(theme: str = "light") -> str:
-    """Generate the global application stylesheet based on theme.
+    """Generate the global application stylesheet based on theme."""
+    p = tokens.DARK_PALETTE if theme == "dark" else tokens.LIGHT_PALETTE
 
-    Args:
-        theme: "light" or "dark"
+    bg         = p["BG"]
+    paper      = p["PAPER_WARM"]
+    surface    = p["SURFACE"]
+    hairline   = p["HAIRLINE"]
+    hairline_s = p["HAIRLINE_S"]
+    fg         = p["FG"]
+    muted_fg   = p["MUTED_FG"]
+    muted      = p["MUTED"]
 
-    Returns:
-        Complete QSS stylesheet string
-    """
-    # Select color palette based on theme
+    # Semantic colors — dark variants exist as DARK_* constants in tokens
     if theme == "dark":
-        bg = "#1a1a2e"
-        paper = "#242442"
-        surface = "#2d2d47"
-        hairline = "#3d3d57"
-        hairline_s = "#4d4d67"
-        fg = "#e8e8f0"
-        muted_fg = "#a8a8b8"
-        muted = "#767686"
-        red = "#ff6b6b"
-        green = "#51cf66"
-        gold = "#ffd93d"
-        amber = "#ffb347"
-        navy = "#1a1a2e"
+        red   = tokens.DARK_RED
+        green = tokens.DARK_GREEN
+        gold  = tokens.DARK_GOLD
+        amber = tokens.DARK_AMBER
+        navy  = bg  # dark navy uses same hue as background
     else:
-        bg = "#f7f3ec"
-        paper = "#f3ede0"
-        surface = "#ffffff"
-        hairline = "#e2dccd"
-        hairline_s = "#cdc4ae"
-        fg = "#181a2c"
-        muted_fg = "#56586c"
-        muted = "#838897"
-        red = "#962e2e"
-        green = "#1b6a4f"
-        gold = "#c79a39"
-        amber = "#a05712"
-        navy = "#16172a"
+        red   = tokens.RED
+        green = tokens.GREEN
+        gold  = tokens.GOLD
+        amber = tokens.GOLD_LEAF  # darker gold used for hover states
+        navy  = tokens.NAVY
 
     return f"""
     /* Global application stylesheet */
@@ -191,7 +179,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
     }}
 
     QLineEdit:focus {{
-        border: 1px solid {gold};
+        border: 2px solid {gold};
     }}
 
     QComboBox {{
@@ -203,7 +191,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
     }}
 
     QComboBox:focus {{
-        border: 1px solid {gold};
+        border: 2px solid {gold};
     }}
 
     QComboBox QAbstractItemView {{
@@ -223,7 +211,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
     }}
 
     QDateEdit:focus {{
-        border: 1px solid {gold};
+        border: 2px solid {gold};
     }}
 
     QSpinBox {{
@@ -235,7 +223,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
     }}
 
     QSpinBox:focus {{
-        border: 1px solid {gold};
+        border: 2px solid {gold};
     }}
 
     QProgressBar {{
@@ -265,6 +253,10 @@ def get_global_stylesheet(theme: str = "light") -> str:
 
     QPushButton:pressed {{
         background: {hairline};
+    }}
+
+    QPushButton:focus {{
+        border: 2px solid {gold};
     }}
 
     QDialogButtonBox QPushButton[text="Add"] {{
@@ -359,22 +351,12 @@ def get_global_stylesheet(theme: str = "light") -> str:
 
 
 def apply_stylesheet(app: QApplication, theme: str = "light") -> None:
-    """Apply the complete stylesheet to the application.
-
-    Args:
-        app: QApplication instance
-        theme: "light" or "dark"
-    """
-    stylesheet = get_global_stylesheet(theme)
-    app.setStyleSheet(stylesheet)
+    """Apply the complete stylesheet to the application."""
+    app.setStyleSheet(get_global_stylesheet(theme))
 
 
 def apply_theme(theme: str) -> None:
-    """Apply theme to the current application.
-
-    Args:
-        theme: "light" or "dark"
-    """
+    """Apply theme to the current application."""
     app = QApplication.instance()
     if app:
         apply_stylesheet(app, theme)
