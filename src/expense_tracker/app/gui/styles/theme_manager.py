@@ -40,6 +40,8 @@ class ThemeManager(QObject):
             return
         self._theme = theme
         self.theme_changed.emit(theme)
+        # Apply stylesheet changes
+        self._apply_stylesheet()
 
     def get_color(self, light_color: str) -> str:
         """Get the appropriate color for current theme."""
@@ -57,6 +59,17 @@ class ThemeManager(QObject):
     def is_dark(self) -> bool:
         """Check if dark mode is enabled."""
         return self._theme == "dark"
+
+    def _apply_stylesheet(self) -> None:
+        """Apply stylesheet changes to the application."""
+        try:
+            from PyQt6.QtWidgets import QApplication
+            from expense_tracker.app.gui.styles.stylesheet_manager import apply_stylesheet
+            app = QApplication.instance()
+            if app:
+                apply_stylesheet(app, self._theme)
+        except Exception:
+            pass  # Silently fail if stylesheet can't be applied
 
 
 # Global theme manager instance

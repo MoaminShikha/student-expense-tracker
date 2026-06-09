@@ -32,6 +32,8 @@ from expense_tracker.infrastructure.json.repositories import (
     JsonTransactionRepository,
 )
 from expense_tracker.app.gui.styles.fonts import load_fonts
+from expense_tracker.app.gui.styles.stylesheet_manager import apply_stylesheet
+from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
 from expense_tracker.app.gui.controllers.activity_controller import ActivityController
 from expense_tracker.app.gui.controllers.dashboard_controller import DashboardController
 from expense_tracker.app.gui.controllers.insights_controller import InsightsController
@@ -45,6 +47,10 @@ def main() -> int:
     logger = logging.getLogger(__name__)
     app = QApplication([])
     load_fonts()
+
+    # Apply initial stylesheet
+    theme_mgr = get_theme_manager()
+    apply_stylesheet(app, theme_mgr.current_theme)
 
     try:
         session_repo = JsonSessionRepository(_DATA_DIR / "session.json")
