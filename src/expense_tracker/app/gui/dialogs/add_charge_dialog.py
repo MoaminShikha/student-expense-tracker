@@ -5,7 +5,7 @@ import calendar
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from PyQt6.QtCore import QDate
+from PyQt6.QtCore import QDate, QTimer
 from PyQt6.QtWidgets import (
     QCheckBox,
     QDateEdit,
@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QProgressBar,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -140,14 +141,21 @@ class AddChargeDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
-        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Add")
+        self._ok_btn = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        self._ok_btn.setText("Add")
         buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancel")
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
 
+        # Progress bar (hidden by default)
+        self._progress = QProgressBar()
+        self._progress.setMaximum(0)
+        self._progress.setVisible(False)
+
         layout = QVBoxLayout(self)
         layout.setSpacing(16)
         layout.addLayout(form)
+        layout.addWidget(self._progress)
         layout.addWidget(buttons)
 
     def _on_recurring_toggled(self, checked: bool) -> None:
@@ -183,6 +191,20 @@ class AddChargeDialog(QDialog):
                     "For monthly recurring, use day 1-28 (to avoid Feb/Apr/Jun/Sep/Nov issues)."
                 )
                 return
+
+        # Show loading state
+        self._progress.setVisible(True)
+        self._ok_btn.setEnabled(False)
+        self.repaint()
+
+        # Simulate processing delay
+        QTimer.singleShot(200, self._complete_accept)
+
+    def _complete_accept(self) -> None:
+        name = self._name_edit.text().strip()
+        raw = self._amount_edit.text().strip()
+        amount = Decimal(raw)
+        day_of_month = self._day_spin.value()
 
         self.name          = name
         self.amount        = amount
