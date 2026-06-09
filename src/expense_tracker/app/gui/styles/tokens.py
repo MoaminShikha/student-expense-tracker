@@ -14,6 +14,7 @@ HAIRLINE_S = "#cdc4ae"   # hsl(36 14% 76%)   — stronger border
 FG         = "#181a2c"   # hsl(240 28% 12%)  — primary text
 MUTED_FG   = "#56586c"   # hsl(224 14% 38%)  — secondary text
 MUTED      = "#838897"   # hsl(222 12% 55%)  — disabled / micro-labels
+DISABLED   = "#a8a8b8"   # hsl(240 8% 68%)   — disabled interactive elements
 
 # ── BRAND ─────────────────────────────────────────────────────────────────────
 NAVY       = "#16172a"   # hsl(240 30% 11%)  — action buttons, avatar bg
@@ -74,3 +75,17 @@ CARD_RADIUS  = 14
 PANEL_RADIUS = 14
 HERO_RADIUS  = 14
 TOPBAR_H     = 54
+
+# ── SPACING SCALE (dp/px) ────────────────────────────────────────────────────
+SPACE_XS     = 4
+SPACE_SM     = 8
+SPACE_MD     = 16
+SPACE_LG     = 24
+SPACE_XL     = 32
+
+# ── Z-INDEX SCALE ────────────────────────────────────────────────────────────
+Z_BASE       = 0
+Z_DROPDOWN   = 10
+Z_STICKY     = 20
+Z_MODAL      = 100
+Z_TOAST      = 1000

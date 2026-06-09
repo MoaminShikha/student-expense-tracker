@@ -41,6 +41,8 @@ _CAUTION_THRESHOLD = Decimal("100")
 
 
 def main() -> int:
+    import logging
+    logger = logging.getLogger(__name__)
     app = QApplication([])
     load_fonts()
 
@@ -60,8 +62,7 @@ def main() -> int:
         spend_service       = SpendService(session_repo, tx_repo)
         balance_service     = BalanceService(engine, income_repo, charge_repo, tx_repo)
     except Exception:
-        import traceback
-        traceback.print_exc()
+        logger.exception("Failed to initialize application")
         return 1
 
     window = MainWindow()

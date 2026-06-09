@@ -98,9 +98,11 @@ class AddSpendDialog(QDialog):
 
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 45")
+        self._amount_edit.setFocus()
 
         self._desc_edit = QLineEdit()
         self._desc_edit.setPlaceholderText("e.g. Lunch at campus")
+        self._desc_edit.setMaxLength(500)
 
         self._cat_combo = QComboBox()
         for label in _CAT_LABELS:

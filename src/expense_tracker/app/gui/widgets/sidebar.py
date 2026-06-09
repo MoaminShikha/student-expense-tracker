@@ -384,6 +384,7 @@ class Sidebar(QWidget):
     def _build_nav_btn(self, key: str, text: str) -> QPushButton:
         btn = _NavButton(key, text)
         btn.setObjectName("sbNavItem")
+        btn.setAccessibleName(f"Navigate to {text}")
         btn.setProperty("active", "true" if key == self._active else "false")
         # Capture key in default arg so the lambda closes over the right value
         btn.clicked.connect(lambda _checked, k=key: self._on_nav_clicked(k))

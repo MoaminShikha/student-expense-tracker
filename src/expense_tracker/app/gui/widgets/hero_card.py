@@ -145,8 +145,8 @@ class HeroCard(QWidget):
         self._daily_amt.setText(per_day)
         self._daily_sub.setText(f"/ day · {days_left}")
 
-    def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
-        self._heads_up.set_data(body_html, amount_str)
+    def set_alert(self, body_text: str, amount_str: str, visible: bool) -> None:
+        self._heads_up.set_data(body_text, amount_str)
         self._heads_up.set_visible(visible)
 
     # ── LAYOUT ────────────────────────────────────────────────────────────────

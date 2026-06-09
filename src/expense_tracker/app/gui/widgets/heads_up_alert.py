@@ -69,7 +69,8 @@ class HeadsUpAlert(QWidget):
             font-family: "DM Mono", Consolas, monospace;
             background: transparent;
         """)
-        self._body.setTextFormat(Qt.TextFormat.RichText)
+        self._body.setTextFormat(Qt.TextFormat.PlainText)
+        self._body.setWordWrap(True)
         self._body.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         # Right amount
@@ -93,9 +94,9 @@ class HeadsUpAlert(QWidget):
 
     # ── PUBLIC ────────────────────────────────────────────────────────────────
 
-    def set_data(self, body_html: str, amount_str: str) -> None:
-        """Update body text (may include <b> tags) and right-side amount."""
-        self._body.setText(body_html)
+    def set_data(self, body_text: str, amount_str: str) -> None:
+        """Update body text and right-side amount."""
+        self._body.setText(body_text)
         self._amount.setText(amount_str)
 
     def set_visible(self, visible: bool) -> None:  # type: ignore[override]

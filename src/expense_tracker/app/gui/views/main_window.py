@@ -153,7 +153,7 @@ class MainWindow(QMainWindow):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
-        self.dashboard_page._hero.timeline.set_percentages(
+        self.dashboard_page.set_timeline_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )
 

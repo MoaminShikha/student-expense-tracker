@@ -1,6 +1,7 @@
 """Add Charge dialog — collects name, amount, due date, optional recurring."""
 from __future__ import annotations
 
+import calendar
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
@@ -96,6 +97,8 @@ class AddChargeDialog(QDialog):
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText("e.g. Rent")
+        self._name_edit.setMaxLength(100)
+        self._name_edit.setFocus()
 
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 400")
@@ -171,10 +174,20 @@ class AddChargeDialog(QDialog):
             QMessageBox.warning(self, "Invalid amount", "Enter a positive number.")
             return
 
+        day_of_month = self._day_spin.value()
+        if self._recurring_cb.isChecked():
+            if day_of_month > 28:
+                QMessageBox.warning(
+                    self,
+                    "Invalid day",
+                    "For monthly recurring, use day 1-28 (to avoid Feb/Apr/Jun/Sep/Nov issues)."
+                )
+                return
+
         self.name          = name
         self.amount        = amount
         self.is_recurring  = self._recurring_cb.isChecked()
-        self.day_of_month  = self._day_spin.value()
+        self.day_of_month  = day_of_month
         self.reminder_days = self._reminder_spin.value()
         qd                 = self._date_edit.date()
         self.due_date      = date(qd.year(), qd.month(), qd.day())
