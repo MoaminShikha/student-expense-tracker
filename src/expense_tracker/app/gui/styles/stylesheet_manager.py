@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from PyQt6.QtWidgets import QApplication
 from expense_tracker.app.gui.styles import tokens
-from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
 
 
 def get_global_stylesheet(theme: str = "light") -> str:
@@ -15,32 +14,35 @@ def get_global_stylesheet(theme: str = "light") -> str:
     Returns:
         Complete QSS stylesheet string
     """
+    # Select color palette based on theme
     if theme == "dark":
-        bg = tokens.DARK_BG
-        paper = tokens.DARK_PAPER_WARM
-        surface = tokens.DARK_SURFACE
-        hairline = tokens.DARK_HAIRLINE
-        hairline_s = tokens.DARK_HAIRLINE_S
-        fg = tokens.DARK_FG
-        muted_fg = tokens.DARK_MUTED_FG
-        muted = tokens.DARK_MUTED
-        red = tokens.DARK_RED
-        green = tokens.DARK_GREEN
-        gold = tokens.DARK_GOLD
-        amber = tokens.DARK_AMBER
+        bg = "#1a1a2e"
+        paper = "#242442"
+        surface = "#2d2d47"
+        hairline = "#3d3d57"
+        hairline_s = "#4d4d67"
+        fg = "#e8e8f0"
+        muted_fg = "#a8a8b8"
+        muted = "#767686"
+        red = "#ff6b6b"
+        green = "#51cf66"
+        gold = "#ffd93d"
+        amber = "#ffb347"
+        navy = "#1a1a2e"
     else:
-        bg = tokens.BG
-        paper = tokens.PAPER_WARM
-        surface = tokens.SURFACE
-        hairline = tokens.HAIRLINE
-        hairline_s = tokens.HAIRLINE_S
-        fg = tokens.FG
-        muted_fg = tokens.MUTED_FG
-        muted = tokens.MUTED
-        red = tokens.RED
-        green = tokens.GREEN
-        gold = tokens.GOLD
-        amber = tokens.AMBER
+        bg = "#f7f3ec"
+        paper = "#f3ede0"
+        surface = "#ffffff"
+        hairline = "#e2dccd"
+        hairline_s = "#cdc4ae"
+        fg = "#181a2c"
+        muted_fg = "#56586c"
+        muted = "#838897"
+        red = "#962e2e"
+        green = "#1b6a4f"
+        gold = "#c79a39"
+        amber = "#a05712"
+        navy = "#16172a"
 
     return f"""
     /* Global application stylesheet */
@@ -267,7 +269,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
 
     QDialogButtonBox QPushButton[text="Add"] {{
         background: {gold};
-        color: {tokens.NAVY};
+        color: {navy};
         border: none;
         font-weight: 600;
     }}
