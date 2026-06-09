@@ -97,6 +97,18 @@ class DashboardPage(QWidget):
     def set_categories(self, rows: Iterable[CategoryRowVM]) -> None:
         self._cat_panel.set_categories(list(rows))
 
+    def set_timeline_percentages(
+        self,
+        spent_pct: float,
+        committed_pct: float,
+        fuzzy_left_pct: float,
+        fuzzy_width_pct: float,
+        today_pct: float,
+    ) -> None:
+        self._hero.timeline.set_percentages(
+            spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
+        )
+
     def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
         self._hero.set_alert(body_html, amount_str, visible)
 

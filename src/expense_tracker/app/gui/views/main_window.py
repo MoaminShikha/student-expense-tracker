@@ -4,9 +4,10 @@ from collections.abc import Iterable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QPropertyAnimation, QEasingCurve
 from PyQt6.QtWidgets import (
     QFrame,
+    QGraphicsOpacityEffect,
     QHBoxLayout,
     QMainWindow,
     QStackedWidget,
@@ -132,6 +133,21 @@ class MainWindow(QMainWindow):
             "settings": PageIndex.SETTINGS,
         }
         idx = mapping.get(key, PageIndex.DASHBOARD)
+
+        # Fade-in animation on page switch
+        current_page = self._stack.currentWidget()
+        if current_page:
+            effect = QGraphicsOpacityEffect()
+            effect.setOpacity(0.0)
+            current_page.setGraphicsEffect(effect)
+            anim = QPropertyAnimation(effect, b"opacity", self)
+            anim.setDuration(150)
+            anim.setStartValue(0.0)
+            anim.setEndValue(1.0)
+            anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+            anim.start()
+
+
         self._stack.setCurrentIndex(idx)
         self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
         # Fire the page-enter callback (registered by controllers in main.py) so
@@ -166,6 +182,18 @@ class MainWindow(QMainWindow):
     def set_categories(self, rows: Iterable[CategoryRowVM]) -> None:
         self.dashboard_page.set_categories(rows)
 
+    def set_timeline_percentages(
+        self,
+        spent_pct: float,
+        committed_pct: float,
+        fuzzy_left_pct: float,
+        fuzzy_width_pct: float,
+        today_pct: float,
+    ) -> None:
+        self.dashboard_page.set_timeline_percentages(
+            spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
+        )
+
     def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
         self.dashboard_page.set_alert(body_html, amount_str, visible)
 
@@ -186,7 +214,7 @@ class MainWindow(QMainWindow):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
-        self.dashboard_page._hero.timeline.set_percentages(
+        self.dashboard_page.set_timeline_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )
 

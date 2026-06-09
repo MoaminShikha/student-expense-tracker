@@ -1,5 +1,6 @@
 # The one place that holds all visual values in the app, changes are only done here
 # Hex values are direct conversions of the HTML :root hsl() block.
+# LIGHT theme is the default; DARK theme colors defined below.
 
 from __future__ import annotations
 
@@ -45,6 +46,7 @@ HAIRLINE_S = _theme["HAIRLINE_S"]
 FG         = _theme["FG"]
 MUTED_FG   = _theme["MUTED_FG"]
 MUTED      = _theme["MUTED"]
+DISABLED   = "#a8a8b8"   # hsl(240 8% 68%)   — disabled interactive elements
 
 # ── BRAND ─────────────────────────────────────────────────────────────────────
 NAVY       = "#16172a"   # hsl(240 30% 11%)  — action buttons, avatar bg
@@ -105,3 +107,43 @@ CARD_RADIUS  = 14
 PANEL_RADIUS = 14
 HERO_RADIUS  = 14
 TOPBAR_H     = 54
+
+# ── SPACING SCALE (dp/px) ────────────────────────────────────────────────────
+SPACE_XS     = 4
+SPACE_SM     = 8
+SPACE_MD     = 16
+SPACE_LG     = 24
+SPACE_XL     = 32
+
+# ── Z-INDEX SCALE ────────────────────────────────────────────────────────────
+Z_BASE       = 0
+Z_DROPDOWN   = 10
+Z_STICKY     = 20
+Z_MODAL      = 100
+Z_TOAST      = 1000
+
+# ── DARK MODE THEME ───────────────────────────────────────────────────────────
+# Dark theme color overrides — use these when dark mode is enabled.
+# Light mode is the current standard defined above.
+
+DARK_BG              = "#1a1a2e"   # hsl(240 25% 12%) — dark background
+DARK_PAPER_WARM      = "#242442"   # hsl(240 20% 16%) — slightly lighter surface
+DARK_SURFACE         = "#2d2d47"   # hsl(240 18% 19%) — card/panel background
+DARK_HAIRLINE        = "#3d3d57"   # hsl(240 15% 26%) — subtle dividers
+DARK_HAIRLINE_S      = "#4d4d67"   # hsl(240 12% 33%) — stronger dividers
+DARK_FG              = "#e8e8f0"   # hsl(240 12% 93%) — primary text
+DARK_MUTED_FG        = "#a8a8b8"   # hsl(240 8% 68%)  — secondary text
+DARK_MUTED           = "#767686"   # hsl(240 8% 53%)  — disabled / micro-labels
+DARK_DISABLED        = "#535363"   # hsl(240 6% 38%)  — disabled interactive
+DARK_RED             = "#ff6b6b"   # hsl(0 100% 68%)  — brighter red for dark
+DARK_GREEN           = "#51cf66"   # hsl(135 70% 65%) — brighter green for dark
+DARK_GOLD            = "#ffd93d"   # hsl(42 100% 65%) — brighter gold for dark
+DARK_AMBER           = "#ffb347"   # hsl(32 100% 65%) — brighter amber for dark
+DARK_GOLD_LEAF       = "#e6b800"   # hsl(42 100% 48%)  — darker gold for dark mode text
+DARK_HERO_BG1        = "#2a2942"   # hsl(240 20% 20%)  — dark gradient start
+DARK_HERO_BG2        = "#1f1f38"   # hsl(240 25% 15%)  — dark gradient end
+DARK_TRACK           = "#3a3a52"   # hsl(240 15% 28%)  — dark timeline track
+DARK_CAT_FOOD        = "#ff8c42"   # hsl(18 100% 60%)  — brighter food color
+DARK_CAT_EDU         = "#5b9cff"   # hsl(217 100% 65%) — brighter education color
+DARK_CAT_TRANS       = "#2dd4bf"   # hsl(162 100% 55%) — brighter transport color
+DARK_CAT_OTHER       = "#c77dff"   # hsl(268 100% 68%) — brighter entertainment/other color
