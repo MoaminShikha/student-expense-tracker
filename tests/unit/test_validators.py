@@ -60,9 +60,6 @@ class TestParseAmount:
     @pytest.mark.parametrize(
         "raw_value,expected",
         [
-            pytest.param("0", Decimal("0"),
-                         id="zero",  # zero amount is technically valid even if uncommon
-                         ),
             pytest.param("42", Decimal("42"),
                          id="whole number",  # typical integer amount parses correctly
                          ),

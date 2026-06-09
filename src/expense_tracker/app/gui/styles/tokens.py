@@ -35,6 +35,10 @@ _DARK = {
 # ── APPLY THEME ────────────────────────────────────────────────────────────────
 _theme = _DARK if DARK_MODE else _LIGHT
 
+# Expose both palettes so stylesheet_manager can pick the right one at runtime
+LIGHT_PALETTE = _LIGHT
+DARK_PALETTE  = _DARK
+
 # ── BACKGROUND & SURFACE ──────────────────────────────────────────────────────
 BG         = _theme["BG"]
 PAPER_WARM = _theme["PAPER_WARM"]

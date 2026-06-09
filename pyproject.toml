@@ -52,8 +52,8 @@ Repository = "https://github.com/moamin/student-expense-tracker.git"
 student-expense-tracker = "expense_tracker.app.cli:main"
 mizaan = "expense_tracker.app.gui.main:main"
 
-[tool.setuptools]
-packages = ["expense_tracker"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 expense_tracker = ["py.typed"]
