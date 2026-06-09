@@ -99,6 +99,7 @@ class AddIncomeDialog(QDialog):
         # ── Form ──────────────────────────────────────────────────────────────
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 500")
+        self._amount_edit.setFocus()
 
         self._source_combo = QComboBox()
         for label in _SOURCE_LABELS:

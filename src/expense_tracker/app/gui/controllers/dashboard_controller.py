@@ -87,30 +87,37 @@ class DashboardController:
         if self._income_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_income_dialog import AddIncomeDialog
+        from PyQt6.QtWidgets import QMessageBox
         dlg = AddIncomeDialog()
         if dlg.exec():
             try:
                 self._income_service.add_income(dlg.amount, dlg.source_tag, dlg.entry_date)
                 self.refresh()
-            except Exception:
+                QMessageBox.information(self._view, "Success", "Income added ✓", QMessageBox.StandardButton.Ok)
+            except Exception as e:
                 self._logger.exception("Failed to add income")
+                QMessageBox.critical(self._view, "Error", f"Failed to add income: {str(e)}", QMessageBox.StandardButton.Ok)
 
     def _on_add_spend_requested(self) -> None:
         if self._spend_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_spend_dialog import AddSpendDialog
+        from PyQt6.QtWidgets import QMessageBox
         dlg = AddSpendDialog()
         if dlg.exec():
             try:
                 self._spend_service.add_transaction(dlg.amount, dlg.description, dlg.category, dlg.spent_on)
                 self.refresh()
-            except Exception:
+                QMessageBox.information(self._view, "Success", "Spend recorded ✓", QMessageBox.StandardButton.Ok)
+            except Exception as e:
                 self._logger.exception("Failed to add spend")
+                QMessageBox.critical(self._view, "Error", f"Failed to record spend: {str(e)}", QMessageBox.StandardButton.Ok)
 
     def _on_add_charge_requested(self) -> None:
         if self._charge_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_charge_dialog import AddChargeDialog
+        from PyQt6.QtWidgets import QMessageBox
         dlg = AddChargeDialog()
         if dlg.exec():
             try:
@@ -119,8 +126,10 @@ class DashboardController:
                 else:
                     self._charge_service.add_charge(dlg.name, dlg.amount, dlg.due_date)
                 self.refresh()
-            except Exception:
+                QMessageBox.information(self._view, "Success", "Charge added ✓", QMessageBox.StandardButton.Ok)
+            except Exception as e:
                 self._logger.exception("Failed to add charge")
+                QMessageBox.critical(self._view, "Error", f"Failed to add charge: {str(e)}", QMessageBox.StandardButton.Ok)
 
     # ── Presentation mapping ──────────────────────────────────────────────────
 
@@ -187,9 +196,9 @@ class DashboardController:
                     if f.estimated_amount is not None
                 ]
                 fuzzy_total = sum(fuzzy_estimates, Decimal("0"))
-                fuzzy_left_pct = committed_pct  # fuzzy zone starts after committed
+                fuzzy_left_pct = spent_pct + committed_pct
                 fuzzy_width_pct = float(min(
-                    Decimal("100") - Decimal(str(committed_pct)),
+                    Decimal("100") - Decimal(str(spent_pct)) - Decimal(str(committed_pct)),
                     fuzzy_total / budget * Decimal("100"),
                 ))
             except Exception:
