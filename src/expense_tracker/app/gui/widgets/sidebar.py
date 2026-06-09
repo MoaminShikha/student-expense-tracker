@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal
+from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal, QEvent
 from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
 from PyQt6.QtWidgets import (
     QFrame,
@@ -389,6 +389,8 @@ class Sidebar(QWidget):
         btn = _NavButton(key, text)
         btn.setObjectName("sbNavItem")
         btn.setAccessibleName(f"Navigate to {text}")
+        btn.setAccessibleDescription(f"Click to go to {text} page")
+        btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         btn.setProperty("active", "true" if key == self._active else "false")
         # Capture key in default arg so the lambda closes over the right value
         btn.clicked.connect(lambda _checked, k=key: self._on_nav_clicked(k))
