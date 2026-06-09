@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from PyQt6.QtCore import QDate, QTimer
+from PyQt6.QtCore import QDate, QTimer, Qt
 from PyQt6.QtWidgets import (
     QComboBox,
     QDateEdit,
@@ -32,7 +32,7 @@ _DIALOG_SS = f"""
         background: transparent;
     }}
     QLineEdit, QComboBox, QDateEdit {{
-        border: 1px solid {tokens.HAIRLINE};
+        border: 2px solid {tokens.HAIRLINE};
         border-radius: 6px;
         padding: 6px 10px;
         font-size: {tokens.T_SM}px;
@@ -41,7 +41,8 @@ _DIALOG_SS = f"""
         background: {tokens.SURFACE};
     }}
     QLineEdit:focus, QComboBox:focus, QDateEdit:focus {{
-        border: 1px solid {tokens.GOLD};
+        border: 2px solid {tokens.FOCUS};
+        outline: none;
     }}
     QComboBox QAbstractItemView {{
         background: {tokens.SURFACE};
@@ -99,21 +100,33 @@ class AddSpendDialog(QDialog):
 
         self._amount_edit = QLineEdit()
         self._amount_edit.setPlaceholderText("e.g. 45")
+        self._amount_edit.setAccessibleName("Spend amount")
+        self._amount_edit.setAccessibleDescription("Enter how much you spent in Israeli Shekels")
+        self._amount_edit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self._amount_edit.setFocus()
 
         self._desc_edit = QLineEdit()
         self._desc_edit.setPlaceholderText("e.g. Lunch at campus")
         self._desc_edit.setMaxLength(500)
+        self._desc_edit.setAccessibleName("Description")
+        self._desc_edit.setAccessibleDescription("Describe what you spent money on (e.g., Lunch, Coffee, Transport)")
+        self._desc_edit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self._cat_combo = QComboBox()
         for label in _CAT_LABELS:
             self._cat_combo.addItem(label)
         self._cat_combo.setCurrentText("Other")
+        self._cat_combo.setAccessibleName("Category")
+        self._cat_combo.setAccessibleDescription("Select the category: Food, Transport, Education, Entertainment, or Other")
+        self._cat_combo.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self._date_edit = QDateEdit()
         self._date_edit.setCalendarPopup(True)
         self._date_edit.setDate(QDate.currentDate())
         self._date_edit.setDisplayFormat("dd MMM yyyy")
+        self._date_edit.setAccessibleName("Spend date")
+        self._date_edit.setAccessibleDescription("Enter the date you made this purchase")
+        self._date_edit.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         form = QFormLayout()
         form.setSpacing(10)
@@ -126,8 +139,17 @@ class AddSpendDialog(QDialog):
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
         self._ok_btn = buttons.button(QDialogButtonBox.StandardButton.Ok)
-        self._ok_btn.setText("Add")
-        buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancel")
+        self._ok_btn.setText("&Add")
+        self._ok_btn.setAccessibleName("Add spend")
+        self._ok_btn.setAccessibleDescription("Click to add this spending entry (Alt+A)")
+        self._ok_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+        cancel_btn = buttons.button(QDialogButtonBox.StandardButton.Cancel)
+        cancel_btn.setText("Cancel")
+        cancel_btn.setAccessibleName("Cancel")
+        cancel_btn.setAccessibleDescription("Click to cancel without adding")
+        cancel_btn.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
 
