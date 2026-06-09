@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 from datetime import date
 from decimal import Decimal
@@ -8,6 +7,7 @@ from pathlib import Path
 from uuid import UUID
 
 from ....domain.models import Transaction, TransactionCategory
+from ..safe_file_io import load_json_safely, save_json_safely
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -94,16 +94,9 @@ class JsonTransactionRepository:
         )
 
     def _load_all(self) -> list[dict]:
-        """Load all records from storage."""
-        if not self._storage_path.exists():
-            return []
-        try:
-            with open(self._storage_path, "r") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
+        """Load all records from storage with corruption recovery."""
+        return load_json_safely(self._storage_path)
 
     def _save_all(self, data: list[dict]) -> None:
-        """Save all records to storage."""
-        with open(self._storage_path, "w") as f:
-            json.dump(data, f, indent=2)
+        """Save all records to storage with atomic write and backup."""
+        save_json_safely(self._storage_path, data)

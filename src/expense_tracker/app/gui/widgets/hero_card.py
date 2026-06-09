@@ -45,6 +45,7 @@ from PyQt6.QtWidgets import (
 
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.styles.textures import dot_grain
+from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
 from expense_tracker.app.gui.widgets.heads_up_alert import HeadsUpAlert
 from expense_tracker.app.gui.widgets.timeline_widget import TimelineWidget
 
@@ -145,8 +146,8 @@ class HeroCard(QWidget):
         self._daily_amt.setText(per_day)
         self._daily_sub.setText(f"/ day · {days_left}")
 
-    def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
-        self._heads_up.set_data(body_html, amount_str)
+    def set_alert(self, body_text: str, amount_str: str, visible: bool) -> None:
+        self._heads_up.set_data(body_text, amount_str)
         self._heads_up.set_visible(visible)
 
     # ── LAYOUT ────────────────────────────────────────────────────────────────
@@ -450,8 +451,13 @@ class HeroCard(QWidget):
         r = float(tokens.HERO_RADIUS)
         rect = QRectF(1, 1, w - 2, h - 2)
 
+        # Get theme-aware colors
+        theme_mgr = get_theme_manager()
+        bg1_color = theme_mgr.get_color(tokens.HERO_BG1)
+        bg2_color = theme_mgr.get_color(tokens.HERO_BG2)
+
         # ── Radial tint top-right ─────────────────────────────────────────────
-        rg1 = QRadialGradient(QPointF(w * 0.88, 0), w * 0.6) 
+        rg1 = QRadialGradient(QPointF(w * 0.88, 0), w * 0.6)
         tint_c = QColor(*_HERO_TINT_RGBA)
         rg1.setColorAt(0, tint_c)
         rg1.setColorAt(1, Qt.GlobalColor.transparent)
@@ -465,8 +471,8 @@ class HeroCard(QWidget):
 
         # ── Linear gradient base ──────────────────────────────────────────────
         lg = QLinearGradient(QPointF(0, 0), QPointF(w, h))
-        lg.setColorAt(0, QColor(tokens.HERO_BG1))
-        lg.setColorAt(1, QColor(tokens.HERO_BG2))
+        lg.setColorAt(0, QColor(bg1_color))
+        lg.setColorAt(1, QColor(bg2_color))
 
         # Draw base gradient
         p.setPen(Qt.PenStyle.NoPen)
