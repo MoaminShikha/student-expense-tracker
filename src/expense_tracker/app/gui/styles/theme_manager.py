@@ -32,6 +32,14 @@ class ThemeManager(QObject):
             tokens.GREEN: (tokens.GREEN, tokens.DARK_GREEN),
             tokens.GOLD: (tokens.GOLD, tokens.DARK_GOLD),
             tokens.AMBER: (tokens.AMBER, tokens.DARK_AMBER),
+            tokens.GOLD_LEAF: (tokens.GOLD_LEAF, tokens.DARK_GOLD_LEAF),
+            tokens.HERO_BG1: (tokens.HERO_BG1, tokens.DARK_HERO_BG1),
+            tokens.HERO_BG2: (tokens.HERO_BG2, tokens.DARK_HERO_BG2),
+            tokens.TRACK: (tokens.TRACK, tokens.DARK_TRACK),
+            tokens.CAT_FOOD: (tokens.CAT_FOOD, tokens.DARK_CAT_FOOD),
+            tokens.CAT_EDU: (tokens.CAT_EDU, tokens.DARK_CAT_EDU),
+            tokens.CAT_TRANS: (tokens.CAT_TRANS, tokens.DARK_CAT_TRANS),
+            tokens.CAT_OTHER: (tokens.CAT_OTHER, tokens.DARK_CAT_OTHER),
         }
 
     def set_theme(self, theme: str) -> None:

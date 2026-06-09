@@ -74,6 +74,15 @@ class DashboardController:
                                                                           session.opening_balance, )
             view_model = self._build_view_model(snapshot, session_id=session.session_id)
             self._view.set_snapshot(view_model, last_sync=None)
+            self._view.set_timeline_percentages(
+                view_model.timeline_spent_pct,
+                view_model.timeline_committed_pct,
+                view_model.timeline_fuzzy_left_pct,
+                view_model.timeline_fuzzy_width_pct,
+                view_model.today_pct,
+            )
+
+            today = date.today()
 
             # Populate upcoming charges
             if self._charge_service:
