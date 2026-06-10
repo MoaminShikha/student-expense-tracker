@@ -8,9 +8,27 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+import threading
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# One lock per absolute storage path, shared across all repositories in this
+# process. Serializes the read-modify-write cycle so GUI worker threads and the
+# main thread cannot interleave writes to the same file and clobber each other.
+# (Cross-process safety would additionally require an OS-level file lock.)
+_path_locks: dict[str, threading.Lock] = {}
+_path_locks_guard = threading.Lock()
+
+
+def _lock_for(storage_path: Path) -> threading.Lock:
+    """Return the process-wide lock guarding writes to ``storage_path``."""
+    key = str(storage_path.resolve() if storage_path.parent.exists() else storage_path)
+    with _path_locks_guard:
+        lock = _path_locks.get(key)
+        if lock is None:
+            lock = _path_locks[key] = threading.Lock()
+        return lock
 
 
 def save_json_safely(storage_path: Path, data: list[dict]) -> None:
@@ -31,6 +49,12 @@ def save_json_safely(storage_path: Path, data: list[dict]) -> None:
     storage_path = Path(storage_path)
     storage_path.parent.mkdir(parents=True, exist_ok=True)
 
+    with _lock_for(storage_path):
+        _save_json_locked(storage_path, data)
+
+
+def _save_json_locked(storage_path: Path, data: list[dict]) -> None:
+    """Backup + atomic write, assuming the path lock is already held."""
     # Step 1: Create backup of current file if it exists
     if storage_path.exists():
         backup_path = storage_path.with_suffix(".json.bak")
@@ -85,7 +109,8 @@ def load_json_safely(storage_path: Path) -> list[dict]:
     if storage_path.exists():
         try:
             with open(storage_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data: list[dict] = json.load(f)
+                return data
         except json.JSONDecodeError as e:
             logger.warning(f"JSON decode failed for {storage_path}: {e}")
             # Fall through to try backup
@@ -98,9 +123,9 @@ def load_json_safely(storage_path: Path) -> list[dict]:
     if backup_path.exists():
         try:
             with open(backup_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                backup_data: list[dict] = json.load(f)
                 logger.info(f"Recovered data from backup: {backup_path}")
-                return data
+                return backup_data
         except Exception as e:
             logger.warning(f"Failed to read backup {backup_path}: {e}")
 

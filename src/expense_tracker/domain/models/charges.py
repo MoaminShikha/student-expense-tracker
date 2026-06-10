@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from decimal import Decimal
 from enum import Enum
@@ -47,6 +47,15 @@ class CommittedCharge:
     due_date: date
     status: ChargeStatus
     recurring_rule_id: UUID | None = None
+
+    @property
+    def is_paid(self) -> bool:
+        """Whether this charge has already been settled."""
+        return self.status is ChargeStatus.PAID
+
+    def mark_paid(self) -> CommittedCharge:
+        """Return a copy of this charge transitioned to the paid state."""
+        return replace(self, status=ChargeStatus.PAID)
 
 
 @dataclass(frozen=True)

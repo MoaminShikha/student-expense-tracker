@@ -24,6 +24,7 @@ class DummyView:
         self.add_income_requested = SignalStub()
         self.add_spend_requested = SignalStub()
         self.add_charge_requested = SignalStub()
+        self.mark_charge_paid_requested = SignalStub()
 
         self.set_snapshot_called = False
         self.last_snapshot = None

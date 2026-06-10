@@ -14,23 +14,7 @@ _DATA_DIR     = _PROJECT_ROOT / "data"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from expense_tracker.application.calculations import BalanceEngine
-from expense_tracker.application.services import (
-    BalanceService,
-    ChargeService,
-    FuzzyChargeService,
-    IncomeService,
-    SessionService,
-    SpendService,
-)
-from expense_tracker.infrastructure.json.repositories import (
-    JsonChargeRepository,
-    JsonFuzzyChargeRepository,
-    JsonIncomeRepository,
-    JsonRecurringRuleRepository,
-    JsonSessionRepository,
-    JsonTransactionRepository,
-)
+from expense_tracker.app.composition import build_services
 from expense_tracker.app.gui.constants import PageIndex
 from expense_tracker.app.gui.styles.fonts import load_fonts
 from expense_tracker.app.gui.styles.stylesheet import application_stylesheet
@@ -56,23 +40,33 @@ def main() -> int:
     apply_stylesheet(app, theme_mgr.current_theme)
 
     try:
-        session_repo = JsonSessionRepository(_DATA_DIR / "session.json")
-        income_repo  = JsonIncomeRepository(_DATA_DIR / "income.json")
-        charge_repo  = JsonChargeRepository(_DATA_DIR / "charges.json")
-        rule_repo    = JsonRecurringRuleRepository(_DATA_DIR / "recurring_rules.json")
-        fuzzy_repo   = JsonFuzzyChargeRepository(_DATA_DIR / "fuzzy_charges.json")
-        tx_repo      = JsonTransactionRepository(_DATA_DIR / "transactions.json")
-
-        engine              = BalanceEngine()
-        session_service     = SessionService(session_repo)
-        income_service      = IncomeService(session_repo, income_repo)
-        charge_service      = ChargeService(session_repo, charge_repo, rule_repo)
-        fuzzy_charge_service = FuzzyChargeService(session_repo, fuzzy_repo, charge_repo, income_repo)
-        spend_service       = SpendService(session_repo, tx_repo)
-        balance_service     = BalanceService(engine, income_repo, charge_repo, tx_repo)
+        services = build_services(_DATA_DIR, logger=logger)
     except Exception:
         logger.exception("Failed to initialize application")
         return 1
+
+    session_service      = services.session_service
+    income_service       = services.income_service
+    charge_service       = services.charge_service
+    fuzzy_charge_service = services.fuzzy_charge_service
+    spend_service        = services.spend_service
+    balance_service      = services.balance_service
+
+    # First-run onboarding: without an active session every add silently no-ops
+    # (services raise "No active session"), so collect an opening balance and
+    # create the session before the main window loads.
+    if session_service.get_active() is None:
+        from expense_tracker.app.gui.dialogs.onboarding_dialog import OnboardingDialog
+
+        onboarding = OnboardingDialog()
+        if not onboarding.exec():
+            logger.info("Onboarding cancelled before a session was created; exiting.")
+            return 0
+        try:
+            session_service.init_session(onboarding.opening_balance)
+        except Exception:
+            logger.exception("Failed to create the initial session")
+            return 1
 
     window = MainWindow()
 

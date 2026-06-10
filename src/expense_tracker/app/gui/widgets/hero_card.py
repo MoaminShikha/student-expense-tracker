@@ -319,7 +319,7 @@ class HeroCard(QWidget):
                 background: transparent;
             }}
             QLabel#heroMoneySym {{
-                color: rgba(24,26,44,0.38);
+                color: {tokens.MUTED};
                 font-family: "Segoe UI", "Arial", sans-serif;
                 font-size: 20px;
                 padding-bottom: 8px;
@@ -353,7 +353,7 @@ class HeroCard(QWidget):
             }}
             QLabel#heroArabic {{
                 font-family: "Noto Naskh Arabic"; font-size: 13px;
-                color: rgba(168,124,36,0.65); background: transparent;
+                color: {tokens.GOLD}; background: transparent;
             }}
             QWidget#heroLine {{
                 background: {tokens.GOLD}; border: none;

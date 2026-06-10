@@ -58,6 +58,7 @@ class DashboardController:
         self._view.add_income_requested.connect(self._on_add_income_requested)
         self._view.add_spend_requested.connect(self._on_add_spend_requested)
         self._view.add_charge_requested.connect(self._on_add_charge_requested)
+        self._view.mark_charge_paid_requested.connect(self._on_mark_charge_paid)
 
     def refresh(self) -> None:
         """Fetch latest data from services and push it into the view."""
@@ -147,12 +148,34 @@ class DashboardController:
             try:
                 self._income_service.add_income(dlg.amount, dlg.source_tag, dlg.entry_date)
                 self.refresh()
-            except ValidationError as e:
-                self._logger.warning("Invalid income entry: %s", e)
-            except ApplicationError as e:
+            except (ValidationError, ApplicationError) as e:
                 self._logger.warning("Could not add income: %s", e)
+                self._show_error("Could not add income", str(e))
             except Exception:
                 self._logger.exception("Unexpected error adding income")
+                self._show_error("Could not add income", "An unexpected error occurred.")
+
+    def _on_mark_charge_paid(self, charge_id: str) -> None:
+        if self._charge_service is None:
+            return
+        from uuid import UUID
+        try:
+            self._charge_service.mark_paid(UUID(charge_id))
+            self.refresh()
+        except (ValidationError, ApplicationError) as e:
+            self._logger.warning("Could not mark charge paid: %s", e)
+            self._show_error("Could not mark charge paid", str(e))
+        except Exception:
+            self._logger.exception("Unexpected error marking charge paid")
+            self._show_error("Could not mark charge paid", "An unexpected error occurred.")
+
+    def _show_error(self, title: str, message: str) -> None:
+        """Surface a failure to the user instead of silently logging it."""
+        try:
+            from expense_tracker.app.gui.widgets.error_dialog import ErrorDialog
+            ErrorDialog.show_error(title, message)
+        except Exception:
+            self._logger.exception("Failed to display error dialog")
 
     def _on_add_spend_requested(self) -> None:
         if self._spend_service is None:
@@ -164,12 +187,12 @@ class DashboardController:
             try:
                 self._spend_service.add_transaction(dlg.amount, dlg.description, dlg.category, dlg.spent_on)
                 self.refresh()
-            except ValidationError as e:
-                self._logger.warning("Invalid spend entry: %s", e)
-            except ApplicationError as e:
+            except (ValidationError, ApplicationError) as e:
                 self._logger.warning("Could not add spend: %s", e)
+                self._show_error("Could not add expense", str(e))
             except Exception:
                 self._logger.exception("Unexpected error adding spend")
+                self._show_error("Could not add expense", "An unexpected error occurred.")
 
     def _on_add_charge_requested(self) -> None:
         if self._charge_service is None:
@@ -184,12 +207,12 @@ class DashboardController:
                 else:
                     self._charge_service.add_charge(dlg.name, dlg.amount, dlg.due_date)
                 self.refresh()
-            except ValidationError as e:
-                self._logger.warning("Invalid charge entry: %s", e)
-            except ApplicationError as e:
+            except (ValidationError, ApplicationError) as e:
                 self._logger.warning("Could not add charge: %s", e)
+                self._show_error("Could not add charge", str(e))
             except Exception:
                 self._logger.exception("Unexpected error adding charge")
+                self._show_error("Could not add charge", "An unexpected error occurred.")
 
     # ── Presentation mapping ──────────────────────────────────────────────────
 
@@ -308,6 +331,7 @@ class DashboardController:
             due_str=charge.due_date.strftime("%d %b"),
             relative_str=relative,
             recurring=charge.recurring_rule_id is not None,
+            charge_id=str(charge.charge_id),
         )
 
     def _tx_to_row(self, tx) -> 'TxRowVM':
