@@ -38,11 +38,16 @@ jobs:
       - name: Lint with ruff
         run: ruff check src/ tests/
 
-      - name: Type check with mypy
-        run: mypy src/expense_tracker --ignore-missing-imports
+      # Core layers (domain/application/ports/infrastructure) are type-clean and
+      # enforced. The Qt GUI layer still has type debt, so it stays advisory.
+      - name: Type check core (strict)
+        run: mypy src/expense_tracker/domain src/expense_tracker/application src/expense_tracker/ports src/expense_tracker/infrastructure --ignore-missing-imports
+
+      - name: Type check GUI (advisory)
+        run: mypy src/expense_tracker/app --ignore-missing-imports
         continue-on-error: true
 
       - name: Run tests (headless)
-        run: xvfb-run -a pytest tests/ --tb=short -q
+        run: xvfb-run -a pytest tests/ --tb=short -q --cov=src/expense_tracker --cov-report=term-missing --cov-fail-under=35
         env:
           QT_QPA_PLATFORM: offscreen

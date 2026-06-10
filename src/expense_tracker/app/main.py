@@ -6,20 +6,10 @@ from pathlib import Path
 from typing import Sequence
 from decimal import Decimal
 
-from ..application.calculations import BalanceEngine
-from ..application.services import BalanceService, ChargeService, FuzzyChargeService, IncomeService, SessionService, SpendService
-from ..infrastructure.json.repositories import (
-    JsonChargeRepository,
-    JsonFuzzyChargeRepository,
-    JsonIncomeRepository,
-    JsonRecurringRuleRepository,
-    JsonSessionRepository,
-    JsonTransactionRepository,
-)
 from ..infrastructure.logging_config import LoggerFactory
-from ..ports.repositories import ChargeRepository, FuzzyChargeRepository, IncomeRepository, RecurringRuleRepository, SessionRepository, TransactionRepository
 from ..shared.exceptions import ExpenseTrackerError
 from .cli import CliApplication
+from .composition import build_services
 
 _DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 _CAUTION_THRESHOLD = Decimal("100")
@@ -43,28 +33,15 @@ class ApplicationEntryPoint:
             logger = logger_factory.get_logger(__name__)
             logger.info("Application started.")
 
-            session_repository: SessionRepository = JsonSessionRepository(_DATA_DIR / "session.json")
-            income_repository: IncomeRepository = JsonIncomeRepository(_DATA_DIR / "income.json")
-            charge_repository: ChargeRepository = JsonChargeRepository(_DATA_DIR / "charges.json")
-            recurring_rule_repository: RecurringRuleRepository = JsonRecurringRuleRepository(_DATA_DIR / "recurring_rules.json")
-            fuzzy_charge_repository: FuzzyChargeRepository = JsonFuzzyChargeRepository(_DATA_DIR / "fuzzy_charges.json")
-            transaction_repository: TransactionRepository = JsonTransactionRepository(_DATA_DIR / "transactions.json")
-
-            session_service = SessionService(session_repository, logger=logger)
-            income_service = IncomeService(session_repository, income_repository, logger=logger)
-            charge_service = ChargeService(session_repository, charge_repository, recurring_rule_repository, logger=logger)
-            fuzzy_charge_service = FuzzyChargeService(session_repository, fuzzy_charge_repository, charge_repository, income_repository, logger=logger)
-            spend_service = SpendService(session_repository, transaction_repository, logger=logger)
-            balance_engine = BalanceEngine()
-            balance_service = BalanceService(balance_engine, income_repository, charge_repository, transaction_repository, logger=logger)
+            services = build_services(_DATA_DIR, logger=logger)
 
             cli_application = CliApplication(
-                session_service,
-                balance_service,
-                income_service,
-                charge_service,
-                fuzzy_charge_service,
-                spend_service,
+                services.session_service,
+                services.balance_service,
+                services.income_service,
+                services.charge_service,
+                services.fuzzy_charge_service,
+                services.spend_service,
                 caution_threshold=_CAUTION_THRESHOLD,
             )
             return cli_application.run(cli_arguments)

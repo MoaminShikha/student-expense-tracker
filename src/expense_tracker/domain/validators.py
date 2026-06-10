@@ -12,9 +12,16 @@ from ..shared.exceptions import ValidationError
 def _parse_decimal(raw_value: str, field_name: str) -> Decimal:
     """Parse a decimal string with proper error handling."""
     try:
-        return Decimal(raw_value)
+        value = Decimal(raw_value)
     except (InvalidOperation, ValueError) as exc:
         raise ValidationError(f"{field_name} must be a valid decimal value.") from exc
+
+    # ``Decimal('NaN')`` / ``Decimal('Infinity')`` parse without error but are
+    # not real amounts and break downstream comparisons (e.g. ``.exponent``).
+    if not value.is_finite():
+        raise ValidationError(f"{field_name} must be a valid decimal value.")
+
+    return value
 
 
 def parse_opening_balance(raw_value: str) -> Decimal:
@@ -44,8 +51,10 @@ def parse_amount(raw_value: str) -> Decimal:
     if amount <= 0:
         raise ValidationError("Amount must be greater than zero.")
 
-    # Validate currency precision (max 2 decimal places)
-    if amount.as_tuple().exponent < -2:
+    # Validate currency precision (max 2 decimal places). ``exponent`` is an int
+    # for finite values, which ``_parse_decimal`` guarantees.
+    exponent = amount.as_tuple().exponent
+    if isinstance(exponent, int) and exponent < -2:
         raise ValidationError("Amount cannot have more than 2 decimal places.")
 
     # Validate max amount (₪1,000,000)

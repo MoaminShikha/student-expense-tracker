@@ -20,6 +20,7 @@ from PyQt6.QtCore import (
     QRectF,
     Qt,
     pyqtProperty,  # type: ignore[attr-defined]
+    pyqtSignal,
 )
 from PyQt6.QtGui import QColor, QPainter
 from PyQt6.QtWidgets import (
@@ -53,6 +54,7 @@ class ChargeRowVM:
     due_str: str
     relative_str: str  # "in 3 days"
     recurring: bool
+    charge_id: str = ""  # used to mark the charge paid; empty when not actionable
 
 
 @dataclass(frozen=True)
@@ -312,6 +314,8 @@ class CategoryPanel(_Panel):
 class UpcomingPanel(_Panel):
     """Upcoming Charges panel with charge rows."""
 
+    charge_paid = pyqtSignal(str)  # emits the charge_id when a row's ✓ is clicked
+
     def __init__(self, btn_signal) -> None:
         super().__init__("Upcoming", "+ Add Charge", btn_signal, meta="charges due soon")
         self._body.addWidget(self._empty_state("No upcoming charges loaded yet."))
@@ -390,6 +394,22 @@ class UpcomingPanel(_Panel):
         layout.addWidget(stripe)
         layout.addWidget(body_w, stretch=1)
         layout.addWidget(right_w)
+
+        # Mark-paid action — only shown for actionable rows (those carrying an id)
+        if row.charge_id:
+            paid_btn = QPushButton("✓")
+            paid_btn.setFixedSize(28, 28)
+            paid_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            paid_btn.setToolTip("Mark this charge as paid")
+            paid_btn.setAccessibleName(f"Mark {row.name} as paid")
+            paid_btn.setStyleSheet(
+                f"QPushButton {{ font-size: {tokens.T_BASE}px; color: {tokens.MUTED};"
+                f" background: transparent; border: 1px solid {tokens.HAIRLINE};"
+                f" border-radius: 6px; }}"
+                f"QPushButton:hover {{ color: {tokens.GREEN}; border-color: {tokens.GREEN}; }}"
+            )
+            paid_btn.clicked.connect(lambda _=False, cid=row.charge_id: self.charge_paid.emit(cid))
+            layout.addWidget(paid_btn)
 
         if not last:
             # separator line

@@ -38,6 +38,7 @@ class DashboardPage(QWidget):
         add_income_signal,
         add_spend_signal,
         add_charge_signal,
+        mark_charge_paid_signal=None,
     ) -> None:
         super().__init__()
         self.setObjectName("dashboardPage")
@@ -51,6 +52,11 @@ class DashboardPage(QWidget):
         self._upcoming_panel = UpcomingPanel(add_charge_signal)
         self._recent_panel = RecentPanel(add_spend_signal)
         self._footer = FooterStrip()
+
+        # A charge row's ✓ button emits charge_paid(id); forward it up to
+        # MainWindow so the controller can mark the charge paid.
+        if mark_charge_paid_signal is not None:
+            self._upcoming_panel.charge_paid.connect(mark_charge_paid_signal)
 
         self._build_layout()
 

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 # ── THEME CONTROL ─────────────────────────────────────────────────────────────
 # Set DARK_MODE = True to switch all tokens to dark palette
-DARK_MODE = True
+DARK_MODE = False
 
 # ── LIGHT THEME TOKENS ─────────────────────────────────────────────────────────
 _LIGHT = {
@@ -94,9 +94,9 @@ CATEGORY_COLORS: dict[str, str] = {
 TRACK      = "#ece6da" if not DARK_MODE else "#334155"  # timeline background track
 
 # ── TYPE SCALE (px) ───────────────────────────────────────────────────────────
-T_MICRO = 8
-T_MINI  = 9
-T_XS    = 10
+T_MICRO = 10   # caption / letter-spaced labels (raised from 8 for legibility / WCAG)
+T_MINI  = 11   # secondary micro-text (raised from 9 for legibility / WCAG)
+T_XS    = 11
 T_SM    = 11
 T_BASE  = 12
 T_MD    = 13
@@ -127,26 +127,30 @@ Z_MODAL      = 100
 Z_TOAST      = 1000
 
 # ── DARK MODE THEME ───────────────────────────────────────────────────────────
-# Dark theme color overrides — use these when dark mode is enabled.
-# Light mode is the current standard defined above.
+# Single source of truth for dark mode. The base surface/text constants below
+# are DERIVED from the canonical `_DARK` palette above so that every color path
+# (stylesheet_manager's DARK_PALETTE, the 180+ direct `tokens.*` refs, and
+# theme_manager.get_color) resolves to one consistent slate palette. The bright
+# accent constants (semantic / category) that follow are intentional dark-mode
+# variants used on top of that base.
 
-DARK_BG              = "#1a1a2e"   # hsl(240 25% 12%) — dark background
-DARK_PAPER_WARM      = "#242442"   # hsl(240 20% 16%) — slightly lighter surface
-DARK_SURFACE         = "#2d2d47"   # hsl(240 18% 19%) — card/panel background
-DARK_HAIRLINE        = "#3d3d57"   # hsl(240 15% 26%) — subtle dividers
-DARK_HAIRLINE_S      = "#4d4d67"   # hsl(240 12% 33%) — stronger dividers
-DARK_FG              = "#e8e8f0"   # hsl(240 12% 93%) — primary text
-DARK_MUTED_FG        = "#a8a8b8"   # hsl(240 8% 68%)  — secondary text
-DARK_MUTED           = "#767686"   # hsl(240 8% 53%)  — disabled / micro-labels
+DARK_BG              = _DARK["BG"]          # near-black slate background
+DARK_PAPER_WARM      = _DARK["PAPER_WARM"]  # slate-900 surface
+DARK_SURFACE         = _DARK["SURFACE"]     # slate-800 card/panel background
+DARK_HAIRLINE        = _DARK["HAIRLINE"]    # slate-700 subtle dividers
+DARK_HAIRLINE_S      = _DARK["HAIRLINE_S"]  # slate-600 stronger dividers
+DARK_FG              = _DARK["FG"]          # near-white primary text
+DARK_MUTED_FG        = _DARK["MUTED_FG"]    # slate-300 secondary text
+DARK_MUTED           = _DARK["MUTED"]       # slate-400 disabled / micro-labels
 DARK_DISABLED        = "#535363"   # hsl(240 6% 38%)  — disabled interactive
 DARK_RED             = "#ff6b6b"   # hsl(0 100% 68%)  — brighter red for dark
 DARK_GREEN           = "#51cf66"   # hsl(135 70% 65%) — brighter green for dark
 DARK_GOLD            = "#ffd93d"   # hsl(42 100% 65%) — brighter gold for dark
 DARK_AMBER           = "#ffb347"   # hsl(32 100% 65%) — brighter amber for dark
 DARK_GOLD_LEAF       = "#e6b800"   # hsl(42 100% 48%)  — darker gold for dark mode text
-DARK_HERO_BG1        = "#2a2942"   # hsl(240 20% 20%)  — dark gradient start
-DARK_HERO_BG2        = "#1f1f38"   # hsl(240 25% 15%)  — dark gradient end
-DARK_TRACK           = "#3a3a52"   # hsl(240 15% 28%)  — dark timeline track
+DARK_HERO_BG1        = _DARK["PAPER_WARM"]  # slate-900 — dark gradient start
+DARK_HERO_BG2        = _DARK["SURFACE"]     # slate-800 — dark gradient end
+DARK_TRACK           = _DARK["HAIRLINE"]    # slate-700 — dark timeline track
 DARK_CAT_FOOD        = "#ff8c42"   # hsl(18 100% 60%)  — brighter food color
 DARK_CAT_EDU         = "#5b9cff"   # hsl(217 100% 65%) — brighter education color
 DARK_CAT_TRANS       = "#2dd4bf"   # hsl(162 100% 55%) — brighter transport color

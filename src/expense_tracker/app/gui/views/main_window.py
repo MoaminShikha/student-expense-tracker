@@ -42,6 +42,7 @@ class MainWindow(QMainWindow):
     add_income_requested = pyqtSignal()
     add_spend_requested  = pyqtSignal()
     add_charge_requested = pyqtSignal()
+    mark_charge_paid_requested = pyqtSignal(str)  # carries the charge_id
 
     _PAGE_NAMES: dict[str, str] = {
         "dashboard": "DASHBOARD / 01",
@@ -72,6 +73,7 @@ class MainWindow(QMainWindow):
             add_income_signal=self.add_income_requested,
             add_spend_signal=self.add_spend_requested,
             add_charge_signal=self.add_charge_requested,
+            mark_charge_paid_signal=self.mark_charge_paid_requested,
         )
         self.activity_page  = ActivityPage(
             add_income_signal=self.add_income_requested,

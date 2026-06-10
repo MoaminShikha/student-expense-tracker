@@ -12,7 +12,7 @@ class ThemeManager(QObject):
 
     def __init__(self) -> None:
         super().__init__()
-        self._theme = "dark"  # Start with dark mode enabled by default
+        self._theme = "light"  # Start with light mode enabled by default
         self._color_map = {}
         self._setup_color_map()
 
