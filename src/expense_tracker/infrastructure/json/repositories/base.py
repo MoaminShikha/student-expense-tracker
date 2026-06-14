@@ -50,7 +50,7 @@ class JsonStore(Generic[T]):
         """Atomically write ``records`` and refresh the cache."""
         save_json_safely(self._storage_path, records)
         self._cache = [dict(record) for record in records]
-        self._cache_key = self._storage_path.stat().st_mtime_ns if self._storage_path.exists() else None
+        self._cache_key = None  # force mtime re-read on next _records() call
 
     def _append(self, entity: T) -> None:
         """Serialize and append one entity."""

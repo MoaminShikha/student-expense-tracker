@@ -50,6 +50,7 @@ class DashboardController:
         self._spend_service = spend_service
         self._caution_threshold = Decimal("100") if caution_threshold is None else caution_threshold
         self._logger = logger or logging.getLogger(__name__)
+        self._first_refresh = True
 
         # Wire MainWindow signals → controller action handlers.
         # DashboardPage's "Add" buttons emit these signals through the
@@ -75,7 +76,9 @@ class DashboardController:
             snapshot = self._balance_service.aggregate_and_build_snapshot(session.session_id, self._caution_threshold,
                                                                           session.opening_balance, )
             view_model = self._build_view_model(snapshot, session_id=session.session_id)
-            self._view.set_snapshot(view_model, last_sync=None)
+            animate = not self._first_refresh
+            self._first_refresh = False
+            self._view.set_snapshot(view_model, last_sync=None, animate=animate)
             self._view.set_timeline_percentages(
                 view_model.timeline_spent_pct,
                 view_model.timeline_committed_pct,

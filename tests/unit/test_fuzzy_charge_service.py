@@ -87,11 +87,13 @@ class TestFuzzyChargeServiceResolve:
         assert resolved_entry.resolved_amount == Decimal("95.50")
         assert resolved_entry.estimated_amount == Decimal("80.00")
         assert fuzzy_repo.get_by_id(fuzzy_entry.fuzzy_id) == resolved_entry
-        charges = charge_repo.list_upcoming(active_session.session_id)
-        assert len(charges) == 1
-        assert charges[0].status is ChargeStatus.UPCOMING
-        assert charges[0].amount == Decimal("95.50")
-        assert charges[0].due_date == date(2026, 4, 22)
+        # resolved fuzzy expense creates a PAID charge — it was a real spend, not a future obligation
+        all_charges = charge_repo.list_for_month(active_session.session_id, 2026, 4)
+        assert len(all_charges) == 1
+        assert all_charges[0].status is ChargeStatus.PAID
+        assert all_charges[0].amount == Decimal("95.50")
+        assert all_charges[0].due_date == date(2026, 4, 22)
+        assert len(charge_repo.list_upcoming(active_session.session_id)) == 0
 
     def test_resolve_income_creates_income_entry(self, tmp_path, active_session: AppSession) -> None:
         # resolving an income fuzzy entry creates one income record instead of a committed charge
@@ -106,6 +108,17 @@ class TestFuzzyChargeServiceResolve:
         assert len(income_entries) == 1
         assert income_entries[0].amount == Decimal("150.00")
         assert income_entries[0].date == date(2026, 4, 25)
+
+
+    def test_resolve_expense_does_not_create_upcoming_charge(self, tmp_path, active_session: AppSession) -> None:
+        # resolved fuzzy expenses must not add to the upcoming (committed) obligations —
+        # the amount is already spent, adding it as UPCOMING would double-count it against free money
+        service, _, charge_repo, _ = _build_service(tmp_path, active_session=active_session)
+        fuzzy_entry = service.add_fuzzy_entry(name="Dentist bill", direction=FuzzyEntryDirection.EXPENSE, estimated_amount=Decimal("200.00"))
+
+        service.resolve(fuzzy_id=fuzzy_entry.fuzzy_id, resolved_amount=Decimal("220.00"), resolved_date=date(2026, 4, 15))
+
+        assert len(charge_repo.list_upcoming(active_session.session_id)) == 0, "resolved fuzzy expense must not appear as upcoming"
 
 
 class TestFuzzyChargeServiceDiscard:

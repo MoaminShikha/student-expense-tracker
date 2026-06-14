@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import shutil
 import threading
 from pathlib import Path
@@ -48,6 +49,10 @@ def save_json_safely(storage_path: Path, data: list[dict]) -> None:
     """
     storage_path = Path(storage_path)
     storage_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.chmod(storage_path.parent, 0o700)
+    except OSError:
+        pass
 
     with _lock_for(storage_path):
         _save_json_locked(storage_path, data)
@@ -60,9 +65,10 @@ def _save_json_locked(storage_path: Path, data: list[dict]) -> None:
         backup_path = storage_path.with_suffix(".json.bak")
         try:
             shutil.copy2(storage_path, backup_path)
-            logger.debug(f"Backup created at {backup_path}")
+            os.chmod(backup_path, 0o600)
+            logger.debug("Backup created at %s", backup_path)
         except Exception as e:
-            logger.warning(f"Failed to create backup: {e}")
+            logger.warning("Failed to create backup: %s", e)
             # Don't fail the entire save operation if backup fails
 
     # Step 2: Write to temporary file
@@ -70,8 +76,9 @@ def _save_json_locked(storage_path: Path, data: list[dict]) -> None:
     try:
         with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+        os.chmod(temp_path, 0o600)
     except Exception as e:
-        logger.error(f"Failed to write temporary file: {e}")
+        logger.error("Failed to write temporary file: %s", e)
         # Clean up temp file if it exists
         if temp_path.exists():
             temp_path.unlink()
@@ -82,9 +89,9 @@ def _save_json_locked(storage_path: Path, data: list[dict]) -> None:
         # On Windows, replace() works atomically after Python 3.8
         # On Unix, rename() is atomic
         temp_path.replace(storage_path)
-        logger.debug(f"Data saved to {storage_path}")
+        logger.debug("Data saved to %s", storage_path)
     except Exception as e:
-        logger.error(f"Failed to move temporary file to target: {e}")
+        logger.error("Failed to move temporary file to target: %s", e)
         # Clean up temp file if it still exists
         if temp_path.exists():
             temp_path.unlink()
@@ -112,10 +119,10 @@ def load_json_safely(storage_path: Path) -> list[dict]:
                 data: list[dict] = json.load(f)
                 return data
         except json.JSONDecodeError as e:
-            logger.warning(f"JSON decode failed for {storage_path}: {e}")
+            logger.warning("JSON decode failed for %s: %s", storage_path, e)
             # Fall through to try backup
         except Exception as e:
-            logger.warning(f"Failed to read {storage_path}: {e}")
+            logger.warning("Failed to read %s: %s", storage_path, e)
             # Fall through to try backup
 
     # Try backup file if primary failed
@@ -124,10 +131,10 @@ def load_json_safely(storage_path: Path) -> list[dict]:
         try:
             with open(backup_path, "r", encoding="utf-8") as f:
                 backup_data: list[dict] = json.load(f)
-                logger.info(f"Recovered data from backup: {backup_path}")
+                logger.info("Recovered data from backup: %s", backup_path)
                 return backup_data
         except Exception as e:
-            logger.warning(f"Failed to read backup {backup_path}: {e}")
+            logger.warning("Failed to read backup %s: %s", backup_path, e)
 
     # Both failed or don't exist
     return []

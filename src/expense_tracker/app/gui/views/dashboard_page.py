@@ -68,7 +68,7 @@ class DashboardPage(QWidget):
         last_sync: datetime | None = None,
         animate: bool = True,
     ) -> None:
-        self._hero.set_money(snapshot.free_money_str)
+        self._hero.set_money_value(snapshot.free_money, animate=animate)
         self._hero.set_state(snapshot.balance_state_value)
         self._hero.set_period_for_today()
         self._hero.set_legend(
@@ -92,7 +92,7 @@ class DashboardPage(QWidget):
         month_abbr = calendar.month_abbr[today.month]
         self._hero.timeline.set_endpoints(f"1 {month_abbr}", f"{last_day} {month_abbr}")
 
-        self._stat_column.set_snapshot(snapshot)
+        self._stat_column.set_snapshot(snapshot, animate=animate)
 
     def set_upcoming(self, rows: Iterable[ChargeRowVM]) -> None:
         self._upcoming_panel.set_upcoming(list(rows))

@@ -112,6 +112,7 @@ class _Panel(QFrame):
         )
 
         btn = QPushButton(btn_text)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setStyleSheet(f"""
             QPushButton {{
                 background: transparent;

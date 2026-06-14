@@ -257,6 +257,7 @@ class BellButton(QWidget):
         self.setFixedSize(28, 28)
         self._has_unread = False
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setAccessibleName("Notifications")
 
     def set_has_unread(self, value: bool) -> None:
         self._has_unread = value
@@ -459,6 +460,8 @@ class Topbar(QWidget):
 
     def _build_sync_area(self) -> QPushButton:
         self._sync_btn.setObjectName("tbSyncBtn")
+        self._sync_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._sync_btn.setAccessibleName("Sync")
         self._sync_btn.clicked.connect(self.refresh_requested.emit)
         return self._sync_btn
 
