@@ -79,7 +79,7 @@ class InsightsController:
             daily_burn = spent / Decimal(max(days_elapsed, 1))
             daily_budget = budget / Decimal(max(days_in_month, 1))
             daily_pct = float(daily_burn / daily_budget * 100) if daily_budget > 0 else 0.0
-            runway_days = int(remaining / daily_burn) if daily_burn > 0 else days_in_month - days_elapsed
+            runway_days = int(remaining / daily_burn) if daily_burn > 0 and remaining > 0 else days_in_month - days_elapsed
 
             # ── Encumbrance split ────────────────────────────────────────────
             # Committed charges = locked obligations (deduct from free money).

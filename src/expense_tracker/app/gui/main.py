@@ -17,7 +17,6 @@ if str(_SRC_DIR) not in sys.path:
 from expense_tracker.app.composition import build_services
 from expense_tracker.app.gui.constants import PageIndex
 from expense_tracker.app.gui.styles.fonts import load_fonts
-from expense_tracker.app.gui.styles.stylesheet import application_stylesheet
 from expense_tracker.app.gui.styles.stylesheet_manager import apply_stylesheet
 from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
 from expense_tracker.app.gui.controllers.activity_controller import ActivityController
@@ -32,10 +31,7 @@ def main() -> int:
     import logging
     logger = logging.getLogger(__name__)
     app = QApplication([])
-    app.setStyleSheet(application_stylesheet())
     load_fonts()
-
-    # Apply initial stylesheet
     theme_mgr = get_theme_manager()
     apply_stylesheet(app, theme_mgr.current_theme)
 

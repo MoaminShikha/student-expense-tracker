@@ -1,8 +1,12 @@
 """Theme manager for light/dark mode switching."""
 from __future__ import annotations
 
+import logging
+
 from PyQt6.QtCore import QObject, pyqtSignal
 from expense_tracker.app.gui.styles import tokens
+
+_logger = logging.getLogger(__name__)
 
 
 class ThemeManager(QObject):
@@ -77,7 +81,7 @@ class ThemeManager(QObject):
             if app:
                 apply_stylesheet(app, self._theme)
         except Exception:
-            pass  # Silently fail if stylesheet can't be applied
+            _logger.warning("Failed to apply stylesheet", exc_info=True)
 
 
 # Global theme manager instance

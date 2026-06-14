@@ -176,6 +176,7 @@ def get_global_stylesheet(theme: str = "light") -> str:
         border: 1px solid {hairline};
         border-radius: 6px;
         padding: 6px 10px;
+        selection-background-color: {gold};
     }}
 
     QLineEdit:focus {{

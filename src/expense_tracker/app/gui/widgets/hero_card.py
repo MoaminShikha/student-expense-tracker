@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import calendar
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from PyQt6.QtCore import (
@@ -46,6 +47,7 @@ from PyQt6.QtWidgets import (
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.styles.textures import dot_grain
 from expense_tracker.app.gui.styles.theme_manager import get_theme_manager
+from expense_tracker.app.gui.widgets.counting_label import CountingLabel
 from expense_tracker.app.gui.widgets.heads_up_alert import HeadsUpAlert
 from expense_tracker.app.gui.widgets.timeline_widget import TimelineWidget
 
@@ -98,7 +100,7 @@ class HeroCard(QWidget):
         self._period_lbl  = QLabel("PERIOD")
         self._period_val  = QLabel("")
         self._money_sym   = QLabel("₪")
-        self._money_value = QLabel("0")
+        self._money_value = CountingLabel(fmt="{:,.0f}")
         self._state_badge = QLabel("ON TRACK")
         self._legend_spent = QLabel("₪0")
         self._legend_committed = QLabel("₪0")
@@ -120,8 +122,8 @@ class HeroCard(QWidget):
         if state != self._state:
             self._apply_state(state, animate=True)
 
-    def set_money(self, value_str: str) -> None:
-        self._money_value.setText(value_str.replace("₪", "").strip())
+    def set_money_value(self, value: Decimal, animate: bool = True) -> None:
+        self._money_value.set_value(value, animate=animate)
 
     def set_period(self, text: str) -> None:
         self._period_val.setText(text)

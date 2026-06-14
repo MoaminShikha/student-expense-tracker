@@ -476,6 +476,10 @@ class Sidebar(QWidget):
 
     # ── NAV STATE ─────────────────────────────────────────────────────────────
 
+    def navigate_to(self, key: str) -> None:
+        """Switch sidebar active state to ``key`` and emit nav_changed."""
+        self._on_nav_clicked(key)
+
     def _on_nav_clicked(self, key: str) -> None:
         # Update active state on all buttons, then emit the nav key.
         # MainWindow._on_nav_changed receives this and switches pages.

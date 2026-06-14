@@ -34,7 +34,7 @@ class ErrorDialog(QDialog):
         # Title
         title_label = QLabel(title)
         title_label.setStyleSheet(
-            f"font-size: {tokens.T_LG}px; font-weight: 700; color: {tokens.DANGER}; "
+            f"font-size: {tokens.T_LG}px; font-weight: 700; color: {tokens.RED}; "
             f"font-family: 'DM Mono', Consolas, monospace;"
         )
         layout.addWidget(title_label)

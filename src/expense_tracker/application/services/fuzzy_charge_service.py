@@ -119,7 +119,7 @@ class FuzzyChargeService:
         if updated_entry.direction is FuzzyEntryDirection.EXPENSE:
             committed_charge = CommittedCharge(charge_id=uuid4(), session_id=updated_entry.session_id,
                                                name=updated_entry.name, amount=resolved_amount, due_date=applied_date,
-                                               status=ChargeStatus.UPCOMING)
+                                               status=ChargeStatus.PAID)
             self._charge_repository.add(committed_charge)
             self._logger.info("Resolved fuzzy entry %s into committed charge %s.", updated_entry.fuzzy_id,
                               committed_charge.charge_id)

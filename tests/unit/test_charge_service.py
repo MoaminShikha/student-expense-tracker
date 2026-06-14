@@ -185,9 +185,9 @@ class TestChargeServiceRecurringDueDateHelper:
             pytest.param(date(2026, 3, 1), 29, date(2026, 3, 29), id="29th stays in a long month"),
             pytest.param(date(2026, 4, 1), 30, date(2026, 4, 30), id="30th stays in a thirty-day month"),
             pytest.param(date(2026, 4, 1), 31, date(2026, 4, 30), id="31st clamps to month end when needed"),
-            pytest.param(date(2026, 1, 31), 31, date(2026, 2, 28), id="short february clamps to 28"),
-            pytest.param(date(2024, 1, 31), 31, date(2024, 2, 29), id="leap february clamps to 29"),
-            pytest.param(date(2026, 4, 30), 31, date(2026, 5, 31), id="thirty day month still reaches 31 next month"),
+            pytest.param(date(2026, 1, 31), 31, date(2026, 1, 31), id="same-day: jan 31 with dom=31 is due today"),
+            pytest.param(date(2024, 1, 31), 31, date(2024, 1, 31), id="same-day: leap jan 31 with dom=31 is due today"),
+            pytest.param(date(2026, 4, 30), 31, date(2026, 4, 30), id="same-day: apr 30 with dom=31 is due today (clamped)"),
             pytest.param(date(2026, 1, 31), 30, date(2026, 2, 28), id="30th clamps in short february"),
             pytest.param(date(2026, 1, 31), 29, date(2026, 2, 28), id="29th clamps in non-leap february"),
         ],
@@ -199,6 +199,49 @@ class TestChargeServiceRecurringDueDateHelper:
         result = service._next_recurring_due_date(reference_date, day_of_month)
 
         assert result == expected
+
+
+class TestChargeServiceRecurringDateBugFixes:
+
+    def test_mark_paid_late_schedules_next_occurrence_in_the_future(self, tmp_path, monkeypatch: pytest.MonkeyPatch, active_session: AppSession) -> None:
+        # a charge paid months after its due date must produce a next occurrence in the future,
+        # not in the past from the original due date
+        class _EarlyDate(date):
+            @classmethod
+            def today(cls) -> date:
+                return cls(2026, 4, 10)
+
+        monkeypatch.setattr("expense_tracker.application.services.charge_service.date", _EarlyDate)
+        service, _, charge_repo, rule_repo = _build_charge_service(tmp_path, active_session)
+        original_charge = service.add_recurring_charge(name="Rent", amount=Decimal("500.00"), day_of_month=15)
+
+        # simulate paying months late — advance clock to July
+        class _LateDate(date):
+            @classmethod
+            def today(cls) -> date:
+                return cls(2026, 7, 10)
+
+        monkeypatch.setattr("expense_tracker.application.services.charge_service.date", _LateDate)
+        service.mark_paid(original_charge.charge_id)
+
+        next_charge = charge_repo.list_for_month(active_session.session_id, 2026, 7)
+        assert len(next_charge) == 1
+        assert next_charge[0].due_date == date(2026, 7, 15), "next due date must be in the future, not in the past"
+
+    def test_add_recurring_charge_on_due_day_is_due_today(self, tmp_path, monkeypatch: pytest.MonkeyPatch, active_session: AppSession) -> None:
+        # creating a recurring charge on exactly its scheduled day must produce a first charge due today,
+        # not skip to next month
+        class _FixedDate(date):
+            @classmethod
+            def today(cls) -> date:
+                return cls(2026, 4, 15)
+
+        monkeypatch.setattr("expense_tracker.application.services.charge_service.date", _FixedDate)
+        service, _, charge_repo, _ = _build_charge_service(tmp_path, active_session)
+
+        charge = service.add_recurring_charge(name="Rent", amount=Decimal("500.00"), day_of_month=15)
+
+        assert charge.due_date == date(2026, 4, 15), "first occurrence must be today, not next month"
 
 
 class TestChargeServiceAddRecurringCharge:

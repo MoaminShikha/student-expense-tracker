@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
             }
             if event.key() in key_map:
                 nav_key = key_map[event.key()]
-                self._sidebar._on_nav_clicked(nav_key)
+                self._sidebar.navigate_to(nav_key)
                 event.accept()
                 return
 
@@ -136,22 +136,24 @@ class MainWindow(QMainWindow):
         }
         idx = mapping.get(key, PageIndex.DASHBOARD)
 
-        # Fade-in animation on page switch
-        current_page = self._stack.currentWidget()
-        if current_page:
+        # Switch first so currentWidget() returns the incoming page.
+        self._stack.setCurrentIndex(idx)
+        self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
+
+        # Fade-in the incoming page, then remove the effect so it doesn't linger
+        # and degrade text rendering.
+        incoming = self._stack.currentWidget()
+        if incoming:
             effect = QGraphicsOpacityEffect()
-            effect.setOpacity(0.0)
-            current_page.setGraphicsEffect(effect)
+            incoming.setGraphicsEffect(effect)
             anim = QPropertyAnimation(effect, b"opacity", self)
             anim.setDuration(150)
             anim.setStartValue(0.0)
             anim.setEndValue(1.0)
             anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+            anim.finished.connect(lambda: incoming.setGraphicsEffect(None))
             anim.start()
 
-
-        self._stack.setCurrentIndex(idx)
-        self._topbar.set_breadcrumb(self._PAGE_NAMES.get(key, "DASHBOARD / 01"))
         # Fire the page-enter callback (registered by controllers in main.py) so
         # data refreshes every time the user navigates to that page.
         cb = self._on_page_enter.get(idx)
@@ -170,7 +172,7 @@ class MainWindow(QMainWindow):
         last_sync: datetime | None = None,
         animate: bool = True,
     ) -> None:
-        self.dashboard_page.set_snapshot(snapshot, last_sync, animate)
+        self.dashboard_page.set_snapshot(snapshot, last_sync, animate=animate)
         self._topbar.set_on_track_state(snapshot.on_track_state_value)
         if last_sync:
             self._topbar.set_last_sync(last_sync.strftime("%d %b · %H:%M"))

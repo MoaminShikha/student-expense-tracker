@@ -32,6 +32,7 @@ def _split_amount(amount_str: str) -> tuple[str, str]:
     return "", s
 
 from expense_tracker.app.gui.styles import tokens
+from expense_tracker.app.gui.widgets.counting_label import CountingLabel
 
 if __name__ != "__main__":
     from typing import TYPE_CHECKING
@@ -87,7 +88,7 @@ def _stat_card(
     context_text: str,
     value_color: str,
     value_size: int = 28,
-) -> tuple[QFrame, QLabel, QLabel]:
+) -> tuple[QFrame, CountingLabel, QLabel]:
     """Return (frame, value_label, sub_label)."""
     frame = QFrame()
     frame.setObjectName("statCard")
@@ -149,7 +150,7 @@ def _stat_card(
         f"background: transparent;"
     )
 
-    val = QLabel("0")
+    val = CountingLabel(fmt="{:,.0f}")
     val.setObjectName("statValue")
     val.setStyleSheet(
         f"color: {value_color};"
@@ -253,14 +254,11 @@ class StatColumn(QWidget):
 
     # ── PUBLIC ────────────────────────────────────────────────────────────────
 
-    def set_snapshot(self, vm: "BalanceViewModel") -> None:
+    def set_snapshot(self, vm: "BalanceViewModel", animate: bool = True) -> None:
         from decimal import Decimal
-        _, spent_num       = _split_amount(vm.monthly_spent_str)
-        _, committed_num   = _split_amount(vm.monthly_committed_str)
-        _, left_num        = _split_amount(vm.monthly_left_str)
-        self._spent_val.setText(spent_num)
-        self._committed_val.setText(committed_num)
-        self._left_val.setText(left_num)
+        self._spent_val.set_value(vm.monthly_spent, animate=animate)
+        self._committed_val.set_value(vm.monthly_committed, animate=animate)
+        self._left_val.set_value(vm.monthly_left, animate=animate)
 
         # Burn bar
         budget = vm.monthly_budget

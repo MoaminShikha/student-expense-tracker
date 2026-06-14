@@ -1,9 +1,18 @@
 from __future__ import annotations
 
-from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from pathlib import Path
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtCore import QUrl
+from PyQt6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
 from expense_tracker.app.gui.styles import tokens
 from expense_tracker.app.gui.widgets.paper_widget import PaperWidget
+
+# settings_page.py lives at src/expense_tracker/app/gui/views/settings_page.py
+# parents[5] is the project root; data/ sits beside src/
+_DATA_DIR = Path(__file__).resolve().parents[5] / "data"
 
 
 class SettingsPage(QWidget):
@@ -34,11 +43,11 @@ class SettingsPage(QWidget):
         )
         layout.addWidget(appearance_title)
 
-        # Mizān ships dark-first; a light theme is planned. We show a static note
-        # rather than a toggle so there's no control that appears to do nothing.
+        # Light mode is the default. A runtime toggle requires re-importing ~180 token
+        # references frozen at startup — deferred to a future refactor.
         appearance_info = QLabel("Mizān uses a light theme.\nA dark theme is coming in a future update.")
         appearance_info.setStyleSheet(
-            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
+            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED_FG};"
             f"font-family: 'DM Mono', Consolas, monospace; background: transparent;"
         )
         appearance_info.setWordWrap(True)
@@ -52,13 +61,34 @@ class SettingsPage(QWidget):
         )
         layout.addWidget(data_title)
 
-        data_info = QLabel("Session-based data stored in data/ directory.\nExport and backup options coming soon.")
+        data_info = QLabel(f"Session data is stored in the data/ directory.\nLocation: {_DATA_DIR}")
         data_info.setStyleSheet(
-            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
+            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED_FG};"
             f"font-family: 'DM Mono', Consolas, monospace; background: transparent;"
         )
         data_info.setWordWrap(True)
         layout.addWidget(data_info)
+
+        open_btn = QPushButton("Open data folder")
+        open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        open_btn.setAccessibleName("Open data folder in file manager")
+        open_btn.setFixedWidth(180)
+        open_btn.setStyleSheet(f"""
+            QPushButton {{
+                font-family: "DM Mono", Consolas, monospace;
+                font-size: {tokens.T_SM}px;
+                padding: 7px 14px;
+                border-radius: 6px;
+                background: {tokens.SURFACE};
+                border: 1px solid {tokens.HAIRLINE};
+                color: {tokens.FG};
+            }}
+            QPushButton:hover {{
+                background: {tokens.PAPER_WARM};
+            }}
+        """)
+        open_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(_DATA_DIR))))
+        layout.addWidget(open_btn)
 
         # About section
         about_title = QLabel("About")
@@ -68,9 +98,9 @@ class SettingsPage(QWidget):
         )
         layout.addWidget(about_title)
 
-        about_info = QLabel("Mizān — Student Budget Tracker\nVersion 0.9\n\nBuilt with PyQt6\nData in JSON")
+        about_info = QLabel("Mizān — Student Budget Tracker\nVersion 0.2.0\n\nBuilt with PyQt6 · data stored as JSON")
         about_info.setStyleSheet(
-            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED};"
+            f"font-size: {tokens.T_SM}px; color: {tokens.MUTED_FG};"
             f"font-family: 'DM Mono', Consolas, monospace; background: transparent;"
         )
         about_info.setWordWrap(True)

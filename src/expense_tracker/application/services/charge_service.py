@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from calendar import monthrange
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -84,7 +84,7 @@ class ChargeService:
                 session_id=charge.session_id,
                 name=charge.name,
                 amount=charge.amount,
-                due_date=self._next_recurring_due_date(charge.due_date, recurring_rule.day_of_month),
+                due_date=self._next_recurring_due_date(max(charge.due_date + timedelta(days=1), date.today()), recurring_rule.day_of_month),
                 status=ChargeStatus.UPCOMING,
                 recurring_rule_id=recurring_rule.rule_id,
             )
@@ -179,7 +179,7 @@ class ChargeService:
         last_day = monthrange(year, month)[1]
         candidate = date(year, month, min(day_of_month, last_day))
 
-        if candidate <= reference_date:
+        if candidate < reference_date:
             if month == 12:
                 year += 1
                 month = 1
