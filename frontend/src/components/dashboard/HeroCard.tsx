@@ -155,7 +155,8 @@ export function HeroCard({ balance, events = [] }: HeroCardProps) {
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
         events={events.map(e => ({
-          day: new Date(e.date).getDate(),
+          day: parseInt(e.date.split('-')[2], 10), // parse day directly to avoid timezone shift
+          date: e.date,
           type: e.type as 'spend' | 'income',
           description: e.description,
           category: e.category,
