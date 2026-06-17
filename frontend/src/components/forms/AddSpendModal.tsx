@@ -1,6 +1,5 @@
 import React from 'react'
 import { postSpend } from '../../services/api'
-import type { AddSpendInput } from '../../types'
 
 interface AddSpendModalProps {
   open: boolean
@@ -8,7 +7,7 @@ interface AddSpendModalProps {
   onSuccess: () => void
 }
 
-const CATEGORIES = ['Food', 'Education', 'Transport', 'Other']
+const CATEGORIES = ['food', 'education', 'transport', 'entertainment', 'other']
 
 const MODAL_STYLE: React.CSSProperties = {
   position: 'fixed',
@@ -44,32 +43,30 @@ const INPUT_STYLE: React.CSSProperties = {
 
 export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) {
   const today = new Date().toISOString().split('T')[0]
-  const [form, setForm] = React.useState<AddSpendInput>({
-    amount: 0,
-    description: '',
-    category: 'Food',
-    date: today,
-  })
+  const [amount, setAmount] = React.useState('')
+  const [description, setDescription] = React.useState('')
+  const [category, setCategory] = React.useState(CATEGORIES[0])
+  const [date, setDate] = React.useState(today)
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   if (!open) return null
 
-  function set<K extends keyof AddSpendInput>(key: K, value: AddSpendInput[K]) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (form.amount <= 0) { setError('Amount must be positive'); return }
-    if (!form.description.trim()) { setError('Description is required'); return }
+    const amt = parseFloat(amount)
+    if (!amount || isNaN(amt) || amt <= 0) { setError('Amount must be positive'); return }
+    if (!description.trim()) { setError('Description is required'); return }
     setError(null)
     setSubmitting(true)
     try {
-      await postSpend(form)
+      await postSpend({ amount, description, category, date })
       onSuccess()
       onClose()
-      setForm({ amount: 0, description: '', category: 'Food', date: today })
+      setAmount('')
+      setDescription('')
+      setCategory(CATEGORIES[0])
+      setDate(today)
     } catch (e) {
       console.error('AddSpend:', e)
       setError('Failed to add spend. Is the backend running?')
@@ -89,8 +86,8 @@ export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) 
               type="number"
               min="0.01"
               step="0.01"
-              value={form.amount || ''}
-              onChange={(e) => set('amount', parseFloat(e.target.value) || 0)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               required
               style={INPUT_STYLE}
               autoFocus
@@ -100,8 +97,8 @@ export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) 
             Description
             <input
               type="text"
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
               placeholder="e.g. Café Najjar — lunch"
               style={INPUT_STYLE}
@@ -110,19 +107,21 @@ export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) 
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
             Category
             <select
-              value={form.category}
-              onChange={(e) => set('category', e.target.value)}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
               style={INPUT_STYLE}
             >
-              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c} style={{ textTransform: 'capitalize' }}>{c}</option>
+              ))}
             </select>
           </label>
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
             Date
             <input
               type="date"
-              value={form.date}
-              onChange={(e) => set('date', e.target.value)}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
               required
               style={INPUT_STYLE}
             />

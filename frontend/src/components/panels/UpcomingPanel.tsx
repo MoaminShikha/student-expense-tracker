@@ -6,7 +6,14 @@ interface UpcomingPanelProps {
   onMutation: () => void
 }
 
-function formatDaysUntil(days: number): string {
+function daysUntilDate(dateStr: string): number {
+  const due = new Date(dateStr)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function formatDaysLabel(days: number): string {
   if (days === 0) return 'today'
   if (days === 1) return 'in 1d'
   if (days < 0) return `${Math.abs(days)}d ago`
@@ -16,11 +23,11 @@ function formatDaysUntil(days: number): string {
 }
 
 export function UpcomingPanel({ charges, onMutation }: UpcomingPanelProps) {
-  const totalAmount = charges.reduce((s, c) => s + (c.fuzzy_max ?? c.amount), 0)
+  const totalAmount = charges.reduce((s, c) => s + parseFloat(c.amount), 0)
 
-  async function handleMarkPaid(id: number) {
+  async function handleMarkPaid(chargeId: string) {
     try {
-      await markChargePaid(id)
+      await markChargePaid(chargeId)
       onMutation()
     } catch (e) {
       console.error('markChargePaid:', e)
@@ -38,7 +45,7 @@ export function UpcomingPanel({ charges, onMutation }: UpcomingPanelProps) {
           <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '11px' }}>
             {charges.length} charges ·{' '}
             <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: 'var(--red)' }}>
-              ₪{totalAmount.toLocaleString()}
+              ₪{Math.round(totalAmount).toLocaleString()}
             </span>{' '}
             total
           </div>
@@ -51,14 +58,20 @@ export function UpcomingPanel({ charges, onMutation }: UpcomingPanelProps) {
         </button>
       </div>
 
+      {charges.length === 0 && (
+        <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', padding: '8px 0' }}>No upcoming charges.</div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {charges.map((charge, i) => {
-          const isDue = charge.days_until <= 7
-          const stripeColor = charge.is_fuzzy ? 'var(--amber)' : isDue ? 'var(--red)' : 'var(--muted)'
+          const days = daysUntilDate(charge.due_date)
+          const isDue = days <= 7
+          const isRecurring = charge.recurring_rule_id !== null
+          const stripeColor = isDue ? 'var(--red)' : 'var(--muted)'
 
           return (
             <div
-              key={charge.id}
+              key={charge.charge_id}
               style={{
                 display: 'flex',
                 alignItems: 'stretch',
@@ -71,24 +84,24 @@ export function UpcomingPanel({ charges, onMutation }: UpcomingPanelProps) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--t-base)', color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {charge.name}
-                  {charge.is_recurring && <span style={{ fontSize: 'var(--t-xs)', color: 'var(--muted)' }} aria-label="Recurring">↻</span>}
+                  {isRecurring && <span style={{ fontSize: 'var(--t-xs)', color: 'var(--muted)' }} aria-label="Recurring">↻</span>}
                 </div>
                 <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '1px' }}>
-                  {charge.is_fuzzy ? 'approx. ' : ''}{charge.due_date}
+                  {charge.due_date}
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: charge.is_fuzzy ? 'var(--amber)' : isDue ? 'var(--red)' : 'var(--muted-fg)', fontStyle: charge.is_fuzzy ? 'italic' : 'normal' }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: isDue ? 'var(--red)' : 'var(--muted-fg)' }}>
                   <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
-                  {charge.is_fuzzy ? `${charge.fuzzy_min}–${charge.fuzzy_max}` : charge.amount.toLocaleString()}
+                  {Math.round(parseFloat(charge.amount)).toLocaleString()}
                 </div>
                 <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '1px' }}>
-                  {formatDaysUntil(charge.days_until)}
+                  {formatDaysLabel(days)}
                 </div>
-                {!charge.is_paid && isDue && (
+                {charge.status !== 'PAID' && isDue && (
                   <button
                     type="button"
-                    onClick={() => void handleMarkPaid(charge.id)}
+                    onClick={() => void handleMarkPaid(charge.charge_id)}
                     style={{ fontSize: 'var(--t-mini)', color: 'var(--green)', background: 'none', border: 'none', cursor: 'pointer', marginTop: '2px', fontFamily: "'DM Mono', monospace" }}
                   >
                     Mark paid

@@ -1,13 +1,19 @@
-import type { BalanceDashboard } from '../../types'
+import type { BalanceResponse } from '../../types'
 
 interface AlertBannerProps {
-  balance: BalanceDashboard
+  balance: BalanceResponse
 }
 
 export function AlertBanner({ balance }: AlertBannerProps) {
-  if (!balance.next_charge_name || balance.next_charge_days === null || balance.next_charge_days > 7) {
-    return null
-  }
+  const next = balance.next_due_charge
+  if (!next) return null
+
+  const dueDate = new Date(next.due_date)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const daysUntil = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (daysUntil > 7) return null
 
   return (
     <div
@@ -44,11 +50,11 @@ export function AlertBanner({ balance }: AlertBannerProps) {
         Heads-up
       </span>
       <div style={{ flex: 1, fontSize: 'var(--t-sm)', color: 'var(--fg)' }}>
-        <strong>{balance.next_charge_name}</strong> · due in <strong>{balance.next_charge_days} days</strong> · already counted in your balance
+        <strong>{next.name}</strong> · due in <strong>{daysUntil} days</strong> · already counted in your balance
       </div>
       <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '14px', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.5, marginRight: '1px' }}>₪</span>
-        {balance.committed_total.toLocaleString()}
+        {Math.round(parseFloat(next.amount)).toLocaleString()}
       </span>
     </div>
   )

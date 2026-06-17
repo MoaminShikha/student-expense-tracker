@@ -1,6 +1,5 @@
 import React from 'react'
 import { postCharge } from '../../services/api'
-import type { AddChargeInput } from '../../types'
 
 interface AddChargeModalProps {
   open: boolean
@@ -44,33 +43,39 @@ const INPUT_STYLE: React.CSSProperties = {
 
 export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps) {
   const today = new Date().toISOString().split('T')[0]
-  const [form, setForm] = React.useState<AddChargeInput>({
-    name: '',
-    amount: 0,
-    due_date: today,
-    is_recurring: false,
-    is_fuzzy: false,
-  })
+  const [name, setName] = React.useState('')
+  const [amount, setAmount] = React.useState('')
+  const [dueDate, setDueDate] = React.useState(today)
+  const [recurring, setRecurring] = React.useState(false)
+  const [dayOfMonth, setDayOfMonth] = React.useState('')
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   if (!open) return null
 
-  function set<K extends keyof AddChargeInput>(key: K, value: AddChargeInput[K]) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.name.trim()) { setError('Name is required'); return }
-    if (!form.is_fuzzy && form.amount <= 0) { setError('Amount must be positive'); return }
+    if (!name.trim()) { setError('Name is required'); return }
+    const amt = parseFloat(amount)
+    if (!amount || isNaN(amt) || amt <= 0) { setError('Amount must be positive'); return }
+    if (recurring && !dayOfMonth) { setError('Day of month is required for recurring charges'); return }
     setError(null)
     setSubmitting(true)
     try {
-      await postCharge(form)
+      await postCharge({
+        name,
+        amount,
+        due_date: dueDate,
+        recurring,
+        day_of_month: recurring && dayOfMonth ? parseInt(dayOfMonth) : undefined,
+      })
       onSuccess()
       onClose()
-      setForm({ name: '', amount: 0, due_date: today, is_recurring: false, is_fuzzy: false })
+      setName('')
+      setAmount('')
+      setDueDate(today)
+      setRecurring(false)
+      setDayOfMonth('')
     } catch (e) {
       console.error('AddCharge:', e)
       setError('Failed to add charge. Is the backend running?')
@@ -88,8 +93,8 @@ export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps
             Name
             <input
               type="text"
-              value={form.name}
-              onChange={(e) => set('name', e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               placeholder="e.g. Rent, Gym, Phone bill"
               style={INPUT_STYLE}
@@ -97,64 +102,25 @@ export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps
             />
           </label>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+          <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
+            Amount (₪)
             <input
-              type="checkbox"
-              id="is-fuzzy"
-              checked={form.is_fuzzy}
-              onChange={(e) => set('is_fuzzy', e.target.checked)}
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              style={INPUT_STYLE}
             />
-            <label htmlFor="is-fuzzy" style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', cursor: 'pointer' }}>
-              Fuzzy amount (estimated range)
-            </label>
-          </div>
-
-          {form.is_fuzzy ? (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-              <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', flex: 1 }}>
-                Min (₪)
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.fuzzy_min ?? ''}
-                  onChange={(e) => set('fuzzy_min', parseFloat(e.target.value) || 0)}
-                  style={INPUT_STYLE}
-                />
-              </label>
-              <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', flex: 1 }}>
-                Max (₪)
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.fuzzy_max ?? ''}
-                  onChange={(e) => set('fuzzy_max', parseFloat(e.target.value) || 0)}
-                  style={INPUT_STYLE}
-                />
-              </label>
-            </div>
-          ) : (
-            <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
-              Amount (₪)
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={form.amount || ''}
-                onChange={(e) => set('amount', parseFloat(e.target.value) || 0)}
-                required
-                style={INPUT_STYLE}
-              />
-            </label>
-          )}
+          </label>
 
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
             Due date
             <input
               type="date"
-              value={form.due_date}
-              onChange={(e) => set('due_date', e.target.value)}
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
               required
               style={INPUT_STYLE}
             />
@@ -163,24 +129,25 @@ export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
             <input
               type="checkbox"
-              id="is-recurring"
-              checked={form.is_recurring}
-              onChange={(e) => set('is_recurring', e.target.checked)}
+              id="recurring"
+              checked={recurring}
+              onChange={(e) => setRecurring(e.target.checked)}
             />
-            <label htmlFor="is-recurring" style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', cursor: 'pointer' }}>
+            <label htmlFor="recurring" style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', cursor: 'pointer' }}>
               Recurring monthly
             </label>
           </div>
 
-          {form.is_recurring && (
+          {recurring && (
             <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
-              Day of month
+              Day of month (required)
               <input
                 type="number"
                 min="1"
                 max="31"
-                value={form.day_of_month ?? ''}
-                onChange={(e) => set('day_of_month', parseInt(e.target.value) || undefined)}
+                value={dayOfMonth}
+                onChange={(e) => setDayOfMonth(e.target.value)}
+                required
                 placeholder="e.g. 1 for 1st of month"
                 style={INPUT_STYLE}
               />

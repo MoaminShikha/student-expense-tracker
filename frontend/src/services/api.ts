@@ -1,8 +1,8 @@
 import type {
-  BalanceDashboard,
+  BalanceResponse,
   CommittedCharge,
   Transaction,
-  CategoryBreakdown,
+  CategoryBreakdownMap,
   AddSpendInput,
   AddIncomeInput,
   AddChargeInput,
@@ -20,7 +20,7 @@ async function fetchJSON<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const getBalance = () =>
-  fetchJSON<BalanceDashboard>(`${BASE}/balance`)
+  fetchJSON<BalanceResponse>(`${BASE}/balance`)
 
 export const getChargesUpcoming = () =>
   fetchJSON<CommittedCharge[]>(`${BASE}/charges/upcoming`)
@@ -29,7 +29,7 @@ export const getTransactions = () =>
   fetchJSON<Transaction[]>(`${BASE}/transactions/recent`)
 
 export const getTransactionsByCategory = () =>
-  fetchJSON<CategoryBreakdown[]>(`${BASE}/transactions/by-category`)
+  fetchJSON<CategoryBreakdownMap>(`${BASE}/transactions/by-category`)
 
 export const postSpend = (data: AddSpendInput) =>
   fetchJSON<Transaction>(`${BASE}/spend`, {
@@ -38,18 +38,28 @@ export const postSpend = (data: AddSpendInput) =>
   })
 
 export const postIncome = (data: AddIncomeInput) =>
-  fetchJSON<Transaction>(`${BASE}/income`, {
+  fetchJSON<unknown>(`${BASE}/income`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
 export const postCharge = (data: AddChargeInput) =>
-  fetchJSON<CommittedCharge>(`${BASE}/charges`, {
+  fetchJSON<CommittedCharge>(`${BASE}/charge`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
 
-export const markChargePaid = (id: number) =>
-  fetchJSON<CommittedCharge>(`${BASE}/charges/${id}/pay`, {
+// charge_id is a UUID string from the API
+export const markChargePaid = (chargeId: string) =>
+  fetchJSON<{ status: string }>(`${BASE}/charge/${chargeId}/mark-paid`, {
     method: 'POST',
   })
+
+export const initSession = (openingBalance: string) =>
+  fetchJSON<{ status: string }>(`${BASE}/session/init`, {
+    method: 'POST',
+    body: JSON.stringify({ opening_balance: openingBalance }),
+  })
+
+export const checkHealth = () =>
+  fetchJSON<{ status: string; session: boolean }>(`${BASE}/health`)

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { getBalance } from '../services/api'
-import type { BalanceDashboard } from '../types'
+import type { BalanceResponse } from '../types'
 
 export function useBalance(refreshKey: number) {
-  const [data, setData] = useState<BalanceDashboard | null>(null)
+  const [data, setData] = useState<BalanceResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

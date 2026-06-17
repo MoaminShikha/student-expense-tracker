@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react'
 import { getTransactionsByCategory } from '../../services/api'
-import type { CategoryBreakdown } from '../../types'
+import type { CategoryBreakdown, CategoryBreakdownMap } from '../../types'
 
 const CAT_COLORS: Record<string, string> = {
-  Food: 'var(--cat-food)',
-  Education: 'var(--cat-edu)',
-  Transport: 'var(--cat-trans)',
-  Other: 'var(--cat-other)',
+  food: 'var(--cat-food)',
+  education: 'var(--cat-edu)',
+  transport: 'var(--cat-trans)',
+  other: 'var(--cat-other)',
+  uncategorized: 'var(--muted)',
 }
 
 interface CategoryPanelProps {
   refreshKey: number
-  totalSpent: number
+  totalSpent: string
 }
 
 export function CategoryPanel({ refreshKey, totalSpent }: CategoryPanelProps) {
@@ -19,9 +20,20 @@ export function CategoryPanel({ refreshKey, totalSpent }: CategoryPanelProps) {
 
   useEffect(() => {
     getTransactionsByCategory()
-      .then(setCategories)
+      .then((map: CategoryBreakdownMap) => {
+        const arr: CategoryBreakdown[] = Object.entries(map).map(([cat, v]) => ({
+          category: cat,
+          amount: parseFloat(v.amount),
+          count: v.count,
+          pct: v.pct_of_total,
+        }))
+        arr.sort((a, b) => b.amount - a.amount)
+        setCategories(arr)
+      })
       .catch((e: unknown) => console.error('CategoryPanel:', e))
   }, [refreshKey])
+
+  const totalNum = parseFloat(totalSpent)
 
   return (
     <article style={{ borderRadius: '14px', background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--hairline)', padding: '16px 18px' }} aria-labelledby="panel-cat">
@@ -41,8 +53,12 @@ export function CategoryPanel({ refreshKey, totalSpent }: CategoryPanelProps) {
         </button>
       </div>
 
+      {categories.length === 0 && (
+        <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', padding: '8px 0' }}>No transactions yet.</div>
+      )}
+
       {categories.map((cat) => {
-        const color = CAT_COLORS[cat.category] ?? 'var(--muted)'
+        const color = CAT_COLORS[cat.category.toLowerCase()] ?? 'var(--muted)'
         return (
           <div
             key={cat.category}
@@ -51,12 +67,12 @@ export function CategoryPanel({ refreshKey, totalSpent }: CategoryPanelProps) {
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '5px' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '7px' }}>
                 <span aria-hidden="true" style={{ width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0, display: 'inline-block', marginBottom: '1px', background: color }} />
-                <span style={{ fontSize: 'var(--t-base)', color: 'var(--fg)' }}>{cat.category}</span>
+                <span style={{ fontSize: 'var(--t-base)', color: 'var(--fg)', textTransform: 'capitalize' }}>{cat.category}</span>
                 <span style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)' }}>{Math.round(cat.pct)}%</span>
               </div>
               <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: 'var(--fg)' }}>
                 <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
-                {cat.total.toLocaleString()}
+                {Math.round(cat.amount).toLocaleString()}
               </span>
             </div>
             <div
@@ -77,7 +93,7 @@ export function CategoryPanel({ refreshKey, totalSpent }: CategoryPanelProps) {
         <span style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)' }}>Total spent</span>
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: 'var(--fg)' }}>
           <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
-          {totalSpent.toLocaleString()}
+          {Math.round(totalNum).toLocaleString()}
         </span>
       </div>
     </article>
