@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Timeline } from './Timeline'
-import type { BalanceResponse, ActivityEntry } from '../../types'
+import type { BalanceResponse, ActivityEntry, CommittedCharge } from '../../types'
 
 interface HeroCardProps {
   balance: BalanceResponse
   events?: ActivityEntry[]
+  charges?: CommittedCharge[]
 }
 
 const STATE_COLORS = {
@@ -43,7 +44,7 @@ function useCountUp(target: number, duration = 800) {
   return value
 }
 
-export function HeroCard({ balance, events = [] }: HeroCardProps) {
+export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) {
   const raw = balance.balance_state
   const stateKey: keyof typeof STATE_COLORS =
     raw === 'crisis' ? 'red' : raw === 'caution' ? 'amber' : 'green'
@@ -154,14 +155,24 @@ export function HeroCard({ balance, events = [] }: HeroCardProps) {
         dayOfMonth={balance.day_of_month}
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
-        events={events.map(e => ({
-          day: parseInt(e.date.split('-')[2], 10), // parse day directly to avoid timezone shift
-          date: e.date,
-          type: e.type as 'spend' | 'income',
-          description: e.description,
-          category: e.category,
-          amount: e.amount,
-        }))}
+        events={[
+          ...events.map(e => ({
+            day: parseInt(e.date.split('-')[2], 10),
+            date: e.date,
+            type: e.type as 'spend' | 'income',
+            description: e.description,
+            category: e.category,
+            amount: e.amount,
+          })),
+          ...charges.map(c => ({
+            day: parseInt(c.due_date.split('-')[2], 10),
+            date: c.due_date,
+            type: (c.status === 'paid' ? 'charge' : 'upcoming') as 'charge' | 'upcoming',
+            description: c.name,
+            category: null,
+            amount: c.amount,
+          })),
+        ]}
       />
     </motion.article>
   )
