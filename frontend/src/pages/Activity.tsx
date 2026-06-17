@@ -3,7 +3,7 @@ import { MainLayout } from '../components/layout/MainLayout'
 import type { Page } from '../components/layout/Sidebar'
 import type { ActivityEntry } from '../types'
 import { useFetch } from '../hooks/useFetch'
-import { getAllTransactions } from '../services/api'
+import { getAllTransactions, deleteEntry } from '../services/api'
 
 interface ActivityProps {
   onNavigate: (page: Page) => void
@@ -15,7 +15,6 @@ const TYPE_COLOR: Record<string, string> = { spend: 'var(--gold-leaf)', income: 
 const TYPE_BG: Record<string, string> = { spend: 'hsl(42 55% 50% / 0.1)', income: 'hsl(162 60% 26% / 0.1)' }
 
 function computeRunningBalance(entries: ActivityEntry[]): Map<string, number> {
-  // oldest-first to accumulate, then map by entry_id
   const asc = [...entries].reverse()
   let bal = 0
   const m = new Map<string, number>()
@@ -39,9 +38,11 @@ function exportCSV(entries: ActivityEntry[], balanceMap: Map<string, number>) {
 }
 
 export function Activity({ onNavigate }: ActivityProps) {
-  const { data: entries, loading, error } = useFetch<ActivityEntry[]>(getAllTransactions, [], 0)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const { data: entries, loading, error } = useFetch<ActivityEntry[]>(getAllTransactions, [], refreshKey)
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   const filtered = useMemo(() =>
     entries
@@ -51,6 +52,17 @@ export function Activity({ onNavigate }: ActivityProps) {
   )
 
   const balanceMap = useMemo(() => computeRunningBalance(entries), [entries])
+
+  async function handleDelete(entry: ActivityEntry) {
+    if (!confirm(`Delete "${entry.description}"?`)) return
+    setDeleting(entry.entry_id)
+    try {
+      await deleteEntry(entry.entry_id, entry.type as 'spend' | 'income')
+      setRefreshKey(k => k + 1)
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
     fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-xs)', letterSpacing: '.06em',
@@ -83,14 +95,14 @@ export function Activity({ onNavigate }: ActivityProps) {
         {loading && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: 'var(--t-sm)' }}>Loading…</div>}
         {error && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--red)', fontSize: 'var(--t-sm)' }}>{error}</div>}
         {!loading && !error && filtered.length === 0 && (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: 'var(--t-sm)' }}>No transactions yet. Add your first spend or income.</div>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontSize: 'var(--t-sm)' }}>No transactions yet. Add your first spend or income on the Dashboard.</div>
         )}
         {!loading && !error && filtered.length > 0 && (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ fontSize: 'var(--t-mini)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                {['Date', 'Type', 'Description', 'Category', 'Amount', 'Balance after'].map(h => (
-                  <th key={h} style={{ padding: '9px 16px', textAlign: h === 'Amount' || h === 'Balance after' ? 'right' : 'left', fontWeight: 400, borderBottom: '1px solid var(--hairline)' }}>{h}</th>
+                {['Date', 'Type', 'Description', 'Category', 'Amount', 'Balance after', ''].map((h, i) => (
+                  <th key={i} style={{ padding: '9px 16px', textAlign: h === 'Amount' || h === 'Balance after' ? 'right' : 'left', fontWeight: 400, borderBottom: '1px solid var(--hairline)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -98,10 +110,11 @@ export function Activity({ onNavigate }: ActivityProps) {
               {filtered.map((entry, idx) => {
                 const balAfter = balanceMap.get(entry.entry_id) ?? 0
                 const isSpend = entry.type === 'spend'
+                const isDeleting = deleting === entry.entry_id
                 return (
-                  <tr key={entry.entry_id} style={{ borderBottom: idx < filtered.length - 1 ? '1px solid var(--hairline)' : 'none', fontSize: 'var(--t-sm)' }}>
+                  <tr key={entry.entry_id} style={{ borderBottom: idx < filtered.length - 1 ? '1px solid var(--hairline)' : 'none', fontSize: 'var(--t-sm)', opacity: isDeleting ? 0.4 : 1 }}>
                     <td style={{ padding: '10px 16px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-                      {new Date(entry.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {new Date(entry.date + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td style={{ padding: '10px 16px' }}>
                       <span style={{ background: TYPE_BG[entry.type] ?? 'var(--bg)', color: TYPE_COLOR[entry.type] ?? 'var(--fg)', fontSize: 'var(--t-mini)', letterSpacing: '.08em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '3px' }}>
@@ -115,6 +128,19 @@ export function Activity({ onNavigate }: ActivityProps) {
                     </td>
                     <td style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--muted)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-xs)', whiteSpace: 'nowrap' }}>
                       ₪ {Math.round(balAfter).toLocaleString()}
+                    </td>
+                    <td style={{ padding: '10px 8px', textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(entry)}
+                        disabled={isDeleting}
+                        aria-label={`Delete ${entry.description}`}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '13px', padding: '2px 6px', borderRadius: '4px', lineHeight: 1 }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--red)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
+                      >
+                        ×
+                      </button>
                     </td>
                   </tr>
                 )

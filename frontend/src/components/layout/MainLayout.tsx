@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
+import { getStreak } from '../../services/api'
 import type { BalanceResponse } from '../../types'
 import type { Page } from './Sidebar'
 
@@ -14,9 +15,14 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ balance, onSync, syncing, activePage, onNavigate, children }: MainLayoutProps) {
+  const [streakDays, setStreakDays] = useState(0)
+  useEffect(() => {
+    getStreak().then(r => setStreakDays(r.streak_days)).catch(() => {})
+  }, [])
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
-      <Sidebar activePage={activePage} onNavigate={onNavigate} />
+      <Sidebar activePage={activePage} onNavigate={onNavigate} streakDays={streakDays} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <Topbar balance={balance} onSync={onSync} syncing={syncing} />
         <main id="main-content" style={{ padding: '14px 24px 22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
