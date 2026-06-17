@@ -10,14 +10,24 @@ export function getCurrencySymbol(): string {
   return localStorage.getItem('mizan_currency_symbol') ?? '₪'
 }
 
+export function getDisplayName(): string {
+  return localStorage.getItem('mizan_display_name') ?? ''
+}
+
+export function getInitials(name: string): string {
+  return name.trim().split(/\s+/).map(w => w[0]?.toUpperCase() ?? '').join('').slice(0, 2) || '?'
+}
+
 export function Settings({ onNavigate }: SettingsProps) {
   const [symbol, setSymbol] = useState(() => localStorage.getItem('mizan_currency_symbol') ?? '₪')
   const [code, setCode] = useState(() => localStorage.getItem('mizan_currency_code') ?? 'ILS')
+  const [displayName, setDisplayName] = useState(() => localStorage.getItem('mizan_display_name') ?? '')
   const [saved, setSaved] = useState(false)
 
   function handleSave() {
     localStorage.setItem('mizan_currency_symbol', symbol || '₪')
     localStorage.setItem('mizan_currency_code', code || 'ILS')
+    localStorage.setItem('mizan_display_name', displayName.trim())
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -44,6 +54,11 @@ export function Settings({ onNavigate }: SettingsProps) {
 
         <div style={{ background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--hairline)', padding: '24px' }}>
           <div style={{ fontSize: 'var(--t-mini)', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '16px', paddingBottom: '8px', borderBottom: '1px solid var(--hairline)' }}>Display</div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: 'var(--t-mini)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted-fg)', display: 'block', marginBottom: '5px' }} htmlFor="display-name">Your name</label>
+            <input id="display-name" style={inputStyle} value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={40} placeholder="e.g. Moamin Shikha" />
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>

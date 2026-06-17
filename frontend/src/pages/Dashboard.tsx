@@ -78,7 +78,7 @@ function SessionInitForm({ onSuccess }: { onSuccess: () => void }) {
 
 interface DashboardProps {
   refreshKey: number
-  onMutation: () => void
+  onMutation: (msg?: string) => void
   activePage: Page
   onNavigate: (page: Page) => void
 }
@@ -181,9 +181,9 @@ export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: Da
         </span>
       </footer>
 
-      <AddSpendModal open={modal === 'spend'} onClose={() => setModal(null)} onSuccess={onMutation} />
-      <AddIncomeModal open={modal === 'income'} onClose={() => setModal(null)} onSuccess={onMutation} />
-      <AddChargeModal open={modal === 'charge'} onClose={() => setModal(null)} onSuccess={onMutation} />
+      <AddSpendModal open={modal === 'spend'} onClose={() => setModal(null)} onSuccess={() => onMutation('Spend recorded')} />
+      <AddIncomeModal open={modal === 'income'} onClose={() => setModal(null)} onSuccess={() => onMutation('Income added')} />
+      <AddChargeModal open={modal === 'charge'} onClose={() => setModal(null)} onSuccess={() => onMutation('Charge saved')} />
     </MainLayout>
   )
 }

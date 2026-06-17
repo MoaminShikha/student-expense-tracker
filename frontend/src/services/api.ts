@@ -69,3 +69,9 @@ export const getAllTransactions = () =>
 
 export const getWeeklySummary = (weeks = 8) =>
   fetchJSON<import('../types').WeeklySummary[]>(`${BASE}/transactions/weekly-summary?weeks=${weeks}`)
+
+export const getStreak = () =>
+  fetchJSON<{ streak_days: number }>(`${BASE}/streak`)
+
+export const deleteEntry = (entryId: string, entryType: 'spend' | 'income') =>
+  fetchJSON<{ deleted: string }>(`${BASE}/entry/${entryId}?entry_type=${entryType}`, { method: 'DELETE' })

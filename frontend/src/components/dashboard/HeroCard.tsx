@@ -156,22 +156,35 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
         events={[
-          ...events.map(e => ({
-            day: parseInt(e.date.split('-')[2], 10),
-            date: e.date,
-            type: e.type as 'spend' | 'income',
-            description: e.description,
-            category: e.category,
-            amount: e.amount,
-          })),
-          ...charges.map(c => ({
-            day: parseInt(c.due_date.split('-')[2], 10),
-            date: c.due_date,
-            type: (c.status === 'paid' ? 'charge' : 'upcoming') as 'charge' | 'upcoming',
-            description: c.name,
-            category: null,
-            amount: c.amount,
-          })),
+          // ponytail: filter to current month before mapping
+          ...events
+            .filter(e => {
+              const [y, m] = e.date.split('-')
+              const now = new Date()
+              return parseInt(y) === now.getFullYear() && parseInt(m) === now.getMonth() + 1
+            })
+            .map(e => ({
+              day: parseInt(e.date.split('-')[2], 10),
+              date: e.date,
+              type: e.type as 'spend' | 'income',
+              description: e.description,
+              category: e.category,
+              amount: e.amount,
+            })),
+          ...charges
+            .filter(c => {
+              const [y, m] = c.due_date.split('-')
+              const now = new Date()
+              return parseInt(y) === now.getFullYear() && parseInt(m) === now.getMonth() + 1
+            })
+            .map(c => ({
+              day: parseInt(c.due_date.split('-')[2], 10),
+              date: c.due_date,
+              type: (c.status === 'paid' ? 'charge' : 'upcoming') as 'charge' | 'upcoming',
+              description: c.name,
+              category: null,
+              amount: c.amount,
+            })),
         ]}
       />
     </motion.article>

@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getDisplayName, getInitials } from '../../pages/Settings'
 
 export type Page = 'Dashboard' | 'Activity' | 'Insights' | 'Settings'
 
@@ -59,9 +60,19 @@ const NAV_ITEMS = [
 
 const NAVIGABLE: Page[] = ['Dashboard', 'Activity', 'Insights', 'Settings']
 
-export function Sidebar({ streakDays = 12, activePage = 'Dashboard', onNavigate }: SidebarProps) {
+export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }: SidebarProps) {
   const totalSegs = 14
   const onSegs = Math.min(streakDays, totalSegs)
+  const [userName, setUserName] = useState(getDisplayName)
+
+  // Sync when user saves Settings
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === 'mizan_display_name') setUserName(e.newValue ?? '')
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   return (
     <aside
@@ -181,11 +192,11 @@ export function Sidebar({ streakDays = 12, activePage = 'Dashboard', onNavigate 
             position: 'relative',
           }}
         >
-          MS
+          {getInitials(userName || 'Mizān')}
           <span style={{ position: 'absolute', bottom: 0, right: 0, width: '9px', height: '9px', borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--surface)' }} />
         </div>
         <div>
-          <div style={{ fontSize: 'var(--t-sm)', color: 'var(--fg)' }}>Moamin Shikha</div>
+          <div style={{ fontSize: 'var(--t-sm)', color: 'var(--fg)' }}>{userName || 'Set your name'}</div>
           <div style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)', marginTop: '1px' }}>Student · Budget</div>
         </div>
       </div>
