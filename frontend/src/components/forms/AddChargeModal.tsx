@@ -1,0 +1,211 @@
+import React from 'react'
+import { postCharge } from '../../services/api'
+import type { AddChargeInput } from '../../types'
+
+interface AddChargeModalProps {
+  open: boolean
+  onClose: () => void
+  onSuccess: () => void
+}
+
+const MODAL_STYLE: React.CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 100,
+  background: 'hsl(240 28% 12% / 0.4)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
+const PANEL_STYLE: React.CSSProperties = {
+  background: 'var(--surface)',
+  borderRadius: '16px',
+  padding: '24px',
+  width: '380px',
+  maxWidth: '95vw',
+  boxShadow: '0 20px 60px hsl(240 28% 12% / 0.2)',
+  border: '1px solid var(--hairline)',
+  maxHeight: '90vh',
+  overflowY: 'auto',
+}
+
+const INPUT_STYLE: React.CSSProperties = {
+  width: '100%',
+  padding: '8px 10px',
+  border: '1px solid var(--hairline)',
+  borderRadius: '8px',
+  background: 'var(--bg)',
+  color: 'var(--fg)',
+  fontFamily: "'DM Mono', monospace",
+  fontSize: 'var(--t-sm)',
+  marginTop: '4px',
+}
+
+export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps) {
+  const today = new Date().toISOString().split('T')[0]
+  const [form, setForm] = React.useState<AddChargeInput>({
+    name: '',
+    amount: 0,
+    due_date: today,
+    is_recurring: false,
+    is_fuzzy: false,
+  })
+  const [submitting, setSubmitting] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+
+  if (!open) return null
+
+  function set<K extends keyof AddChargeInput>(key: K, value: AddChargeInput[K]) {
+    setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!form.name.trim()) { setError('Name is required'); return }
+    if (!form.is_fuzzy && form.amount <= 0) { setError('Amount must be positive'); return }
+    setError(null)
+    setSubmitting(true)
+    try {
+      await postCharge(form)
+      onSuccess()
+      onClose()
+      setForm({ name: '', amount: 0, due_date: today, is_recurring: false, is_fuzzy: false })
+    } catch (e) {
+      console.error('AddCharge:', e)
+      setError('Failed to add charge. Is the backend running?')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div style={MODAL_STYLE} onClick={onClose}>
+      <div style={PANEL_STYLE} onClick={(e) => e.stopPropagation()}>
+        <h2 style={{ fontSize: 'var(--t-lg)', fontFamily: "'Playfair Display', serif", color: 'var(--fg)', marginBottom: '16px' }}>Add Charge</h2>
+        <form onSubmit={(e) => void handleSubmit(e)}>
+          <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)' }}>
+            Name
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => set('name', e.target.value)}
+              required
+              placeholder="e.g. Rent, Gym, Phone bill"
+              style={INPUT_STYLE}
+              autoFocus
+            />
+          </label>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+            <input
+              type="checkbox"
+              id="is-fuzzy"
+              checked={form.is_fuzzy}
+              onChange={(e) => set('is_fuzzy', e.target.checked)}
+            />
+            <label htmlFor="is-fuzzy" style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', cursor: 'pointer' }}>
+              Fuzzy amount (estimated range)
+            </label>
+          </div>
+
+          {form.is_fuzzy ? (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', flex: 1 }}>
+                Min (₪)
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.fuzzy_min ?? ''}
+                  onChange={(e) => set('fuzzy_min', parseFloat(e.target.value) || 0)}
+                  style={INPUT_STYLE}
+                />
+              </label>
+              <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', flex: 1 }}>
+                Max (₪)
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.fuzzy_max ?? ''}
+                  onChange={(e) => set('fuzzy_max', parseFloat(e.target.value) || 0)}
+                  style={INPUT_STYLE}
+                />
+              </label>
+            </div>
+          ) : (
+            <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
+              Amount (₪)
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={form.amount || ''}
+                onChange={(e) => set('amount', parseFloat(e.target.value) || 0)}
+                required
+                style={INPUT_STYLE}
+              />
+            </label>
+          )}
+
+          <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
+            Due date
+            <input
+              type="date"
+              value={form.due_date}
+              onChange={(e) => set('due_date', e.target.value)}
+              required
+              style={INPUT_STYLE}
+            />
+          </label>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+            <input
+              type="checkbox"
+              id="is-recurring"
+              checked={form.is_recurring}
+              onChange={(e) => set('is_recurring', e.target.checked)}
+            />
+            <label htmlFor="is-recurring" style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', cursor: 'pointer' }}>
+              Recurring monthly
+            </label>
+          </div>
+
+          {form.is_recurring && (
+            <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
+              Day of month
+              <input
+                type="number"
+                min="1"
+                max="31"
+                value={form.day_of_month ?? ''}
+                onChange={(e) => set('day_of_month', parseInt(e.target.value) || undefined)}
+                placeholder="e.g. 1 for 1st of month"
+                style={INPUT_STYLE}
+              />
+            </label>
+          )}
+
+          {error && <div style={{ fontSize: 'var(--t-sm)', color: 'var(--red)', marginTop: '8px' }}>{error}</div>}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '20px', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ padding: '8px 16px', border: '1px solid var(--hairline)', borderRadius: '8px', background: 'transparent', color: 'var(--muted-fg)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-sm)', cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{ padding: '8px 16px', border: 'none', borderRadius: '8px', background: 'var(--red)', color: 'var(--surface)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-sm)', cursor: 'pointer', fontWeight: 500 }}
+            >
+              {submitting ? 'Adding…' : 'Add Charge'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
