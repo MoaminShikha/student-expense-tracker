@@ -172,18 +172,22 @@ class MainWindow(QMainWindow):
         last_sync: datetime | None = None,
         animate: bool = True,
     ) -> None:
+        """Facade: delegate snapshot data to DashboardPage and update the topbar on-track state."""
         self.dashboard_page.set_snapshot(snapshot, last_sync, animate=animate)
         self._topbar.set_on_track_state(snapshot.on_track_state_value)
         if last_sync:
             self._topbar.set_last_sync(last_sync.strftime("%d %b · %H:%M"))
 
     def set_upcoming(self, rows: Iterable[ChargeRowVM]) -> None:
+        """Facade: delegate upcoming charge rows to DashboardPage."""
         self.dashboard_page.set_upcoming(rows)
 
     def set_recent(self, rows: Iterable[TxRowVM]) -> None:
+        """Facade: delegate recent transaction rows to DashboardPage."""
         self.dashboard_page.set_recent(rows)
 
     def set_categories(self, rows: Iterable[CategoryRowVM]) -> None:
+        """Facade: delegate category breakdown rows to DashboardPage."""
         self.dashboard_page.set_categories(rows)
 
     def set_timeline_percentages(
@@ -194,14 +198,17 @@ class MainWindow(QMainWindow):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
+        """Facade: delegate timeline segment percentages to DashboardPage."""
         self.dashboard_page.set_timeline_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )
 
     def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
+        """Facade: delegate alert state to DashboardPage."""
         self.dashboard_page.set_alert(body_html, amount_str, visible)
 
     def set_last_sync(self, dt: datetime | None) -> None:
+        """Update the topbar last-sync timestamp if a datetime is provided."""
         if dt:
             self._topbar.set_last_sync(dt.strftime("%d %b · %H:%M"))
 
@@ -218,6 +225,7 @@ class MainWindow(QMainWindow):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
+        """Facade: alias for set_timeline_percentages, delegates to DashboardPage."""
         self.dashboard_page.set_timeline_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )

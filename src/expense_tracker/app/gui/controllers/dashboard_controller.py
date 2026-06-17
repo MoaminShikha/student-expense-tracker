@@ -41,6 +41,19 @@ class DashboardController:
             spend_service: SpendService | None = None,
             caution_threshold: Decimal | None = None,
             logger: logging.Logger | None = None, ) -> None:
+        """
+        Wire the dashboard controller to its view and application services.
+
+        :param view: MainWindow instance whose signals this controller handles.
+        :param session_service: Service for querying the active budget session.
+        :param balance_service: Service for aggregating balance snapshots.
+        :param income_service: Service for income entry operations.
+        :param charge_service: Service for committed charge operations.
+        :param fuzzy_charge_service: Service for fuzzy/estimated charge operations.
+        :param spend_service: Service for spend transaction operations.
+        :param caution_threshold: Free-money amount below which caution state triggers.
+        :param logger: Optional logger; defaults to the module logger.
+        """
         self._view = view
         self._session_service = session_service
         self._balance_service = balance_service
@@ -139,9 +152,11 @@ class DashboardController:
     # ── Signal handlers ───────────────────────────────────────────────────────
 
     def _on_refresh_requested(self) -> None:
+        """Handle the topbar sync button click by triggering a full dashboard refresh."""
         self.refresh()
 
     def _on_add_income_requested(self) -> None:
+        """Handle the Add Income button click by opening the income dialog and calling IncomeService.add_income."""
         if self._income_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_income_dialog import AddIncomeDialog
@@ -181,6 +196,7 @@ class DashboardController:
             self._logger.exception("Failed to display error dialog")
 
     def _on_add_spend_requested(self) -> None:
+        """Handle the Add Spend button click by opening the spend dialog and calling SpendService.add_transaction."""
         if self._spend_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_spend_dialog import AddSpendDialog
@@ -198,6 +214,7 @@ class DashboardController:
                 self._show_error("Could not add expense", "An unexpected error occurred.")
 
     def _on_add_charge_requested(self) -> None:
+        """Handle the Add Charge button click by opening the charge dialog and calling ChargeService.add_charge or add_recurring_charge."""
         if self._charge_service is None:
             return
         from expense_tracker.app.gui.dialogs.add_charge_dialog import AddChargeDialog

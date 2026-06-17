@@ -145,19 +145,40 @@ class ChargeService:
         self._logger.info("Added recurring charge %s for session %s.", charge.charge_id, active_session.session_id)
         return charge
 
-    def get_charges_for_month(self, session_id: UUID, year: int, month: int) -> list:
-        """Return upcoming committed charges due in the given month."""
+    def get_charges_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
+        """
+        Return upcoming committed charges due in the given month.
+
+        :param session_id: Identifier of the session to query.
+        :param year: Calendar year.
+        :param month: Calendar month (1–12).
+        :return: List of committed charges with UPCOMING status due in the specified month.
+        """
         return [
             c for c in self._charge_repository.list_for_month(session_id, year, month)
             if c.status == ChargeStatus.UPCOMING
         ]
 
-    def list_all_for_month(self, session_id: UUID, year: int, month: int) -> list:
-        """Return all committed charges due in the given month (any status)."""
+    def list_all_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
+        """
+        Return all committed charges due in the given month (any status).
+
+        :param session_id: Identifier of the session to query.
+        :param year: Calendar year.
+        :param month: Calendar month (1–12).
+        :return: List of all committed charges due in the specified month, regardless of status.
+        """
         return self._charge_repository.list_for_month(session_id, year, month)
 
     def get_monthly_committed_total(self, session_id: UUID, year: int, month: int) -> Decimal:
-        """Return the sum of upcoming committed charges due in the given month."""
+        """
+        Return the sum of upcoming committed charges due in the given month.
+
+        :param session_id: Identifier of the session to query.
+        :param year: Calendar year.
+        :param month: Calendar month (1–12).
+        :return: Total amount of all UPCOMING charges due in the specified month.
+        """
         charges = self.get_charges_for_month(session_id, year, month)
         return sum((c.amount for c in charges), Decimal("0"))
 

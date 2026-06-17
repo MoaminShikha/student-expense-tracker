@@ -68,6 +68,7 @@ class DashboardPage(QWidget):
         last_sync: datetime | None = None,
         animate: bool = True,
     ) -> None:
+        """Accept a BalanceViewModel and push all values into the HeroCard and StatColumn."""
         self._hero.set_money_value(snapshot.free_money, animate=animate)
         self._hero.set_state(snapshot.balance_state_value)
         self._hero.set_period_for_today()
@@ -95,12 +96,15 @@ class DashboardPage(QWidget):
         self._stat_column.set_snapshot(snapshot, animate=animate)
 
     def set_upcoming(self, rows: Iterable[ChargeRowVM]) -> None:
+        """Accept an iterable of ChargeRowVM and forward them to the UpcomingPanel."""
         self._upcoming_panel.set_upcoming(list(rows))
 
     def set_recent(self, rows: Iterable[TxRowVM]) -> None:
+        """Accept an iterable of TxRowVM and forward them to the RecentPanel."""
         self._recent_panel.set_recent(list(rows))
 
     def set_categories(self, rows: Iterable[CategoryRowVM]) -> None:
+        """Accept an iterable of CategoryRowVM and forward them to the CategoryPanel."""
         self._cat_panel.set_categories(list(rows))
 
     def set_timeline_percentages(
@@ -111,11 +115,13 @@ class DashboardPage(QWidget):
         fuzzy_width_pct: float,
         today_pct: float,
     ) -> None:
+        """Forward five timeline segment percentages to the HeroCard's TimelineWidget."""
         self._hero.timeline.set_percentages(
             spent_pct, committed_pct, fuzzy_left_pct, fuzzy_width_pct, today_pct
         )
 
     def set_alert(self, body_html: str, amount_str: str, visible: bool) -> None:
+        """Forward alert visibility, body HTML, and amount string to the HeroCard."""
         self._hero.set_alert(body_html, amount_str, visible)
 
     # ── LAYOUT ─────────────────────────────────────────────────────────────────
