@@ -1,0 +1,358 @@
+from __future__ import annotations
+
+from PyQt6.QtCore import QPointF, QRectF, Qt, pyqtSignal
+from PyQt6.QtGui import QColor, QPainter, QPen, QPolygonF
+from PyQt6.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
+from expense_tracker.app.gui_v2 import tokens
+from expense_tracker.app.gui_v2.fonts import noto_naskh
+
+_NAV: list[tuple[str, list[tuple[str, str]]]] = [
+    ("OVERVIEW", [
+        ("dashboard", "Dashboard"),
+        ("activity",  "Activity"),
+    ]),
+    ("INSIGHTS", [
+        ("insights", "Insights"),
+    ]),
+    ("ACCOUNT", [
+        ("settings", "Settings"),
+    ]),
+]
+
+_STREAK_TOTAL = 14
+
+
+class _AvatarWidget(QWidget):
+    """33×33 circle with NAVY fill, GOLD initials, and GREEN status dot."""
+
+    def __init__(self, initials: str = "KM", parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._initials = initials
+        self.setFixedSize(33, 33)
+
+    def paintEvent(self, _event) -> None:  # type: ignore[override]
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(tokens.NAVY))
+        p.drawEllipse(0, 0, 33, 33)
+        p.setPen(QColor(tokens.GOLD))
+        f = p.font()
+        f.setFamily("DM Mono")
+        f.setPointSize(9)
+        p.setFont(f)
+        p.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self._initials)
+        dot_x, dot_y, dot_r = 24, 24, 9
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(QColor(tokens.SURFACE))
+        p.drawEllipse(dot_x, dot_y, dot_r, dot_r)
+        p.setBrush(QColor(tokens.GREEN))
+        p.drawEllipse(dot_x + 2, dot_y + 2, dot_r - 4, dot_r - 4)
+        p.end()
+
+
+class _NavButton(QPushButton):
+    """Sidebar nav button with a painted line icon and active-dot indicator."""
+
+    def __init__(self, key: str, text: str) -> None:
+        super().__init__(text)
+        self._key = key
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def paintEvent(self, event) -> None:  # type: ignore[override]
+        super().paintEvent(event)
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        active = self.property("active") == "true"
+        color = QColor(tokens.FG if active else tokens.MUTED_FG)
+        pen = QPen(color, 1.6)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+        pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        p.setPen(pen)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        x = 20.0
+        y = (self.height() - 15.0) / 2.0
+        self._draw_icon(p, x, y)
+        if active:
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(QColor(tokens.GOLD))
+            p.drawEllipse(QPointF(self.width() - 16, self.height() / 2), 2.0, 2.0)
+        p.end()
+
+    def _draw_icon(self, p: QPainter, x: float, y: float) -> None:
+        active = self.property("active") == "true"
+        color = QColor(tokens.FG if active else tokens.MUTED_FG)
+        if self._key == "dashboard":
+            size, gap = 4.4, 5.6
+            for row in range(2):
+                for col in range(2):
+                    p.drawRoundedRect(QRectF(x + col * gap, y + row * gap, size, size), 1, 1)
+        elif self._key == "activity":
+            p.drawLine(QPointF(x, y + 2), QPointF(x + 15, y + 2))
+            p.drawLine(QPointF(x, y + 7.5), QPointF(x + 11, y + 7.5))
+            p.drawLine(QPointF(x, y + 13), QPointF(x + 7, y + 13))
+        elif self._key == "insights":
+            pts = [
+                QPointF(x + 7.5, y), QPointF(x + 9.6, y + 5),
+                QPointF(x + 15, y + 5.5), QPointF(x + 10.9, y + 9),
+                QPointF(x + 12, y + 14.5), QPointF(x + 7.5, y + 11.8),
+                QPointF(x + 3, y + 14.5), QPointF(x + 4.1, y + 9),
+                QPointF(x, y + 5.5), QPointF(x + 5.4, y + 5),
+            ]
+            p.drawPolygon(QPolygonF(pts))
+        elif self._key == "settings":
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawEllipse(QRectF(x + 4, y + 3, 7, 7))
+            p.drawEllipse(QRectF(x + 6, y + 5, 3, 3))
+            p.setBrush(color)
+            cx, cy = x + 7.5, y + 6.5
+            for tx, ty in [
+                (cx + 4, cy), (cx + 2, cy - 3.5), (cx - 2, cy - 3.5),
+                (cx - 4, cy), (cx - 2, cy + 3.5), (cx + 2, cy + 3.5),
+            ]:
+                p.drawEllipse(QRectF(tx - 1.5, ty - 1.5, 3, 3))
+
+
+class Sidebar(QWidget):
+    """
+    Fixed left navigation sidebar (210px).
+
+    Emits page_selected(int) when a nav item is clicked (PageIndex value).
+    Also emits nav_changed(str) for key-based routing compatibility.
+    """
+
+    nav_changed   = pyqtSignal(str)
+    page_selected = pyqtSignal(int)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.setObjectName("sidebarRoot")
+        self.setFixedWidth(tokens.SIDEBAR_W)
+        self._active = "dashboard"
+        self._nav_btns: dict[str, QPushButton] = {}
+        self._streak_segs: list[QFrame] = []
+        self._streak_count_lbl: QLabel | None = None
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(self._build_brand())
+        layout.addWidget(self._build_nav(), stretch=1)
+        layout.addWidget(self._build_user())
+
+        self.setStyleSheet(f"""
+            QWidget {{
+                background: {tokens.SURFACE};
+                color: {tokens.MUTED_FG};
+                font-family: "DM Mono", Consolas, monospace;
+            }}
+            QWidget#sidebarRoot {{
+                border-right: 1px solid {tokens.HAIRLINE_S};
+            }}
+            QFrame#sbDivider {{ background: {tokens.HAIRLINE}; }}
+            QLabel#sbTag {{
+                font-size: {tokens.T_MICRO}px; letter-spacing: 3px;
+                color: {tokens.GOLD}; background: transparent;
+            }}
+            QLabel#sbWordmark {{
+                color: {tokens.GOLD_LEAF};
+                font-size: 25px; font-weight: 700; background: transparent;
+            }}
+            QLabel#sbSub {{
+                font-size: {tokens.T_MINI}px; letter-spacing: 2px;
+                color: {tokens.MUTED}; background: transparent;
+            }}
+            QLabel#sbSectionLabel {{
+                font-size: {tokens.T_MICRO}px; letter-spacing: 3px;
+                color: {tokens.MUTED}; padding: 9px 20px 3px 20px; background: transparent;
+            }}
+            QPushButton#sbNavItem {{
+                text-align: left; padding-left: 44px; padding-right: 22px;
+                height: 33px; border: none; border-left: 3px solid transparent;
+                background: transparent; color: {tokens.MUTED_FG};
+                font-size: {tokens.T_SM}px; border-radius: 0px;
+            }}
+            QPushButton#sbNavItem:hover {{
+                background: rgba(36,28,10,0.08); color: {tokens.FG};
+                border-left: 3px solid {tokens.HAIRLINE_S};
+            }}
+            QPushButton#sbNavItem[active="true"] {{
+                border-left: 2px solid {tokens.GOLD};
+                background: rgba(199,154,57,0.16); color: {tokens.FG}; font-weight: 500;
+            }}
+            QFrame#sbStreak {{
+                background: {tokens.PAPER_WARM}; border-radius: 10px;
+            }}
+            QLabel#sbStreakLabel {{
+                font-size: {tokens.T_MICRO}px; letter-spacing: 3px;
+                color: {tokens.MUTED}; background: transparent;
+            }}
+            QLabel#sbStreakCount {{
+                font-size: {tokens.T_LG}px; font-weight: 700;
+                font-family: "Playfair Display"; color: {tokens.FG}; background: transparent;
+            }}
+            QLabel#sbStreakUnit {{
+                font-size: {tokens.T_XS}px; color: {tokens.MUTED}; background: transparent;
+            }}
+            QFrame#sbStreakSegOn {{ background: {tokens.GOLD}; border-radius: 3px; }}
+            QFrame#sbStreakSegOff {{ background: {tokens.HAIRLINE}; border-radius: 3px; }}
+            QFrame#sbUserDivider {{ background: {tokens.HAIRLINE}; }}
+            QLabel#sbUserName {{
+                font-size: {tokens.T_SM}px; color: {tokens.FG}; background: transparent;
+            }}
+            QLabel#sbUserSub {{
+                font-size: {tokens.T_MINI}px; color: {tokens.MUTED}; background: transparent;
+            }}
+        """)
+
+    def set_streak(self, days: int) -> None:
+        """Light up the first `days` streak segments in gold."""
+        capped = max(0, min(_STREAK_TOTAL, days))
+        for i, seg in enumerate(self._streak_segs):
+            seg.setObjectName("sbStreakSegOn" if i < capped else "sbStreakSegOff")
+            seg.style().unpolish(seg)
+            seg.style().polish(seg)
+        if self._streak_count_lbl:
+            self._streak_count_lbl.setText(str(capped) if days > 0 else "—")
+
+    def _build_brand(self) -> QWidget:
+        w = QWidget()
+        layout = QVBoxLayout(w)
+        layout.setContentsMargins(20, 18, 20, 0)
+        layout.setSpacing(2)
+        top = QHBoxLayout()
+        tag = QLabel("M—01")
+        tag.setObjectName("sbTag")
+        wordmark = QLabel("ميزان")
+        wordmark.setObjectName("sbWordmark")
+        wordmark.setFont(noto_naskh(25))
+        wordmark.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        top.addWidget(tag)
+        top.addStretch()
+        top.addWidget(wordmark)
+        sub = QHBoxLayout()
+        sub_l = QLabel("STUDENT BUDGET")
+        sub_l.setObjectName("sbSub")
+        sub_r = QLabel("v2.0")
+        sub_r.setObjectName("sbSub")
+        sub.addWidget(sub_l)
+        sub.addStretch()
+        sub.addWidget(sub_r)
+        layout.addLayout(top)
+        layout.addLayout(sub)
+        layout.addSpacing(14)
+        divider = QFrame()
+        divider.setObjectName("sbDivider")
+        divider.setFixedHeight(1)
+        layout.addWidget(divider)
+        return w
+
+    def _build_nav(self) -> QWidget:
+        w = QWidget()
+        layout = QVBoxLayout(w)
+        layout.setContentsMargins(0, 8, 0, 8)
+        layout.setSpacing(0)
+        for section_label, items in _NAV:
+            lbl = QLabel(section_label)
+            lbl.setObjectName("sbSectionLabel")
+            layout.addWidget(lbl)
+            for key, text in items:
+                btn = self._build_nav_btn(key, text)
+                self._nav_btns[key] = btn
+                layout.addWidget(btn)
+        layout.addStretch()
+        streak_wrap = QWidget()
+        streak_wrap_l = QHBoxLayout(streak_wrap)
+        streak_wrap_l.setContentsMargins(14, 6, 14, 8)
+        streak_wrap_l.setSpacing(0)
+        streak_wrap_l.addWidget(self._build_streak())
+        layout.addWidget(streak_wrap)
+        return w
+
+    def _build_nav_btn(self, key: str, text: str) -> QPushButton:
+        btn = _NavButton(key, text)
+        btn.setObjectName("sbNavItem")
+        btn.setProperty("active", "true" if key == self._active else "false")
+        btn.clicked.connect(lambda _checked, k=key: self._on_nav_clicked(k))
+        return btn
+
+    def _build_streak(self) -> QFrame:
+        frame = QFrame()
+        frame.setObjectName("sbStreak")
+        container = QVBoxLayout(frame)
+        container.setContentsMargins(12, 9, 12, 9)
+        container.setSpacing(6)
+        header = QHBoxLayout()
+        lbl = QLabel("STREAK")
+        lbl.setObjectName("sbStreakLabel")
+        count_row = QHBoxLayout()
+        count_row.setSpacing(3)
+        num = QLabel("—")
+        num.setObjectName("sbStreakCount")
+        self._streak_count_lbl = num
+        unit = QLabel("days")
+        unit.setObjectName("sbStreakUnit")
+        count_row.addWidget(num)
+        count_row.addWidget(unit)
+        header.addWidget(lbl)
+        header.addStretch()
+        header.addLayout(count_row)
+        segs = QHBoxLayout()
+        segs.setSpacing(3)
+        for _ in range(_STREAK_TOTAL):
+            seg = QFrame()
+            seg.setObjectName("sbStreakSegOff")
+            seg.setFixedHeight(6)
+            segs.addWidget(seg)
+            self._streak_segs.append(seg)
+        container.addLayout(header)
+        container.addLayout(segs)
+        return frame
+
+    def _build_user(self) -> QWidget:
+        w = QWidget()
+        layout_outer = QVBoxLayout(w)
+        layout_outer.setContentsMargins(0, 0, 0, 0)
+        layout_outer.setSpacing(0)
+        divider = QFrame()
+        divider.setObjectName("sbUserDivider")
+        divider.setFixedHeight(1)
+        layout_outer.addWidget(divider)
+        row_w = QWidget()
+        row = QHBoxLayout(row_w)
+        row.setContentsMargins(20, 12, 20, 16)
+        row.setSpacing(11)
+        avatar = _AvatarWidget("KM")
+        info_w = QWidget()
+        info = QVBoxLayout(info_w)
+        info.setSpacing(2)
+        info.setContentsMargins(0, 0, 0, 0)
+        name = QLabel("Student")
+        name.setObjectName("sbUserName")
+        sub = QLabel("University · Dashboard")
+        sub.setObjectName("sbUserSub")
+        info.addWidget(name)
+        info.addWidget(sub)
+        row.addWidget(avatar)
+        row.addWidget(info_w)
+        row.addStretch()
+        layout_outer.addWidget(row_w)
+        return w
+
+    def _on_nav_clicked(self, key: str) -> None:
+        self._active = key
+        for k, btn in self._nav_btns.items():
+            btn.setProperty("active", "true" if k == key else "false")
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+        self.nav_changed.emit(key)
+        page_map = {"dashboard": 0, "activity": 1, "insights": 2, "settings": 3}
+        self.page_selected.emit(page_map.get(key, 0))

@@ -116,24 +116,30 @@ class HeroCard(QWidget):
 
     @property
     def current_state(self) -> str:
+        """Return the current state key ('normal', 'caution', or 'crisis')."""
         return self._state
 
     def set_state(self, state: str) -> None:
+        """Transition the card to a new state, animating the border color if the state changes."""
         if state != self._state:
             self._apply_state(state, animate=True)
 
     def set_money_value(self, value: Decimal, animate: bool = True) -> None:
+        """Update the large free-money CountingLabel, animating the count if animate=True."""
         self._money_value.set_value(value, animate=animate)
 
     def set_period(self, text: str) -> None:
+        """Set the period counter label text (e.g. '17 / 30')."""
         self._period_val.setText(text)
 
     def set_period_for_today(self) -> None:
+        """Update the period counter to today's day-of-month over the total days in the current month."""
         today = date.today()
         days_in_month = calendar.monthrange(today.year, today.month)[1]
         self.set_period(f"{today.day} / {days_in_month}")
 
     def set_legend(self, spent: str, committed: str, fuzzy: str, limit: str) -> None:
+        """Populate the four legend value labels (Spent, Committed, Fuzzy, Limit) and make them visible."""
         self._legend_spent.setText(spent or "—")
         self._legend_committed.setText(committed or "—")
         self._legend_fuzzy.setText(fuzzy or "—")
@@ -149,6 +155,7 @@ class HeroCard(QWidget):
         self._daily_sub.setText(f"/ day · {days_left}")
 
     def set_alert(self, body_text: str, amount_str: str, visible: bool) -> None:
+        """Show or hide the heads-up alert strip with the given body text and amount."""
         self._heads_up.set_data(body_text, amount_str)
         self._heads_up.set_visible(visible)
 

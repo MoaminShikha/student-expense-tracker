@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from ...domain.models import IncomeEntry, IncomeSourceTag
 from ...ports.repositories import IncomeRepository, SessionRepository
@@ -53,5 +53,13 @@ class IncomeService:
         self._logger.info("Added income entry %s for session %s.", entry.income_id, active_session.session_id)
         return entry
 
-    def list_for_month(self, session_id, year: int, month: int) -> list:
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[IncomeEntry]:
+        """
+        Return all income entries for the given session and calendar month.
+
+        :param session_id: Identifier of the session to query.
+        :param year: Calendar year.
+        :param month: Calendar month (1–12).
+        :return: List of income entries recorded in the specified month.
+        """
         return self._income_repository.list_for_month(session_id, year, month)

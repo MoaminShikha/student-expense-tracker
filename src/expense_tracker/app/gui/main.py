@@ -4,6 +4,9 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
+# Set to True to launch the new GUI v2 instead of the current GUI.
+USE_GUI_V2 = True
+
 from PyQt6.QtWidgets import QApplication
 
 _HERE         = Path(__file__).resolve()
@@ -28,6 +31,10 @@ _CAUTION_THRESHOLD = Decimal("100")
 
 
 def main() -> int:
+    if USE_GUI_V2:
+        from expense_tracker.app.gui_v2.main import main as main_v2
+        return main_v2()
+
     import logging
     logger = logging.getLogger(__name__)
     app = QApplication([])

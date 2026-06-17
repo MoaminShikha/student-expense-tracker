@@ -14,6 +14,8 @@ from expense_tracker.app.gui.styles import tokens
 
 
 class InsightsController:
+    """Orchestrates the insights page by computing category breakdowns, daily burn rate, and encumbrance splits from service data."""
+
     def __init__(
         self,
         view: InsightsPage,
@@ -24,6 +26,17 @@ class InsightsController:
         fuzzy_charge_service: FuzzyChargeService | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
+        """
+        Initialize the insights controller.
+
+        :param view: InsightsPage instance to populate with analytics data.
+        :param session_service: Service for querying the active budget session.
+        :param balance_service: Service for aggregating balance snapshots.
+        :param spend_service: Service for fetching spend transactions.
+        :param charge_service: Service for fetching committed charges.
+        :param fuzzy_charge_service: Service for fetching fuzzy/estimated charges.
+        :param logger: Optional logger; defaults to the module logger.
+        """
         self._view = view
         self._session_service = session_service
         self._balance_service = balance_service

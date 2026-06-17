@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from ...domain.models import Transaction, TransactionCategory
 from ...ports.repositories import SessionRepository, TransactionRepository
@@ -61,5 +61,13 @@ class SpendService:
         self._logger.info("Added transaction %s for session %s.", transaction.transaction_id, active_session.session_id)
         return transaction
 
-    def list_for_month(self, session_id, year: int, month: int) -> list:
+    def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
+        """
+        Return all spend transactions for the given session and calendar month.
+
+        :param session_id: Identifier of the session to query.
+        :param year: Calendar year.
+        :param month: Calendar month (1–12).
+        :return: List of transactions recorded in the specified month.
+        """
         return self._transaction_repository.list_for_month(session_id, year, month)
