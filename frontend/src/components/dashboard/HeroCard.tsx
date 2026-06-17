@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Timeline } from './Timeline'
-import type { BalanceResponse } from '../../types'
+import type { BalanceResponse, ActivityEntry } from '../../types'
 
 interface HeroCardProps {
   balance: BalanceResponse
+  events?: ActivityEntry[]
 }
 
 const STATE_COLORS = {
@@ -42,7 +43,7 @@ function useCountUp(target: number, duration = 800) {
   return value
 }
 
-export function HeroCard({ balance }: HeroCardProps) {
+export function HeroCard({ balance, events = [] }: HeroCardProps) {
   const raw = balance.balance_state
   const stateKey: keyof typeof STATE_COLORS =
     raw === 'crisis' ? 'red' : raw === 'caution' ? 'amber' : 'green'
@@ -153,6 +154,13 @@ export function HeroCard({ balance }: HeroCardProps) {
         dayOfMonth={balance.day_of_month}
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
+        events={events.map(e => ({
+          day: new Date(e.date).getDate(),
+          type: e.type as 'spend' | 'income',
+          description: e.description,
+          category: e.category,
+          amount: e.amount,
+        }))}
       />
     </motion.article>
   )
