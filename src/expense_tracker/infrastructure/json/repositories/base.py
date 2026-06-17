@@ -56,3 +56,12 @@ class JsonStore(Generic[T]):
         records = self._records()
         records.append(self._mapper.to_dict(entity))
         self._persist(records)
+
+    def _delete_by_id(self, id_field: str, id_value: str) -> bool:
+        """Remove the record with the given id field value. Returns True if removed."""
+        records = self._records()
+        new_records = [r for r in records if str(r.get(id_field)) != id_value]
+        if len(new_records) == len(records):
+            return False
+        self._persist(new_records)
+        return True

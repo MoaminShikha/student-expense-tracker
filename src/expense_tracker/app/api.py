@@ -24,9 +24,14 @@ _DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 app = FastAPI(title="Mizan Expense Tracker API")
 
+import os as _os
+_CORS_ORIGINS = _os.environ.get(
+    "MIZAN_CORS_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=_CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -313,6 +318,24 @@ def get_all_transactions():
     return rows
 
 
+@app.get("/api/streak")
+def get_streak():
+    from datetime import timedelta
+    session = _require_session()
+    svc = _get_services()
+    today = date.today()
+    txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
+    incomes = svc.balance_service._income_repository.list_for_session(session.session_id)
+    active_days = {t.date for t in txs} | {i.date for i in incomes}
+    streak = 0
+    for offset in range(14):
+        if (today - timedelta(days=offset)) in active_days:
+            streak += 1
+        else:
+            break
+    return {"streak_days": streak}
+
+
 @app.get("/api/transactions/weekly-summary")
 def get_weekly_summary(weeks: int = 8):
     from datetime import timedelta
@@ -328,6 +351,25 @@ def get_weekly_summary(weeks: int = 8):
         total = sum((t.amount for t in txs if week_start <= t.date <= week_end), Decimal("0"))
         result.append({"week_label": "Now" if i == 0 else f"W{weeks - i}", "week_start": week_start.isoformat(), "total_spend": float(total)})
     return result
+
+
+@app.delete("/api/entry/{entry_id}")
+def delete_entry(entry_id: str, entry_type: str):
+    """Delete a spend or income entry by ID. entry_type must be 'spend' or 'income'."""
+    svc = _get_services()
+    try:
+        uid = UUID(entry_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid entry_id.")
+    if entry_type == "spend":
+        removed = svc.balance_service._transaction_repository.delete(uid)
+    elif entry_type == "income":
+        removed = svc.balance_service._income_repository.delete(uid)
+    else:
+        raise HTTPException(status_code=422, detail="entry_type must be 'spend' or 'income'.")
+    if not removed:
+        raise HTTPException(status_code=404, detail="Entry not found.")
+    return {"deleted": entry_id}
 
 
 @app.post("/api/spend")

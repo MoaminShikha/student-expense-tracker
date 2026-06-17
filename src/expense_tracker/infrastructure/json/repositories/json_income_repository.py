@@ -27,6 +27,10 @@ class JsonIncomeRepository(JsonStore[IncomeEntry]):
         logger.debug("Retrieved %d income entries for session %s", len(entries), session_id)
         return entries
 
+    def delete(self, income_id: UUID) -> bool:
+        """Remove an income entry by ID. Returns True if found and removed."""
+        return self._delete_by_id("income_id", str(income_id))
+
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[IncomeEntry]:
         """List income entries for one calendar month."""
         entries = [
