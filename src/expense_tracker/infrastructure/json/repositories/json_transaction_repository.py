@@ -27,6 +27,10 @@ class JsonTransactionRepository(JsonStore[Transaction]):
         logger.debug("Retrieved %d transactions for session %s", len(transactions), session_id)
         return transactions
 
+    def delete(self, transaction_id: UUID) -> bool:
+        """Remove a transaction by ID. Returns True if found and removed."""
+        return self._delete_by_id("transaction_id", str(transaction_id))
+
     def list_for_month(self, session_id: UUID, year: int, month: int) -> list[Transaction]:
         """List spend transactions for one calendar month."""
         transactions = [
