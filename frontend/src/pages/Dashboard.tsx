@@ -12,7 +12,9 @@ import { AddChargeModal } from '../components/forms/AddChargeModal'
 import { useBalance } from '../hooks/useBalance'
 import { useCharges } from '../hooks/useCharges'
 import { useTransactions } from '../hooks/useTransactions'
-import { initSession } from '../services/api'
+import { useFetch } from '../hooks/useFetch'
+import { initSession, getAllTransactions } from '../services/api'
+import type { ActivityEntry } from '../types'
 import type { Page } from '../components/layout/Sidebar'
 
 function SessionInitForm({ onSuccess }: { onSuccess: () => void }) {
@@ -85,6 +87,7 @@ export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: Da
   const { data: balance, loading: balLoading, error: balError } = useBalance(refreshKey)
   const { data: charges } = useCharges(refreshKey)
   const { data: transactions } = useTransactions(refreshKey)
+  const { data: allEntries } = useFetch<ActivityEntry[]>(getAllTransactions, [], refreshKey)
 
   const [syncing, setSyncing] = React.useState(false)
   const [modal, setModal] = React.useState<'spend' | 'income' | 'charge' | null>(null)
@@ -153,7 +156,7 @@ export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: Da
         aria-label="Budget overview"
         style={{ display: 'grid', gridTemplateColumns: '1fr 290px', gap: '12px' }}
       >
-        <HeroCard balance={balance} />
+        <HeroCard balance={balance} events={allEntries} />
         <StatColumn balance={balance} />
       </section>
 
