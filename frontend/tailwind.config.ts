@@ -1,0 +1,50 @@
+import type { Config } from 'tailwindcss'
+
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        bg: 'hsl(36 25% 96%)',
+        'paper-warm': 'hsl(38 28% 94%)',
+        surface: 'hsl(0 0% 100%)',
+        hairline: 'hsl(36 16% 86%)',
+        'hairline-s': 'hsl(36 14% 76%)',
+        fg: 'hsl(240 28% 12%)',
+        'muted-fg': 'hsl(224 14% 38%)',
+        muted: 'hsl(222 12% 55%)',
+        navy: 'hsl(240 30% 11%)',
+        gold: 'hsl(42 55% 50%)',
+        'gold-leaf': 'hsl(42 65% 40%)',
+        red: 'hsl(0 55% 38%)',
+        green: 'hsl(162 60% 26%)',
+        'green-bg': 'hsl(162 45% 92%)',
+        amber: 'hsl(32 80% 38%)',
+        'amber-bg': 'hsl(38 78% 94%)',
+        'amber-bd': 'hsl(38 60% 70%)',
+        'cat-food': 'hsl(18 88% 50%)',
+        'cat-edu': 'hsl(217 82% 52%)',
+        'cat-trans': 'hsl(162 72% 36%)',
+        'cat-other': 'hsl(268 65% 58%)',
+        track: 'hsl(36 16% 92%)',
+        focus: 'hsl(42 90% 50%)',
+      },
+      fontFamily: {
+        mono: ['"DM Mono"', '"Courier New"', 'monospace'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        arabic: ['"Noto Naskh Arabic"', 'serif'],
+      },
+      fontSize: {
+        micro: '8px',
+        mini: '9px',
+        xs: '10px',
+        sm: '11px',
+        base: '12px',
+        md: '13px',
+        lg: '15px',
+        xl: '18px',
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config
