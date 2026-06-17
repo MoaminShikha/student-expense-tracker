@@ -1,11 +1,10 @@
 import type { Transaction } from '../../types'
 
 const CAT_COLORS: Record<string, string> = {
-  Food: 'var(--cat-food)',
-  Education: 'var(--cat-edu)',
-  Transport: 'var(--cat-trans)',
-  Income: 'var(--green)',
-  Other: 'var(--cat-other)',
+  food: 'var(--cat-food)',
+  education: 'var(--cat-edu)',
+  transport: 'var(--cat-trans)',
+  other: 'var(--cat-other)',
 }
 
 interface RecentPanelProps {
@@ -42,12 +41,19 @@ export function RecentPanel({ transactions }: RecentPanelProps) {
         </button>
       </div>
 
+      {transactions.length === 0 && (
+        <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', padding: '8px 0' }}>No transactions yet.</div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {transactions.map((tx, i) => {
-          const catColor = tx.is_income ? 'var(--green)' : (CAT_COLORS[tx.category] ?? 'var(--muted)')
+          const catKey = (tx.category ?? '').toLowerCase()
+          const catColor = CAT_COLORS[catKey] ?? 'var(--muted)'
+          const amt = parseFloat(tx.amount)
+
           return (
             <div
-              key={tx.id}
+              key={tx.transaction_id}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -73,20 +79,20 @@ export function RecentPanel({ transactions }: RecentPanelProps) {
                   fontFamily: "'Playfair Display', serif",
                 }}
               >
-                {tx.is_income ? '+' : tx.category.charAt(0)}
+                {tx.category ? tx.category.charAt(0).toUpperCase() : '?'}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 'var(--t-sm)', color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {tx.description}
                 </div>
-                <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '1px' }}>
-                  {tx.is_income ? 'Income' : tx.category}
+                <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '1px', textTransform: 'capitalize' }}>
+                  {tx.category ?? 'uncategorized'}
                 </div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: tx.is_income ? 'var(--green)' : 'var(--fg)' }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: 'var(--fg)' }}>
                   <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
-                  {tx.amount.toLocaleString()}
+                  {Math.round(amt).toLocaleString()}
                 </div>
                 <div style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)', marginTop: '1px' }}>
                   {formatDate(tx.date)}

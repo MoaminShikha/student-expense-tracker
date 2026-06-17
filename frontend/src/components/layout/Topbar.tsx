@@ -1,8 +1,8 @@
 import React from 'react'
-import type { BalanceDashboard } from '../../types'
+import type { BalanceResponse } from '../../types'
 
 interface TopbarProps {
-  balance: BalanceDashboard | null
+  balance: BalanceResponse | null
   onSync: () => void
   syncing: boolean
 }
@@ -10,10 +10,10 @@ interface TopbarProps {
 export function Topbar({ balance, onSync, syncing }: TopbarProps) {
   const [period, setPeriod] = React.useState<'W' | 'M' | 'Y'>('M')
 
-  const state = balance?.state ?? 'green'
-  const lastSync = balance?.last_sync
-    ? new Date(balance.last_sync).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : '--:--'
+  const stateRaw = balance?.balance_state ?? 'normal'
+  const state: 'green' | 'amber' | 'red' =
+    stateRaw === 'crisis' ? 'red' : stateRaw === 'caution' ? 'amber' : 'green'
+  const lastSync = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
   const pillLabel = state === 'green' ? 'On track' : state === 'amber' ? 'Caution' : 'Over budget'
   const pillColors = {

@@ -1,89 +1,96 @@
-export interface BalanceDashboard {
-  free_money: number
-  spent_mtd: number
-  committed_total: number
-  fuzzy_min: number
-  fuzzy_max: number
-  income_mtd: number
-  monthly_limit: number
-  monthly_left: number
-  spent_pct: number
-  committed_pct: number
-  fuzzy_pct_start: number
-  fuzzy_pct_width: number
-  today_pct: number
-  state: 'green' | 'amber' | 'red'
-  days_left: number
-  period_label: string
-  period_day: number
-  period_total_days: number
-  next_charge_name: string | null
-  next_charge_days: number | null
-  streak_days: number
-  last_sync: string
+// All monetary amounts from the API are strings (Decimal serialized).
+// Parse with parseFloat() before display math.
+
+export interface BalanceResponse {
+  free_money: string
+  monthly_budget: string
+  monthly_spent: string
+  monthly_left: string
+  on_track_state: string
+  balance_state: string
+  timeline_spent_pct: number
+  timeline_committed_pct: number
+  timeline_today_pct: number
+  days_in_month: number
+  day_of_month: number
+  month_label: string
+  next_due_charge: {
+    charge_id: string
+    name: string
+    amount: string
+    due_date: string
+    status: string
+  } | null
 }
 
 export interface CommittedCharge {
-  id: number
+  charge_id: string
+  session_id: string
   name: string
-  amount: number
+  amount: string
   due_date: string
-  is_recurring: boolean
-  is_fuzzy: boolean
-  fuzzy_min: number | null
-  fuzzy_max: number | null
-  days_until: number
-  is_paid: boolean
+  status: string
+  recurring_rule_id: string | null
 }
 
 export interface Transaction {
-  id: number
+  transaction_id: string
+  amount: string
   description: string
-  amount: number
-  category: string
+  category: string | null
   date: string
-  is_income: boolean
-  notes: string | null
 }
 
+// by-category endpoint returns a dict: { category: { amount, count, pct_of_total } }
+export type CategoryBreakdownMap = Record<
+  string,
+  { amount: string; count: number; pct_of_total: number }
+>
+
+// Derived shape for display
 export interface CategoryBreakdown {
   category: string
-  total: number
+  amount: number
+  count: number
   pct: number
-  color: string
 }
 
 export interface FuzzyCharge {
-  id: number
+  fuzzy_id: string
   name: string
-  amount_min: number
-  amount_max: number
+  direction: string
+  status: string
   expected_date: string | null
-  notes: string | null
+  estimated_amount: string | null
 }
 
+// POST bodies — amounts are strings per API contract
 export interface AddSpendInput {
-  amount: number
+  amount: string
   description: string
-  category: string
+  category: string | null
   date: string
-  notes?: string
 }
 
 export interface AddIncomeInput {
-  amount: number
-  source: string
+  amount: string
+  source_tag: string
   date: string
-  notes?: string
 }
 
 export interface AddChargeInput {
   name: string
-  amount: number
+  amount: string
   due_date: string
-  is_recurring: boolean
+  recurring?: boolean
   day_of_month?: number
-  is_fuzzy?: boolean
-  fuzzy_min?: number
-  fuzzy_max?: number
 }
+
+export const INCOME_SOURCE_TAGS = [
+  'scholarship',
+  'family',
+  'work',
+  'other',
+] as const
+
+export type IncomeSourceTag = (typeof INCOME_SOURCE_TAGS)[number]

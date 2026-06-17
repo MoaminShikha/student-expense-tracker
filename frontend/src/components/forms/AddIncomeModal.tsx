@@ -1,6 +1,6 @@
 import React from 'react'
 import { postIncome } from '../../services/api'
-import type { AddIncomeInput } from '../../types'
+import { INCOME_SOURCE_TAGS } from '../../types'
 
 interface AddIncomeModalProps {
   open: boolean
@@ -42,31 +42,27 @@ const INPUT_STYLE: React.CSSProperties = {
 
 export function AddIncomeModal({ open, onClose, onSuccess }: AddIncomeModalProps) {
   const today = new Date().toISOString().split('T')[0]
-  const [form, setForm] = React.useState<AddIncomeInput>({
-    amount: 0,
-    source: '',
-    date: today,
-  })
+  const [amount, setAmount] = React.useState('')
+  const [sourceTag, setSourceTag] = React.useState(INCOME_SOURCE_TAGS[0])
+  const [date, setDate] = React.useState(today)
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
   if (!open) return null
 
-  function set<K extends keyof AddIncomeInput>(key: K, value: AddIncomeInput[K]) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (form.amount <= 0) { setError('Amount must be positive'); return }
-    if (!form.source.trim()) { setError('Source is required'); return }
+    const amt = parseFloat(amount)
+    if (!amount || isNaN(amt) || amt <= 0) { setError('Amount must be positive'); return }
     setError(null)
     setSubmitting(true)
     try {
-      await postIncome(form)
+      await postIncome({ amount, source_tag: sourceTag, date })
       onSuccess()
       onClose()
-      setForm({ amount: 0, source: '', date: today })
+      setAmount('')
+      setSourceTag(INCOME_SOURCE_TAGS[0])
+      setDate(today)
     } catch (e) {
       console.error('AddIncome:', e)
       setError('Failed to add income. Is the backend running?')
@@ -86,30 +82,31 @@ export function AddIncomeModal({ open, onClose, onSuccess }: AddIncomeModalProps
               type="number"
               min="0.01"
               step="0.01"
-              value={form.amount || ''}
-              onChange={(e) => set('amount', parseFloat(e.target.value) || 0)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               required
               style={INPUT_STYLE}
               autoFocus
             />
           </label>
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
-            Source tag
-            <input
-              type="text"
-              value={form.source}
-              onChange={(e) => set('source', e.target.value)}
-              required
-              placeholder="e.g. Stipend, Freelance, Family"
+            Source
+            <select
+              value={sourceTag}
+              onChange={(e) => setSourceTag(e.target.value as typeof INCOME_SOURCE_TAGS[number])}
               style={INPUT_STYLE}
-            />
+            >
+              {INCOME_SOURCE_TAGS.map((t) => (
+                <option key={t} value={t} style={{ textTransform: 'capitalize' }}>{t}</option>
+              ))}
+            </select>
           </label>
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)', display: 'block', marginTop: '12px' }}>
             Date
             <input
               type="date"
-              value={form.date}
-              onChange={(e) => set('date', e.target.value)}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
               required
               style={INPUT_STYLE}
             />
