@@ -156,7 +156,7 @@ export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: Da
         aria-label="Budget overview"
         style={{ display: 'grid', gridTemplateColumns: '1fr 290px', gap: '12px' }}
       >
-        <HeroCard balance={balance} events={allEntries} />
+        <HeroCard balance={balance} events={allEntries} charges={charges} />
         <StatColumn balance={balance} />
       </section>
 
