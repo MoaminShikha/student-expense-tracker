@@ -145,6 +145,10 @@ class ChargeService:
         self._logger.info("Added recurring charge %s for session %s.", charge.charge_id, active_session.session_id)
         return charge
 
+    def list_upcoming(self, session_id: UUID) -> list[CommittedCharge]:
+        """Return all upcoming charges for a session."""
+        return self._charge_repository.list_upcoming(session_id)
+
     def get_charges_for_month(self, session_id: UUID, year: int, month: int) -> list[CommittedCharge]:
         """
         Return upcoming committed charges due in the given month.

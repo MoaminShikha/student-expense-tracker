@@ -43,7 +43,7 @@ const INPUT_STYLE: React.CSSProperties = {
 export function AddIncomeModal({ open, onClose, onSuccess }: AddIncomeModalProps) {
   const today = new Date().toISOString().split('T')[0]
   const [amount, setAmount] = React.useState('')
-  const [sourceTag, setSourceTag] = React.useState(INCOME_SOURCE_TAGS[0])
+  const [sourceTag, setSourceTag] = React.useState<typeof INCOME_SOURCE_TAGS[number]>(INCOME_SOURCE_TAGS[0])
   const [date, setDate] = React.useState(today)
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)

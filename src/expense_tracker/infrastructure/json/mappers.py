@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from typing import Protocol, TypeVar
 from uuid import UUID
 
 from ...domain.models import (
@@ -26,21 +25,6 @@ from ...domain.models import (
     Transaction,
     TransactionCategory,
 )
-
-T = TypeVar("T")
-
-
-class Mapper(Protocol[T]):
-    """Maps one domain entity to and from a JSON-safe ``dict`` record."""
-
-    def to_dict(self, entity: T) -> dict:
-        """Serialize ``entity`` to a JSON-safe record."""
-        ...
-
-    def from_dict(self, record: dict) -> T:
-        """Reconstruct an entity from a JSON record."""
-        ...
-
 
 class SessionMapper:
     """Mapper for :class:`AppSession`."""

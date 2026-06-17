@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
 from pathlib import Path
+from typing import NamedTuple
 
 from ..application.calculations import BalanceEngine
 from ..application.services import (
@@ -23,14 +23,7 @@ from ..infrastructure.json.repositories import (
 )
 
 
-@dataclass(frozen=True)
-class Services:
-    """Container for the fully-wired application services.
-
-    Built by :func:`build_services` so the CLI and GUI entry points share a
-    single composition root instead of hand-wiring repositories twice.
-    """
-
+class Services(NamedTuple):
     session_service: SessionService
     income_service: IncomeService
     charge_service: ChargeService

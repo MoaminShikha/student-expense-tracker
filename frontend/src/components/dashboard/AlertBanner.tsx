@@ -1,10 +1,12 @@
 import type { BalanceResponse } from '../../types'
+import type { Page } from '../layout/Sidebar'
 
 interface AlertBannerProps {
   balance: BalanceResponse
+  onNavigate?: (page: Page) => void
 }
 
-export function AlertBanner({ balance }: AlertBannerProps) {
+export function AlertBanner({ balance, onNavigate }: AlertBannerProps) {
   const next = balance.next_due_charge
   if (!next) return null
 
@@ -56,6 +58,11 @@ export function AlertBanner({ balance }: AlertBannerProps) {
         <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.5, marginRight: '1px' }}>₪</span>
         {Math.round(parseFloat(next.amount)).toLocaleString()}
       </span>
+      {onNavigate && (
+        <button type="button" onClick={() => onNavigate('Insights')} style={{ fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-mini)', letterSpacing: '.06em', background: 'none', border: 'none', color: 'var(--amber)', cursor: 'pointer', whiteSpace: 'nowrap', padding: 0, textDecoration: 'underline' }}>
+          View Insights →
+        </button>
+      )}
     </div>
   )
 }

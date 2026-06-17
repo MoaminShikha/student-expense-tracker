@@ -37,46 +37,6 @@ class BalanceService:
         self._transaction_repository = transaction_repository
         self._logger = logger or logging.getLogger(__name__)
 
-    def build_snapshot(
-        self,
-        opening_balance: Decimal,
-        total_income: Decimal,
-        total_committed: Decimal,
-        total_spent: Decimal,
-        income_this_month: Decimal,
-        charges_this_month: Decimal,
-        spent_this_month: Decimal,
-        caution_threshold: Decimal,
-        red_threshold: Decimal = Decimal("130"),
-    ) -> BalanceSnapshot:
-        """
-        Build a dashboard balance snapshot from pre-aggregated totals.
-
-        :param opening_balance: Session opening balance.
-        :param total_income: Sum of all logged income.
-        :param total_committed: Sum of all committed charges.
-        :param total_spent: Sum of all spend transactions.
-        :param income_this_month: Sum of income entries in the current calendar month.
-        :param charges_this_month: Sum of charges due in the current calendar month.
-        :param spent_this_month: Sum of spend transactions in the current calendar month.
-        :param caution_threshold: Threshold for caution balance state.
-        :param red_threshold: Threshold percentage for red on-track state.
-        :return: Computed balance snapshot.
-        """
-        snapshot = self._balance_engine.build_snapshot(
-            opening_balance,
-            total_income,
-            total_committed,
-            total_spent,
-            income_this_month,
-            charges_this_month,
-            spent_this_month,
-            caution_threshold,
-            red_threshold,
-        )
-        self._logger.info("Built balance snapshot with free money %s.", snapshot.free_money)
-        return snapshot
-
     def aggregate_and_build_snapshot(self, session_id: UUID, caution_threshold: Decimal, session_opening_balance: Decimal, red_threshold: Decimal = Decimal("130")) -> BalanceSnapshot:
         """
         Fetch all repository data for a session, aggregate totals, and build snapshot.
@@ -102,6 +62,7 @@ class BalanceService:
         total_spent = sum((tx.amount for tx in all_transactions), Decimal("0"))
         spent_this_month = sum((tx.amount for tx in self._transaction_repository.list_for_month(session_id, year, month)), Decimal("0"))
 
-        snapshot = self.build_snapshot(session_opening_balance, all_income, total_committed, total_spent, income_this_month, charges_this_month, spent_this_month, caution_threshold, red_threshold)
+        snapshot = self._balance_engine.build_snapshot(session_opening_balance, all_income, total_committed, total_spent, income_this_month, charges_this_month, spent_this_month, caution_threshold, red_threshold)
+        self._logger.info("Built balance snapshot with free money %s.", snapshot.free_money)
         return snapshot
 
