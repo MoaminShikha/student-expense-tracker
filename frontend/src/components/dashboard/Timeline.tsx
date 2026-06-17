@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 
 interface TimelineEvent {
   day: number
+  date?: string  // ISO "YYYY-MM-DD", used for accurate popover label
   type: 'spend' | 'income' | 'charge' | 'upcoming' | 'fuzzy'
   description: string
   category: string | null
@@ -63,8 +64,11 @@ export function Timeline({ spentPct, committedPct, fuzzyPctStart, fuzzyPctWidth,
   function handleClick(ev: React.MouseEvent, event: TimelineEvent) {
     const rect = (ev.target as HTMLElement).getBoundingClientRect()
     const sign = event.type === 'income' ? '+' : event.type === 'upcoming' || event.type === 'fuzzy' ? '~' : '−'
+    const dateLabel = event.date
+      ? new Date(event.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+      : `${event.day} ${periodStart.split(' ')[1] ?? ''}`
     setPopover({
-      text: `${periodStart.split(' ')[0]} ${event.day}\n${event.description}${event.category ? ` · ${event.category}` : ''}\n${sign}₪ ${parseFloat(event.amount).toLocaleString()}`,
+      text: `${dateLabel}\n${event.description}${event.category ? ` · ${event.category}` : ''}\n${sign}₪ ${parseFloat(event.amount).toLocaleString()}`,
       x: rect.left + rect.width / 2,
       y: rect.top,
     })
