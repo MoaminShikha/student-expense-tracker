@@ -29,3 +29,20 @@ data/
 # Stale build plan (replaced by AGENTS.md)
 GUI_BUILD_PLAN.md
 
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/frontend/
+frontend/package-lock.json
+
+# Graph exports
+graphify-out/
+
+# Docs build
+docs/superpowers/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
