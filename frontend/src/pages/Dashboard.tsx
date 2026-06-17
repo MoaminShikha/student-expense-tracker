@@ -13,6 +13,7 @@ import { useBalance } from '../hooks/useBalance'
 import { useCharges } from '../hooks/useCharges'
 import { useTransactions } from '../hooks/useTransactions'
 import { initSession } from '../services/api'
+import type { Page } from '../components/layout/Sidebar'
 
 function SessionInitForm({ onSuccess }: { onSuccess: () => void }) {
   const [openingBalance, setOpeningBalance] = React.useState('')
@@ -76,9 +77,11 @@ function SessionInitForm({ onSuccess }: { onSuccess: () => void }) {
 interface DashboardProps {
   refreshKey: number
   onMutation: () => void
+  activePage: Page
+  onNavigate: (page: Page) => void
 }
 
-export function Dashboard({ refreshKey, onMutation }: DashboardProps) {
+export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: DashboardProps) {
   const { data: balance, loading: balLoading, error: balError } = useBalance(refreshKey)
   const { data: charges } = useCharges(refreshKey)
   const { data: transactions } = useTransactions(refreshKey)
@@ -95,7 +98,7 @@ export function Dashboard({ refreshKey, onMutation }: DashboardProps) {
 
   if (balLoading) {
     return (
-      <MainLayout balance={null} onSync={() => void handleSync()} syncing={syncing}>
+      <MainLayout balance={null} onSync={() => void handleSync()} syncing={syncing} activePage={activePage} onNavigate={onNavigate}>
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-sm)' }}>
           Loading…
         </div>
@@ -106,7 +109,7 @@ export function Dashboard({ refreshKey, onMutation }: DashboardProps) {
   if (balError || !balance) {
     const isNoSession = balError?.includes('400') || balError?.includes('No active session')
     return (
-      <MainLayout balance={null} onSync={() => void handleSync()} syncing={syncing}>
+      <MainLayout balance={null} onSync={() => void handleSync()} syncing={syncing} activePage={activePage} onNavigate={onNavigate}>
         {isNoSession ? (
           <SessionInitForm onSuccess={onMutation} />
         ) : (
@@ -119,8 +122,8 @@ export function Dashboard({ refreshKey, onMutation }: DashboardProps) {
   }
 
   return (
-    <MainLayout balance={balance} onSync={() => void handleSync()} syncing={syncing}>
-      <AlertBanner balance={balance} />
+    <MainLayout balance={balance} onSync={() => void handleSync()} syncing={syncing} activePage={activePage} onNavigate={onNavigate}>
+      <AlertBanner balance={balance} onNavigate={onNavigate} />
 
       <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
         <button
@@ -140,7 +143,7 @@ export function Dashboard({ refreshKey, onMutation }: DashboardProps) {
         <button
           type="button"
           onClick={() => setModal('charge')}
-          style={{ padding: '7px 14px', border: 'none', borderRadius: '8px', background: 'var(--red)', color: 'var(--surface)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-sm)', cursor: 'pointer', fontWeight: 500 }}
+          style={{ padding: '7px 14px', borderRadius: '8px', background: 'transparent', color: 'var(--red)', border: '1.5px solid var(--red)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-sm)', cursor: 'pointer', fontWeight: 500 }}
         >
           + Charge
         </button>

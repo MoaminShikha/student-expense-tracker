@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Timeline } from './Timeline'
 import type { BalanceResponse } from '../../types'
 
@@ -17,6 +19,29 @@ function badgeText(state: string, daysLeft: number): string {
   return 'Crisis · limit exceeded'
 }
 
+function useCountUp(target: number, duration = 800) {
+  const [value, setValue] = useState(0)
+  const rafRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const start = performance.now()
+    function tick(now: number) {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setValue(Math.round(target * eased))
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(tick)
+      }
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current) }
+  }, [target, duration])
+
+  return value
+}
+
 export function HeroCard({ balance }: HeroCardProps) {
   const raw = balance.balance_state
   const stateKey: keyof typeof STATE_COLORS =
@@ -26,11 +51,17 @@ export function HeroCard({ balance }: HeroCardProps) {
 
   const freeMoney = parseFloat(balance.free_money)
   const monthlySpent = parseFloat(balance.monthly_spent)
-  const monthlyBudget = parseFloat(balance.monthly_budget)
+  // ponytail: monthlyBudget kept for future legend use
+
+  const displayValue = useCountUp(Math.round(freeMoney))
 
   return (
-    <article
+    <motion.article
       aria-labelledby="hero-heading"
+      animate={{
+        borderColor: sc.outline,
+      }}
+      transition={{ duration: 0.5 }}
       style={{
         borderRadius: '14px',
         padding: '18px 22px 16px',
@@ -67,9 +98,13 @@ export function HeroCard({ balance }: HeroCardProps) {
 
       <div aria-live="polite" aria-atomic="true" style={{ display: 'flex', alignItems: 'baseline', gap: '2px', lineHeight: 1 }}>
         <span aria-hidden="true" style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '22px', color: 'var(--fg)', opacity: 0.38 }}>₪</span>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: '52px', color: 'var(--fg)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.03em' }}>
-          {Math.round(freeMoney).toLocaleString()}
-        </span>
+        <AnimatePresence mode="wait">
+          <span
+            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: '52px', color: 'var(--fg)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.03em' }}
+          >
+            {displayValue.toLocaleString()}
+          </span>
+        </AnimatePresence>
         <span className="visually-hidden">shekels</span>
       </div>
 
@@ -93,24 +128,20 @@ export function HeroCard({ balance }: HeroCardProps) {
         {badgeText(stateKey, daysLeft)}
       </div>
 
-      <div aria-label="Legend" style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: 'var(--t-sm)', color: 'var(--muted-fg)' }}>
-          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gold-leaf)', flexShrink: 0 }} aria-hidden="true" />
-          <span>Spent</span>&nbsp;
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-base)', fontWeight: 700, color: 'var(--gold-leaf)' }}>
-            <span style={{ fontSize: 'var(--t-mini)', fontStyle: 'italic', opacity: 0.45, marginRight: '1px' }}>₪</span>
-            {Math.round(monthlySpent).toLocaleString()}
-          </span>
+      {daysLeft > 0 && (
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '12px', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Daily burn', value: `₪ ${Math.round(monthlySpent / Math.max(balance.day_of_month, 1)).toLocaleString()}` },
+            { label: 'Allow/day',  value: `₪ ${Math.round(freeMoney / daysLeft).toLocaleString()}` },
+            { label: 'Proj. end',  value: `₪ ${Math.round(freeMoney - (monthlySpent / Math.max(balance.day_of_month, 1)) * daysLeft).toLocaleString()}` },
+          ].map(({ label, value }) => (
+            <div key={label}>
+              <div style={{ fontSize: 'var(--t-micro)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '1px' }}>{label}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, color: 'var(--fg)' }}>{value}</div>
+            </div>
+          ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: 'var(--t-sm)', color: 'var(--muted-fg)' }}>
-          <div style={{ width: '8px', height: '8px', background: 'transparent', border: '1.5px solid var(--muted)', flexShrink: 0 }} aria-hidden="true" />
-          <span>Limit</span>&nbsp;
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-base)', fontWeight: 700, color: 'var(--gold-leaf)' }}>
-            <span style={{ fontSize: 'var(--t-mini)', fontStyle: 'italic', opacity: 0.45, marginRight: '1px' }}>₪</span>
-            {Math.round(monthlyBudget).toLocaleString()}
-          </span>
-        </div>
-      </div>
+      )}
 
       <Timeline
         spentPct={balance.timeline_spent_pct}
@@ -118,9 +149,11 @@ export function HeroCard({ balance }: HeroCardProps) {
         fuzzyPctStart={balance.timeline_spent_pct + balance.timeline_committed_pct}
         fuzzyPctWidth={0}
         todayPct={balance.timeline_today_pct}
+        daysInMonth={balance.days_in_month}
+        dayOfMonth={balance.day_of_month}
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
       />
-    </article>
+    </motion.article>
   )
 }

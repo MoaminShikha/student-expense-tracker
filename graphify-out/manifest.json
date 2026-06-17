@@ -1,0 +1,727 @@
+{
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\_metadata.json": {
+    "mtime": 1781698290.318322,
+    "ast_hash": "c668521135f3f74ddddb5c816fa41943",
+    "semantic_hash": "c668521135f3f74ddddb5c816fa41943"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\chunk-I3CUQLNI.js": {
+    "mtime": 1781698290.3065076,
+    "ast_hash": "fd1aec3fae42f01e4d1c5c8547af7294",
+    "semantic_hash": "fd1aec3fae42f01e4d1c5c8547af7294"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\framer-motion.js": {
+    "mtime": 1781698290.3110223,
+    "ast_hash": "fdd7846c224b0300d842d37668a11398",
+    "semantic_hash": "fdd7846c224b0300d842d37668a11398"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\package.json": {
+    "mtime": 1781698289.9296732,
+    "ast_hash": "d0707362e90f00edd12435e9d3b9d71c",
+    "semantic_hash": "d0707362e90f00edd12435e9d3b9d71c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\react-dom_client.js": {
+    "mtime": 1781698290.3120193,
+    "ast_hash": "c5f6de8cecd7b603af939a663ea7ec43",
+    "semantic_hash": "c5f6de8cecd7b603af939a663ea7ec43"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\react.js": {
+    "mtime": 1781698290.3090198,
+    "ast_hash": "09b1e3b5d90de6c3692b79531ad13671",
+    "semantic_hash": "09b1e3b5d90de6c3692b79531ad13671"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\.vite\\deps\\react_jsx-dev-runtime.js": {
+    "mtime": 1781698290.3100212,
+    "ast_hash": "1e43cfc60842498390f64def4f6bfae6",
+    "semantic_hash": "1e43cfc60842498390f64def4f6bfae6"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\package.json": {
+    "mtime": 1781698034.350204,
+    "ast_hash": "1dd3a38e2d68737b83dc9f36b4d2f1ed",
+    "semantic_hash": "1dd3a38e2d68737b83dc9f36b4d2f1ed"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\postcss.config.ts": {
+    "mtime": 1781698034.3472097,
+    "ast_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0",
+    "semantic_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\App.tsx": {
+    "mtime": 1781698023.5182917,
+    "ast_hash": "848f96f5d43dfaa5698de0d8d8a328a1",
+    "semantic_hash": "848f96f5d43dfaa5698de0d8d8a328a1"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\dashboard\\AlertBanner.tsx": {
+    "mtime": 1781698023.495891,
+    "ast_hash": "193f49c72e27f629e64355c8bf34927a",
+    "semantic_hash": "193f49c72e27f629e64355c8bf34927a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\dashboard\\HeroCard.tsx": {
+    "mtime": 1781698023.4989038,
+    "ast_hash": "4b654170ba2ec2850ba9d520d3b8f759",
+    "semantic_hash": "4b654170ba2ec2850ba9d520d3b8f759"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\dashboard\\StatColumn.tsx": {
+    "mtime": 1781698023.4969053,
+    "ast_hash": "9dc87f424763bbfe9e670608f68575f8",
+    "semantic_hash": "9dc87f424763bbfe9e670608f68575f8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\dashboard\\Timeline.tsx": {
+    "mtime": 1781698023.4979024,
+    "ast_hash": "d199d6daca767b8b345ee0656916051a",
+    "semantic_hash": "d199d6daca767b8b345ee0656916051a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\forms\\AddChargeModal.tsx": {
+    "mtime": 1781698023.506299,
+    "ast_hash": "87cd3a7b559f17312ec38fa91e25fa85",
+    "semantic_hash": "87cd3a7b559f17312ec38fa91e25fa85"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\forms\\AddIncomeModal.tsx": {
+    "mtime": 1781698023.5052853,
+    "ast_hash": "59a96109747bf681d90e356496be1c3e",
+    "semantic_hash": "59a96109747bf681d90e356496be1c3e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\forms\\AddSpendModal.tsx": {
+    "mtime": 1781698023.5072975,
+    "ast_hash": "c7ef00b54609f7c4c4aa1307cd8cbb4b",
+    "semantic_hash": "c7ef00b54609f7c4c4aa1307cd8cbb4b"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\layout\\MainLayout.tsx": {
+    "mtime": 1781698023.501908,
+    "ast_hash": "01921df5883060376267d609141a0b00",
+    "semantic_hash": "01921df5883060376267d609141a0b00"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\layout\\Sidebar.tsx": {
+    "mtime": 1781698023.500922,
+    "ast_hash": "7a18326ea26d6f93117bddaee335e053",
+    "semantic_hash": "7a18326ea26d6f93117bddaee335e053"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\layout\\Topbar.tsx": {
+    "mtime": 1781698023.500922,
+    "ast_hash": "651eb8527935e82817bb1906d2a688bc",
+    "semantic_hash": "651eb8527935e82817bb1906d2a688bc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\panels\\CategoryPanel.tsx": {
+    "mtime": 1781698023.5039096,
+    "ast_hash": "80e255eb25ee212f10f6b704e4ea6226",
+    "semantic_hash": "80e255eb25ee212f10f6b704e4ea6226"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\panels\\RecentPanel.tsx": {
+    "mtime": 1781698023.5029027,
+    "ast_hash": "9b6ba50626547ab047c5eec7cdfbceb8",
+    "semantic_hash": "9b6ba50626547ab047c5eec7cdfbceb8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\components\\panels\\UpcomingPanel.tsx": {
+    "mtime": 1781698023.5039096,
+    "ast_hash": "c95eae02140cd5d2d8c1c1eb6b982efe",
+    "semantic_hash": "c95eae02140cd5d2d8c1c1eb6b982efe"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\hooks\\useBalance.ts": {
+    "mtime": 1781698023.5105138,
+    "ast_hash": "47cc554c1867491374d24139e00a06b6",
+    "semantic_hash": "47cc554c1867491374d24139e00a06b6"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\hooks\\useCharges.ts": {
+    "mtime": 1781698023.5092988,
+    "ast_hash": "b7363ca17f71df41c77900f6930dc242",
+    "semantic_hash": "b7363ca17f71df41c77900f6930dc242"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\hooks\\useTransactions.ts": {
+    "mtime": 1781698023.5105138,
+    "ast_hash": "48499db96ef6f3eda8e8797846996a75",
+    "semantic_hash": "48499db96ef6f3eda8e8797846996a75"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\main.tsx": {
+    "mtime": 1781698023.5182917,
+    "ast_hash": "1765c9d36a25d70b098a557befb88763",
+    "semantic_hash": "1765c9d36a25d70b098a557befb88763"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\pages\\Activity.tsx": {
+    "mtime": 1781698023.514277,
+    "ast_hash": "cd362d61b853d9b2991135f3f7b6bbb7",
+    "semantic_hash": "cd362d61b853d9b2991135f3f7b6bbb7"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\pages\\Dashboard.tsx": {
+    "mtime": 1781698023.5127664,
+    "ast_hash": "9c84161769fcf58bdbb8ef860a0d2ac5",
+    "semantic_hash": "9c84161769fcf58bdbb8ef860a0d2ac5"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\pages\\Insights.tsx": {
+    "mtime": 1781698023.515288,
+    "ast_hash": "2e6626177a07ad463dfdf7309a0233ef",
+    "semantic_hash": "2e6626177a07ad463dfdf7309a0233ef"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\services\\api.ts": {
+    "mtime": 1781698023.5082984,
+    "ast_hash": "f0264facbd8a2878a1bc8b8385d17ab7",
+    "semantic_hash": "f0264facbd8a2878a1bc8b8385d17ab7"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\src\\types\\index.ts": {
+    "mtime": 1781698023.516299,
+    "ast_hash": "214934b530dd73756b95a8760180d7c1",
+    "semantic_hash": "214934b530dd73756b95a8760180d7c1"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\tailwind.config.ts": {
+    "mtime": 1781698023.4933414,
+    "ast_hash": "8ccb3da5a5f1eb24512c8a6bbf86fc04",
+    "semantic_hash": "8ccb3da5a5f1eb24512c8a6bbf86fc04"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\tsconfig.json": {
+    "mtime": 1781698034.352203,
+    "ast_hash": "0ae30e40e3c5158b36aa279e47ca6e8c",
+    "semantic_hash": "0ae30e40e3c5158b36aa279e47ca6e8c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\tsconfig.node.json": {
+    "mtime": 1781698034.3441732,
+    "ast_hash": "df562a73dce2f53f022bc93ee20099c2",
+    "semantic_hash": "df562a73dce2f53f022bc93ee20099c2"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\vite.config.ts": {
+    "mtime": 1781698034.3492036,
+    "ast_hash": "3cfeb31a0fe0e51873be9a573475795a",
+    "semantic_hash": "3cfeb31a0fe0e51873be9a573475795a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\package.json": {
+    "mtime": 1781695671.7742743,
+    "ast_hash": "1dd3a38e2d68737b83dc9f36b4d2f1ed",
+    "semantic_hash": "1dd3a38e2d68737b83dc9f36b4d2f1ed"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\postcss.config.js": {
+    "mtime": 1781698256.2824574,
+    "ast_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0",
+    "semantic_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\App.tsx": {
+    "mtime": 1781695796.6501646,
+    "ast_hash": "848f96f5d43dfaa5698de0d8d8a328a1",
+    "semantic_hash": "848f96f5d43dfaa5698de0d8d8a328a1"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\dashboard\\AlertBanner.tsx": {
+    "mtime": 1781692447.0687156,
+    "ast_hash": "193f49c72e27f629e64355c8bf34927a",
+    "semantic_hash": "193f49c72e27f629e64355c8bf34927a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\dashboard\\HeroCard.tsx": {
+    "mtime": 1781695720.6558259,
+    "ast_hash": "4b654170ba2ec2850ba9d520d3b8f759",
+    "semantic_hash": "4b654170ba2ec2850ba9d520d3b8f759"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\dashboard\\StatColumn.tsx": {
+    "mtime": 1781692436.5677655,
+    "ast_hash": "9dc87f424763bbfe9e670608f68575f8",
+    "semantic_hash": "9dc87f424763bbfe9e670608f68575f8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\dashboard\\Timeline.tsx": {
+    "mtime": 1781695735.4415617,
+    "ast_hash": "d199d6daca767b8b345ee0656916051a",
+    "semantic_hash": "d199d6daca767b8b345ee0656916051a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\forms\\AddChargeModal.tsx": {
+    "mtime": 1781692618.6902664,
+    "ast_hash": "87cd3a7b559f17312ec38fa91e25fa85",
+    "semantic_hash": "87cd3a7b559f17312ec38fa91e25fa85"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\forms\\AddIncomeModal.tsx": {
+    "mtime": 1781692569.826464,
+    "ast_hash": "59a96109747bf681d90e356496be1c3e",
+    "semantic_hash": "59a96109747bf681d90e356496be1c3e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\forms\\AddSpendModal.tsx": {
+    "mtime": 1781692717.5679488,
+    "ast_hash": "c7ef00b54609f7c4c4aa1307cd8cbb4b",
+    "semantic_hash": "c7ef00b54609f7c4c4aa1307cd8cbb4b"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\layout\\MainLayout.tsx": {
+    "mtime": 1781695788.8467908,
+    "ast_hash": "01921df5883060376267d609141a0b00",
+    "semantic_hash": "01921df5883060376267d609141a0b00"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\layout\\Sidebar.tsx": {
+    "mtime": 1781695772.5580354,
+    "ast_hash": "7a18326ea26d6f93117bddaee335e053",
+    "semantic_hash": "7a18326ea26d6f93117bddaee335e053"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\layout\\Topbar.tsx": {
+    "mtime": 1781692678.1177504,
+    "ast_hash": "651eb8527935e82817bb1906d2a688bc",
+    "semantic_hash": "651eb8527935e82817bb1906d2a688bc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\panels\\CategoryPanel.tsx": {
+    "mtime": 1781692487.5593615,
+    "ast_hash": "80e255eb25ee212f10f6b704e4ea6226",
+    "semantic_hash": "80e255eb25ee212f10f6b704e4ea6226"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\panels\\RecentPanel.tsx": {
+    "mtime": 1781692541.987413,
+    "ast_hash": "9b6ba50626547ab047c5eec7cdfbceb8",
+    "semantic_hash": "9b6ba50626547ab047c5eec7cdfbceb8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\components\\panels\\UpcomingPanel.tsx": {
+    "mtime": 1781692500.4162884,
+    "ast_hash": "c95eae02140cd5d2d8c1c1eb6b982efe",
+    "semantic_hash": "c95eae02140cd5d2d8c1c1eb6b982efe"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\hooks\\useBalance.ts": {
+    "mtime": 1781720659.0366194,
+    "ast_hash": "34e6d4b3d3901c53b8366a5dbbff491b",
+    "semantic_hash": "34e6d4b3d3901c53b8366a5dbbff491b"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\hooks\\useCharges.ts": {
+    "mtime": 1781720675.1163104,
+    "ast_hash": "2f9dd589e2a6e5db31c62707a333f85e",
+    "semantic_hash": "2f9dd589e2a6e5db31c62707a333f85e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\hooks\\useFetch.ts": {
+    "mtime": 1781720641.1756768,
+    "ast_hash": "c4fc2d2f09ddee2a5c0c20b4246ca627",
+    "semantic_hash": "c4fc2d2f09ddee2a5c0c20b4246ca627"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\hooks\\useTransactions.ts": {
+    "mtime": 1781720689.855817,
+    "ast_hash": "656e175e8e8b46d49616ab7ff29523a8",
+    "semantic_hash": "656e175e8e8b46d49616ab7ff29523a8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\main.tsx": {
+    "mtime": 1781692199.6039715,
+    "ast_hash": "1765c9d36a25d70b098a557befb88763",
+    "semantic_hash": "1765c9d36a25d70b098a557befb88763"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\pages\\Activity.tsx": {
+    "mtime": 1781695834.8703392,
+    "ast_hash": "cd362d61b853d9b2991135f3f7b6bbb7",
+    "semantic_hash": "cd362d61b853d9b2991135f3f7b6bbb7"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\pages\\Dashboard.tsx": {
+    "mtime": 1781695825.1593044,
+    "ast_hash": "9c84161769fcf58bdbb8ef860a0d2ac5",
+    "semantic_hash": "9c84161769fcf58bdbb8ef860a0d2ac5"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\pages\\Insights.tsx": {
+    "mtime": 1781695842.4740822,
+    "ast_hash": "2e6626177a07ad463dfdf7309a0233ef",
+    "semantic_hash": "2e6626177a07ad463dfdf7309a0233ef"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\services\\api.ts": {
+    "mtime": 1781692318.0322075,
+    "ast_hash": "f0264facbd8a2878a1bc8b8385d17ab7",
+    "semantic_hash": "f0264facbd8a2878a1bc8b8385d17ab7"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\src\\types\\index.ts": {
+    "mtime": 1781692736.8202648,
+    "ast_hash": "214934b530dd73756b95a8760180d7c1",
+    "semantic_hash": "214934b530dd73756b95a8760180d7c1"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\tailwind.config.ts": {
+    "mtime": 1781691767.607129,
+    "ast_hash": "8ccb3da5a5f1eb24512c8a6bbf86fc04",
+    "semantic_hash": "8ccb3da5a5f1eb24512c8a6bbf86fc04"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\tsconfig.json": {
+    "mtime": 1781691741.5540671,
+    "ast_hash": "0ae30e40e3c5158b36aa279e47ca6e8c",
+    "semantic_hash": "0ae30e40e3c5158b36aa279e47ca6e8c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\tsconfig.node.json": {
+    "mtime": 1781691755.3927891,
+    "ast_hash": "df562a73dce2f53f022bc93ee20099c2",
+    "semantic_hash": "df562a73dce2f53f022bc93ee20099c2"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\vite.config.ts": {
+    "mtime": 1781691730.2732875,
+    "ast_hash": "3cfeb31a0fe0e51873be9a573475795a",
+    "semantic_hash": "3cfeb31a0fe0e51873be9a573475795a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\__init__.py": {
+    "mtime": 1776153034.5575347,
+    "ast_hash": "2ab3850144355082d7cfe91e5a042ab5",
+    "semantic_hash": "2ab3850144355082d7cfe91e5a042ab5"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\app\\__init__.py": {
+    "mtime": 1776153034.6457937,
+    "ast_hash": "e9243ca99c503215b6e5136742860cb3",
+    "semantic_hash": "e9243ca99c503215b6e5136742860cb3"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\app\\api.py": {
+    "mtime": 1781720621.2423897,
+    "ast_hash": "b9cd268d9ba41e9e74b7b3b934534363",
+    "semantic_hash": "b9cd268d9ba41e9e74b7b3b934534363"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\app\\cli.py": {
+    "mtime": 1778924312.904699,
+    "ast_hash": "920ab2aaeee489a510073b67f54abdbc",
+    "semantic_hash": "920ab2aaeee489a510073b67f54abdbc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\app\\composition.py": {
+    "mtime": 1781720577.5265708,
+    "ast_hash": "7de6626333de6e29fdb00c3cfcd5854d",
+    "semantic_hash": "7de6626333de6e29fdb00c3cfcd5854d"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\app\\run_api.py": {
+    "mtime": 1781695192.9314647,
+    "ast_hash": "79e3be9c40b98763f484ee501dffac41",
+    "semantic_hash": "79e3be9c40b98763f484ee501dffac41"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\__init__.py": {
+    "mtime": 1776153034.714479,
+    "ast_hash": "1d0dea56401bfde5260759196f2c5f73",
+    "semantic_hash": "1d0dea56401bfde5260759196f2c5f73"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\calculations.py": {
+    "mtime": 1776514116.9367986,
+    "ast_hash": "1f8f67ef0a5e73cbb11b258cfb80b6b2",
+    "semantic_hash": "1f8f67ef0a5e73cbb11b258cfb80b6b2"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\__init__.py": {
+    "mtime": 1776513740.2820587,
+    "ast_hash": "3c77e9fc12f71b60cfe15af528368aae",
+    "semantic_hash": "3c77e9fc12f71b60cfe15af528368aae"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\balance_service.py": {
+    "mtime": 1781720485.225589,
+    "ast_hash": "e9378c9351763441b7cedee527a06310",
+    "semantic_hash": "e9378c9351763441b7cedee527a06310"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\charge_service.py": {
+    "mtime": 1781720216.452527,
+    "ast_hash": "43c1e91c436fc1726b5d7ae03efa030e",
+    "semantic_hash": "43c1e91c436fc1726b5d7ae03efa030e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\fuzzy_charge_service.py": {
+    "mtime": 1781689721.1723115,
+    "ast_hash": "48fb51e91afedd46e133c13cd1707969",
+    "semantic_hash": "48fb51e91afedd46e133c13cd1707969"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\income_service.py": {
+    "mtime": 1781689738.8567238,
+    "ast_hash": "2ee43c7acccb09c38e68c1130d9e7607",
+    "semantic_hash": "2ee43c7acccb09c38e68c1130d9e7607"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\session_service.py": {
+    "mtime": 1776846998.1578393,
+    "ast_hash": "3e26a5da7926d98197ed0e4251346ff4",
+    "semantic_hash": "3e26a5da7926d98197ed0e4251346ff4"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\application\\services\\spend_service.py": {
+    "mtime": 1781689738.8580494,
+    "ast_hash": "f068e6c26a69d03f9916784b73f6fa54",
+    "semantic_hash": "f068e6c26a69d03f9916784b73f6fa54"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\__init__.py": {
+    "mtime": 1776153034.7863777,
+    "ast_hash": "e34c46e82058320d78aafd56d9f8868c",
+    "semantic_hash": "e34c46e82058320d78aafd56d9f8868c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\__init__.py": {
+    "mtime": 1776348216.5241559,
+    "ast_hash": "c9e614e5eb37927d41d211339ba0a186",
+    "semantic_hash": "c9e614e5eb37927d41d211339ba0a186"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\balance.py": {
+    "mtime": 1776253410.895555,
+    "ast_hash": "a167b0b5b97c23aef9fd473a965754e6",
+    "semantic_hash": "a167b0b5b97c23aef9fd473a965754e6"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\charges.py": {
+    "mtime": 1781689721.1723115,
+    "ast_hash": "80ea9e90d5f49d7f0bcbda62dd2ebc70",
+    "semantic_hash": "80ea9e90d5f49d7f0bcbda62dd2ebc70"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\income.py": {
+    "mtime": 1776253392.103241,
+    "ast_hash": "b44da482b045969080016ee5c1aebddb",
+    "semantic_hash": "b44da482b045969080016ee5c1aebddb"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\session.py": {
+    "mtime": 1776253387.6421022,
+    "ast_hash": "3f627e54024d1298cd43a600fc5ecb13",
+    "semantic_hash": "3f627e54024d1298cd43a600fc5ecb13"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\models\\transaction.py": {
+    "mtime": 1776253403.6013827,
+    "ast_hash": "8aea01d38e3df1d0f563c508ea2de425",
+    "semantic_hash": "8aea01d38e3df1d0f563c508ea2de425"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\domain\\validators.py": {
+    "mtime": 1781689721.1733122,
+    "ast_hash": "d16488818a441b1d663f6a90559224cc",
+    "semantic_hash": "d16488818a441b1d663f6a90559224cc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\__init__.py": {
+    "mtime": 1776153043.8505895,
+    "ast_hash": "251c0ea304b61cea1afca9e5567a90da",
+    "semantic_hash": "251c0ea304b61cea1afca9e5567a90da"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\__init__.py": {
+    "mtime": 1776153043.8980916,
+    "ast_hash": "996db9d3e756f580be97d1a63686ef9f",
+    "semantic_hash": "996db9d3e756f580be97d1a63686ef9f"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\mappers.py": {
+    "mtime": 1781720518.0837505,
+    "ast_hash": "d82645d281b2051a4c1fcddaeb8537c9",
+    "semantic_hash": "d82645d281b2051a4c1fcddaeb8537c9"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\__init__.py": {
+    "mtime": 1776547349.729462,
+    "ast_hash": "60e0eb9c06ddc0cc8263ae78619d2068",
+    "semantic_hash": "60e0eb9c06ddc0cc8263ae78619d2068"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\base.py": {
+    "mtime": 1781720537.241256,
+    "ast_hash": "3337db188d0a6da63f452e7d6d6bad51",
+    "semantic_hash": "3337db188d0a6da63f452e7d6d6bad51"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_charge_repository.py": {
+    "mtime": 1781689721.1743128,
+    "ast_hash": "66050a9d8db898da028386e1aeebee93",
+    "semantic_hash": "66050a9d8db898da028386e1aeebee93"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_fuzzy_charge_repository.py": {
+    "mtime": 1781689721.1743128,
+    "ast_hash": "32278664edc85f3fbf5897017983def3",
+    "semantic_hash": "32278664edc85f3fbf5897017983def3"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_income_repository.py": {
+    "mtime": 1781689721.1753116,
+    "ast_hash": "c07a57aa55d006774e75740c6ba7970c",
+    "semantic_hash": "c07a57aa55d006774e75740c6ba7970c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_recurring_rule_repository.py": {
+    "mtime": 1781689721.1753116,
+    "ast_hash": "ebc22fc3cee0c2caa18a0b2450cd10fd",
+    "semantic_hash": "ebc22fc3cee0c2caa18a0b2450cd10fd"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_session_repository.py": {
+    "mtime": 1781689721.1763113,
+    "ast_hash": "9ede0915c3475e16e30b1154c7adaa92",
+    "semantic_hash": "9ede0915c3475e16e30b1154c7adaa92"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\repositories\\json_transaction_repository.py": {
+    "mtime": 1781689721.1763113,
+    "ast_hash": "5df1f0179afc1c91ef8bcca9d07f90a4",
+    "semantic_hash": "5df1f0179afc1c91ef8bcca9d07f90a4"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\json\\safe_file_io.py": {
+    "mtime": 1781689721.177311,
+    "ast_hash": "518a4cd77060a252ca8043da5afbe14e",
+    "semantic_hash": "518a4cd77060a252ca8043da5afbe14e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\logging_config.py": {
+    "mtime": 1776202554.0672917,
+    "ast_hash": "eee380a2e62e81699e9d74e1d5cd5534",
+    "semantic_hash": "eee380a2e62e81699e9d74e1d5cd5534"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\ports\\__init__.py": {
+    "mtime": 1776153034.8849008,
+    "ast_hash": "0562864ff4801302ebeaaa76973dd1d8",
+    "semantic_hash": "0562864ff4801302ebeaaa76973dd1d8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\ports\\repositories.py": {
+    "mtime": 1777203789.674893,
+    "ast_hash": "215f8b32e7e63174fd184fe1c6d751a7",
+    "semantic_hash": "215f8b32e7e63174fd184fe1c6d751a7"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\shared\\__init__.py": {
+    "mtime": 1776202191.0287144,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\shared\\exceptions.py": {
+    "mtime": 1776202236.7602396,
+    "ast_hash": "798b86a0f2dc46fecc57c1c4f3b5660c",
+    "semantic_hash": "798b86a0f2dc46fecc57c1c4f3b5660c"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\conftest.py": {
+    "mtime": 1776260188.6332378,
+    "ast_hash": "c143df6ed6d3a2c38a01c8bb67acc982",
+    "semantic_hash": "c143df6ed6d3a2c38a01c8bb67acc982"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\conftest.py": {
+    "mtime": 1776260560.454843,
+    "ast_hash": "19496bdbe23a1ff88a88e752ee6a653d",
+    "semantic_hash": "19496bdbe23a1ff88a88e752ee6a653d"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_api_helpers.py": {
+    "mtime": 1781720164.6568222,
+    "ast_hash": "74547d7ae9a75bb06dfe80dac63153e8",
+    "semantic_hash": "74547d7ae9a75bb06dfe80dac63153e8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_calculations.py": {
+    "mtime": 1776257957.9370215,
+    "ast_hash": "e09881bd434e4e16bcbc81186ad49387",
+    "semantic_hash": "e09881bd434e4e16bcbc81186ad49387"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_charge_service.py": {
+    "mtime": 1781720151.1236565,
+    "ast_hash": "9ae09b10d4be6f1036f32f66c0c15d34",
+    "semantic_hash": "9ae09b10d4be6f1036f32f66c0c15d34"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_cli_flows.py": {
+    "mtime": 1777203901.9997103,
+    "ast_hash": "8519452aab6e780ee61c9f488abf99f5",
+    "semantic_hash": "8519452aab6e780ee61c9f488abf99f5"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_dashboard_controller.py": {
+    "mtime": 1781689721.1803117,
+    "ast_hash": "22c4978e31b080a70fa2b516847d282f",
+    "semantic_hash": "22c4978e31b080a70fa2b516847d282f"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_domain_behavior.py": {
+    "mtime": 1781689721.1803117,
+    "ast_hash": "5edea899057b1be70020b33445ab49d2",
+    "semantic_hash": "5edea899057b1be70020b33445ab49d2"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_fuzzy_charge_service.py": {
+    "mtime": 1781689721.1803117,
+    "ast_hash": "ece4209dc1151f8550b8fde67df55524",
+    "semantic_hash": "ece4209dc1151f8550b8fde67df55524"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_gui_foundation.py": {
+    "mtime": 1778628739.3565342,
+    "ast_hash": "c44508e0936a8b4de8cb74b3be5add72",
+    "semantic_hash": "c44508e0936a8b4de8cb74b3be5add72"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_gui_main_window.py": {
+    "mtime": 1778887225.2318633,
+    "ast_hash": "6529f4ad47895522988ddbbe813eb315",
+    "semantic_hash": "6529f4ad47895522988ddbbe813eb315"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_income_service.py": {
+    "mtime": 1777201700.0003653,
+    "ast_hash": "69d1bb49fa89d6810797909751bb349b",
+    "semantic_hash": "69d1bb49fa89d6810797909751bb349b"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_repositories.py": {
+    "mtime": 1776548635.3835294,
+    "ast_hash": "636ec5b1581f01617952a82629a169a5",
+    "semantic_hash": "636ec5b1581f01617952a82629a169a5"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_session_service.py": {
+    "mtime": 1781689721.181312,
+    "ast_hash": "763d8329087d5b678ad4f6a58ac50d42",
+    "semantic_hash": "763d8329087d5b678ad4f6a58ac50d42"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_shared_cross_cutting.py": {
+    "mtime": 1776257978.8385408,
+    "ast_hash": "49c45745df60e75adf64b27a7486f681",
+    "semantic_hash": "49c45745df60e75adf64b27a7486f681"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_spend_service.py": {
+    "mtime": 1777201716.9994035,
+    "ast_hash": "d52eb7d0fbd89471e2e200785101c4b2",
+    "semantic_hash": "d52eb7d0fbd89471e2e200785101c4b2"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\tests\\unit\\test_validators.py": {
+    "mtime": 1781689721.181312,
+    "ast_hash": "54cb25d4e570f119b703047c36f4de46",
+    "semantic_hash": "54cb25d4e570f119b703047c36f4de46"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\.github\\copilot-instructions.md": {
+    "mtime": 1776258022.8394516,
+    "ast_hash": "3f47e21a38e95f8372a767a3062eb57f",
+    "semantic_hash": "3f47e21a38e95f8372a767a3062eb57f"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\.github\\workflows\\ci.yml": {
+    "mtime": 1781689721.1513085,
+    "ast_hash": "58b00cce59db4f21038a2d52fdd6289b",
+    "semantic_hash": "58b00cce59db4f21038a2d52fdd6289b"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\AGENTS.md": {
+    "mtime": 1778574414.1721218,
+    "ast_hash": "4337a20a7672e6a34a020ed984290841",
+    "semantic_hash": "4337a20a7672e6a34a020ed984290841"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\CODING_RULES.md": {
+    "mtime": 1781718426.9415233,
+    "ast_hash": "eace6fe556f6eb81f5a1d6cdf4826e80",
+    "semantic_hash": "eace6fe556f6eb81f5a1d6cdf4826e80"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\PROJECT_CREATION.md": {
+    "mtime": 1781717907.9699614,
+    "ast_hash": "0d66086503848ba597e6cd7f6dc58cbc",
+    "semantic_hash": "0d66086503848ba597e6cd7f6dc58cbc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\superpowers\\specs\\2026-06-17-gui-redesign-react.md": {
+    "mtime": 1781691059.2219353,
+    "ast_hash": "ca730446372567c7f5f3a9e9eb5bb772",
+    "semantic_hash": "ca730446372567c7f5f3a9e9eb5bb772"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\architecture.html": {
+    "mtime": 1777301315.831348,
+    "ast_hash": "b5ad672f656918525d496c2d38283a77",
+    "semantic_hash": "b5ad672f656918525d496c2d38283a77"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\index.html": {
+    "mtime": 1778319126.7075295,
+    "ast_hash": "eff98fbbc3aa50b1a4b39fd0c2dae354",
+    "semantic_hash": "eff98fbbc3aa50b1a4b39fd0c2dae354"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\mizan-landing.html": {
+    "mtime": 1778318685.138507,
+    "ast_hash": "4eb27987596d7be095ce9d3a51a141df",
+    "semantic_hash": "4eb27987596d7be095ce9d3a51a141df"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\mizan-project.html": {
+    "mtime": 1778318710.333347,
+    "ast_hash": "993ddb529571ed61bced7fb2e6532565",
+    "semantic_hash": "993ddb529571ed61bced7fb2e6532565"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\mizan_dashboard.html": {
+    "mtime": 1777301332.2083724,
+    "ast_hash": "0e35f1b4a5791cb93386d7006d9dd1b8",
+    "semantic_hash": "0e35f1b4a5791cb93386d7006d9dd1b8"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\Docs\\visuals\\mizan_mobile.html": {
+    "mtime": 1776849592.8118565,
+    "ast_hash": "3bbcb328706e5f3a4dce1b7a7e46ad31",
+    "semantic_hash": "3bbcb328706e5f3a4dce1b7a7e46ad31"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\README.md": {
+    "mtime": 1781689721.1523085,
+    "ast_hash": "a0d968780638f7fba91f793c1366c6e0",
+    "semantic_hash": "a0d968780638f7fba91f793c1366c6e0"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\better_gui\\DESIGN.md": {
+    "mtime": 1781689721.1533086,
+    "ast_hash": "8afabbe802b16a1711c40bf225a3f20d",
+    "semantic_hash": "8afabbe802b16a1711c40bf225a3f20d"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\better_gui\\IMPLEMENTATION_SPEC.md": {
+    "mtime": 1781689721.1533086,
+    "ast_hash": "c9816bf549593249c355f42d494bf712",
+    "semantic_hash": "c9816bf549593249c355f42d494bf712"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\better_gui\\PLAN.md": {
+    "mtime": 1781689721.154309,
+    "ast_hash": "0d20f9a8636ee13201e8a074f8a10d8f",
+    "semantic_hash": "0d20f9a8636ee13201e8a074f8a10d8f"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\frontend\\index.html": {
+    "mtime": 1781698034.3542054,
+    "ast_hash": "d14470adc5d3f484eb359cb5d42d2722",
+    "semantic_hash": "d14470adc5d3f484eb359cb5d42d2722"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\frontend\\index.html": {
+    "mtime": 1781691706.281924,
+    "ast_hash": "d14470adc5d3f484eb359cb5d42d2722",
+    "semantic_hash": "d14470adc5d3f484eb359cb5d42d2722"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\requirements-dev.txt": {
+    "mtime": 1781689721.1553087,
+    "ast_hash": "ca86fd3306ce812c8bece992a1ee38dc",
+    "semantic_hash": "ca86fd3306ce812c8bece992a1ee38dc"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\requirements.txt": {
+    "mtime": 1781689721.1553087,
+    "ast_hash": "ec4232d40fb3dcaa36319f643280ad5a",
+    "semantic_hash": "ec4232d40fb3dcaa36319f643280ad5a"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\infrastructure\\postgres\\README.md": {
+    "mtime": 1776153652.9167378,
+    "ast_hash": "1cfb3d11b10ef74afade5c3cb6fa856f",
+    "semantic_hash": "1cfb3d11b10ef74afade5c3cb6fa856f"
+  },
+  "C:\\Users\\kingm\\Desktop\\IDEs\\Student Expense Tracker\\src\\expense_tracker\\web\\README.md": {
+    "mtime": 1776153052.6213534,
+    "ast_hash": "f41dda8d3d740c6d042836679c2da539",
+    "semantic_hash": "f41dda8d3d740c6d042836679c2da539"
+  }
+}

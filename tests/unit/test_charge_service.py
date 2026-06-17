@@ -308,3 +308,24 @@ class TestChargeServiceAddRecurringCharge:
 
         with pytest.raises(ValidationError):
             service.add_recurring_charge(name="Rent", amount=Decimal("500.00"), day_of_month=day_of_month)
+
+
+class TestListUpcoming:
+    def test_returns_upcoming_charges_for_session(self, tmp_path, active_session: AppSession) -> None:
+        service, _, _, _ = _build_charge_service(tmp_path, active_session)
+        service.add_charge("Rent", Decimal("500"), date.today())
+
+        result = service.list_upcoming(active_session.session_id)
+
+        assert len(result) == 1
+        assert result[0].name == "Rent"
+        assert result[0].status is ChargeStatus.UPCOMING
+
+    def test_excludes_paid_charges(self, tmp_path, active_session: AppSession) -> None:
+        service, _, _, _ = _build_charge_service(tmp_path, active_session)
+        charge = service.add_charge("Rent", Decimal("500"), date.today())
+        service.mark_paid(charge.charge_id)
+
+        result = service.list_upcoming(active_session.session_id)
+
+        assert all(c.charge_id != charge.charge_id for c in result)

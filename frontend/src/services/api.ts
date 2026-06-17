@@ -63,3 +63,9 @@ export const initSession = (openingBalance: string) =>
 
 export const checkHealth = () =>
   fetchJSON<{ status: string; session: boolean }>(`${BASE}/health`)
+
+export const getAllTransactions = () =>
+  fetchJSON<import('../types').ActivityEntry[]>(`${BASE}/transactions/all`)
+
+export const getWeeklySummary = (weeks = 8) =>
+  fetchJSON<import('../types').WeeklySummary[]>(`${BASE}/transactions/weekly-summary?weeks=${weeks}`)

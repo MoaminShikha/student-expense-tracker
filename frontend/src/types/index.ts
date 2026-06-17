@@ -86,6 +86,21 @@ export interface AddChargeInput {
   day_of_month?: number
 }
 
+export interface ActivityEntry {
+  entry_id: string
+  type: 'spend' | 'income'
+  amount: string
+  description: string
+  category: string | null
+  date: string
+}
+
+export interface WeeklySummary {
+  week_label: string
+  week_start: string
+  total_spend: number
+}
+
 export const INCOME_SOURCE_TAGS = [
   'scholarship',
   'family',

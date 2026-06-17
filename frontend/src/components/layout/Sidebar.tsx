@@ -1,7 +1,11 @@
 import React from 'react'
 
+export type Page = 'Dashboard' | 'Activity' | 'Insights' | 'Settings'
+
 interface SidebarProps {
   streakDays?: number
+  activePage?: Page
+  onNavigate?: (page: Page) => void
 }
 
 const NAV_ITEMS = [
@@ -9,8 +13,7 @@ const NAV_ITEMS = [
     section: 'Overview',
     items: [
       {
-        label: 'Dashboard',
-        active: true,
+        label: 'Dashboard' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <rect x="3" y="3" width="7" height="7" rx="1"/>
@@ -21,8 +24,7 @@ const NAV_ITEMS = [
         ),
       },
       {
-        label: 'History',
-        active: false,
+        label: 'Activity' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <path d="M3 6h18M3 12h14M3 18h9"/>
@@ -35,8 +37,7 @@ const NAV_ITEMS = [
     section: 'Money',
     items: [
       {
-        label: 'Income',
-        active: false,
+        label: 'Income' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -45,8 +46,7 @@ const NAV_ITEMS = [
         ),
       },
       {
-        label: 'Charges',
-        active: false,
+        label: 'Charges' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
@@ -55,8 +55,7 @@ const NAV_ITEMS = [
         ),
       },
       {
-        label: 'Transactions',
-        active: false,
+        label: 'Transactions' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <rect x="2" y="5" width="20" height="14" rx="2"/>
@@ -70,8 +69,7 @@ const NAV_ITEMS = [
     section: 'You',
     items: [
       {
-        label: 'Insights',
-        active: false,
+        label: 'Insights' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -79,12 +77,11 @@ const NAV_ITEMS = [
         ),
       },
       {
-        label: 'Profile',
-        active: false,
+        label: 'Settings' as Page,
         icon: (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         ),
       },
@@ -92,14 +89,15 @@ const NAV_ITEMS = [
   },
 ]
 
-export function Sidebar({ streakDays = 12 }: SidebarProps) {
-  const [activeItem, setActiveItem] = React.useState('Dashboard')
+const NAVIGABLE: Page[] = ['Dashboard', 'Activity', 'Insights', 'Settings']
 
+export function Sidebar({ streakDays = 12, activePage = 'Dashboard', onNavigate }: SidebarProps) {
   const totalSegs = 14
   const onSegs = Math.min(streakDays, totalSegs)
 
   return (
     <aside
+      className="sidebar"
       style={{
         width: '210px',
         minWidth: '210px',
@@ -132,13 +130,14 @@ export function Sidebar({ streakDays = 12 }: SidebarProps) {
               {section}
             </div>
             {items.map(({ label, icon }) => {
-              const isActive = activeItem === label
+              const isActive = activePage === label
+              const isNavigable = NAVIGABLE.includes(label)
               return (
                 <button
                   key={label}
                   type="button"
                   aria-current={isActive ? 'page' : undefined}
-                  onClick={() => setActiveItem(label)}
+                  onClick={() => isNavigable && onNavigate?.(label)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -147,7 +146,7 @@ export function Sidebar({ streakDays = 12 }: SidebarProps) {
                     padding: '0 12px 0 18px',
                     border: 'none',
                     borderLeft: `2px solid ${isActive ? 'var(--gold)' : 'transparent'}`,
-                    cursor: 'pointer',
+                    cursor: isNavigable ? 'pointer' : 'default',
                     width: '100%',
                     background: isActive ? 'hsl(36 20% 94%)' : 'transparent',
                     fontFamily: "'DM Mono', monospace",
