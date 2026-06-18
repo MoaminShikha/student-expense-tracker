@@ -23,7 +23,7 @@ free money = opening balance − committed charges − recorded spends
 **Requirements:** Python 3.10+, Node.js 18+
 
 ```bash
-git clone https://github.com/your-username/student-expense-tracker.git
+git clone https://github.com/MoaminShikha/student-expense-tracker.git
 cd student-expense-tracker
 
 # Backend
