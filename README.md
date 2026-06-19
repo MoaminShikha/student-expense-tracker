@@ -2,11 +2,37 @@
 
 > Know exactly how much you can spend today — after bills, before regret.
 
-Mizān (ميزان / מאזן, "balance") is a web-based budgeting app for students. It tracks one number: **how much money you can actually spend today**, after committed obligations are subtracted.
+Personal project — built as a HUJI CS student to solve a real budgeting problem.
+
+---
+
+## The problem
+
+Your bank balance is a lie. It shows ₪2,000 available while next week's rent, the phone bill, and a subscription are all still sitting in there uncounted. Nothing deducts future obligations until they actually clear — so students spend freely, then hit month-end in crisis.
+
+Mizān fixes this without requiring bank access or a complex setup.
+
+---
+
+## How it works
 
 ```
-free money = opening balance − committed charges − recorded spends
+free money = opening balance + income − committed charges − recorded spend
 ```
+
+The key rule: **committed charges deduct the moment they're logged — not when they're due.** The instant you enter rent, it's gone from your usable balance. What you see is what you can actually spend.
+
+---
+
+## Screenshot
+
+![Mizān dashboard](docs/screenshot.png)
+
+---
+
+## Live docs
+
+[**→ Landing page · Architecture · Project overview**](https://moaminshikha.github.io/student-expense-tracker/)
 
 ---
 
@@ -17,6 +43,24 @@ free money = opening balance − committed charges − recorded spends
 | Frontend | React 18 + TypeScript + Vite + Tailwind CSS |
 | Backend | FastAPI (Python 3.10+) |
 | Storage | JSON files under `data/` (no database required) |
+
+---
+
+## Architecture
+
+Five-layer clean architecture — domain models have no knowledge of persistence or HTTP.
+[→ Architecture diagram](https://moaminshikha.github.io/student-expense-tracker/architecture.html)
+
+---
+
+## Features
+
+| Feature | Description |
+|---|---|
+| Dashboard | Free Money, Safe Daily, month timeline, upcoming charges |
+| Activity | Full transaction history, filter by month, delete entries |
+| Insights | Weekly spend trend, category breakdown, nudges |
+| Settings | Currency symbol/code, display name |
 
 ---
 
@@ -37,46 +81,13 @@ start-backend.bat        # Windows
 cd frontend && npm install && npm run dev
 ```
 
-Open **http://localhost:5173** (or whichever port Vite picks).
+Open **http://localhost:5173** — enter an opening balance to get started.
 
 ---
 
-## Features
+## Tests
 
-| Feature | Description |
-|---|---|
-| Dashboard | Live balance, month timeline with event dots, stats row |
-| Activity | Full transaction history, search, filter, CSV export |
-| Insights | Weekly spend chart, category breakdown, smart nudges |
-| Settings | Currency symbol/code (stored in browser localStorage) |
-| Charges | Committed upcoming bills tracked separately from spend |
-
----
-
-## Project structure
-
-```
-src/expense_tracker/
-├── domain/          # Pure models — no I/O
-├── application/     # Services: ChargeService, BalanceService, …
-├── infrastructure/  # JSON persistence with atomic writes
-└── app/
-    ├── api.py       # FastAPI endpoints
-    └── cli/         # CLI entry point
-
-frontend/src/
-├── components/      # UI components (dashboard, forms, layout, insights)
-├── hooks/           # Data-fetching hooks (useFetch)
-├── pages/           # Dashboard, Activity, Insights, Settings
-├── services/        # API client (api.ts)
-└── types/           # Shared TypeScript interfaces
-
-tests/unit/          # 243 unit tests — real JSON files, no mocks
-```
-
----
-
-## Running tests
+243 unit tests against real JSON files — no mocks.
 
 ```bash
 pip install -e ".[dev]"
@@ -87,21 +98,12 @@ pytest
 
 ## Configuration
 
-| Environment variable | Default | Description |
+| Variable | Default | Description |
 |---|---|---|
 | `MIZAN_CORS_ORIGINS` | `http://localhost:5173,...` | Comma-separated allowed origins |
 
 ---
 
-## Design notes
-
-- **One session at a time** — open a session with your opening balance; it persists until you reset.
-- **Atomic writes** — every JSON save goes through a temp-file rename. A `.bak` sidecar is kept for crash recovery.
-- **No external database** — all data lives under `data/` (git-ignored).
-- **localStorage settings** — currency symbol/code and display name are stored in the browser.
-
----
-
 ## License
 
-PolyForm Noncommercial 1.0.0 — free to use and modify for noncommercial purposes; selling or commercial exploitation is prohibited. See [LICENSE](LICENSE).
+[PolyForm Noncommercial 1.0.0](LICENSE) — free to use and modify for noncommercial purposes.
