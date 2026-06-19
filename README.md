@@ -28,9 +28,9 @@ The key rule: **committed charges deduct the moment they're logged — not when 
 
 ---
 
-## Screenshot
+## Demo
 
-![Mizān dashboard](docs/screenshot.png)
+https://github.com/user-attachments/assets/8bf313d5-4808-4b9f-9331-d108eb14e419
 
 ---
 
