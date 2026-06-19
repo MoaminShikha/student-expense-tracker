@@ -441,7 +441,7 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
     <li><a href="mizan-landing.html">Landing</a></li>
     <li><a href="index.html">All pages</a></li>
   </ul>
-  <a class="nav-cta" href="mizan_dashboard.html">Open Dashboard →</a>
+  <a class="nav-cta" href="mizan-landing.html">Landing page →</a>
 </nav>
 
 <!-- HERO -->
@@ -451,27 +451,26 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
       <div class="hero-eyebrow">
         <span class="hero-arabic">ميزان</span>
         <span class="hero-line"></span>
-        <span class="hero-tag">Technical Overview · Stage 1 Complete</span>
+        <span class="hero-tag">Technical Overview · Stage 2 Complete</span>
       </div>
       <h1>A student budgeting system<br>built from <em>first principles.</em></h1>
       <p class="lead">Mizān solves a precise problem: Israeli university students run out of money because their bank balance includes committed obligations. The app separates what's genuinely free to spend from what's already spoken for — and tells you one honest number every day.</p>
       <div class="hero-actions">
         <a class="btn-gold" href="#mechanic">Explore the mechanics</a>
-        <a class="btn-ghost-light" href="mizan_dashboard.html">Open dashboard →</a>
+        <a class="btn-ghost-light" href="mizan-landing.html">Landing page →</a>
       </div>
     </div>
     <div class="stage-badge fade-up" style="transition-delay:0.1s;">
       <div class="sb-row">
         <span class="sb-lbl">Build stages</span>
-        <span class="sb-status">Stage 1 complete</span>
+        <span class="sb-status">Stage 2 complete</span>
       </div>
       <ul class="stage-list">
         <li class="stage-item"><span class="stage-num">01</span><span class="stage-name done">CLI + JSON storage</span><span class="stage-tests">208 tests</span><span class="stage-pip done"></span></li>
-        <li class="stage-item"><span class="stage-num">02</span><span class="stage-name">PyQt6 desktop</span><span class="stage-tests"></span><span class="stage-pip next"></span></li>
+        <li class="stage-item"><span class="stage-num">02</span><span class="stage-name done">React + FastAPI web app</span><span class="stage-tests">243 tests</span><span class="stage-pip done"></span></li>
         <li class="stage-item"><span class="stage-num">03</span><span class="stage-name">PostgreSQL</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
         <li class="stage-item"><span class="stage-num">04</span><span class="stage-name">Reminders + patterns</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
-        <li class="stage-item"><span class="stage-num">05</span><span class="stage-name">Web UI (FastAPI + React)</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
-        <li class="stage-item"><span class="stage-num">06</span><span class="stage-name">Bank connectivity</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
+        <li class="stage-item"><span class="stage-num">05</span><span class="stage-name">Bank connectivity</span><span class="stage-tests"></span><span class="stage-pip later"></span></li>
       </ul>
     </div>
   </div>
@@ -1115,8 +1114,8 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
 <section class="roadmap-section" id="roadmap">
   <div class="roadmap-inner">
     <div class="roadmap-tag fade-up">Build roadmap</div>
-    <h2 class="roadmap-title fade-up">Six stages.<br>One stage <em>complete.</em></h2>
-    <p class="roadmap-lead fade-up">The architecture is designed so each stage adds a new delivery surface without touching the domain layer. The BalanceEngine computes the same way whether called from CLI, PyQt6, or a React frontend.</p>
+    <h2 class="roadmap-title fade-up">Five stages.<br>Two <em>complete.</em></h2>
+    <p class="roadmap-lead fade-up">The architecture is designed so each stage adds a new delivery surface without touching the domain layer. The BalanceEngine computes the same way whether called from CLI or a React frontend.</p>
 
     <div class="roadmap-track">
       <div class="rm-stage done fade-up">
@@ -1132,16 +1131,16 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
           </div>
         </div>
       </div>
-      <div class="rm-stage next fade-up" style="transition-delay:0.06s;">
+      <div class="rm-stage done fade-up" style="transition-delay:0.06s;">
         <div class="rm-stage-num">02</div>
         <div class="rm-stage-body">
           <div class="rm-stage-header">
-            <span class="rm-stage-name">PyQt6 desktop dashboard</span>
-            <span class="rm-stage-status">Next</span>
+            <span class="rm-stage-name">React + FastAPI web app</span>
+            <span class="rm-stage-status">Complete · 243/243 tests</span>
           </div>
-          <div class="rm-stage-desc">The Mizān dashboard design (see mizan_dashboard.html) implemented as a native desktop app. Calls the same service layer as the CLI — no new business logic.</div>
+          <div class="rm-stage-desc">REST API over the service layer. React + TypeScript frontend following the Mizān design system. Dashboard, Activity, Insights, and Settings pages. Same backend logic — new delivery surface.</div>
           <div class="rm-stage-chips">
-            <span class="rm-chip">PyQt6</span><span class="rm-chip">Same service layer</span><span class="rm-chip">Native desktop</span><span class="rm-chip">Full dashboard UI</span>
+            <span class="rm-chip">FastAPI</span><span class="rm-chip">React 18</span><span class="rm-chip">TypeScript</span><span class="rm-chip">Vite</span><span class="rm-chip">JSON repos</span>
           </div>
         </div>
       </div>
@@ -1175,19 +1174,6 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
         <div class="rm-stage-num">05</div>
         <div class="rm-stage-body">
           <div class="rm-stage-header">
-            <span class="rm-stage-name">Web UI — FastAPI + React</span>
-            <span class="rm-stage-status">Planned</span>
-          </div>
-          <div class="rm-stage-desc">REST API over the service layer. React frontend following the Mizān design system. Mobile-optimised companion view (see mizan_mobile.html). Same backend, new surface.</div>
-          <div class="rm-stage-chips">
-            <span class="rm-chip">FastAPI</span><span class="rm-chip">React</span><span class="rm-chip">Mizān design system</span><span class="rm-chip">Mobile view</span>
-          </div>
-        </div>
-      </div>
-      <div class="rm-stage later fade-up" style="transition-delay:0.30s;">
-        <div class="rm-stage-num">06</div>
-        <div class="rm-stage-body">
-          <div class="rm-stage-header">
             <span class="rm-stage-name">Local bank connectivity</span>
             <span class="rm-stage-status">Future</span>
           </div>
@@ -1201,15 +1187,14 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
   </div>
 </section>
 
-<!-- LINK TO DASHBOARD -->
+<!-- LINK SECTION -->
 <div class="link-section">
   <div class="link-inner">
     <div class="link-left">
-      <h3>See the Stage 2 design target</h3>
-      <p>The PyQt6 desktop dashboard design is already built as an HTML mockup — fully interactive, with real state switching and animations.</p>
+      <h3>Explore more</h3>
+      <p>See the full product overview and design language on the landing page.</p>
     </div>
     <div class="link-right">
-      <a class="btn-primary" href="mizan_dashboard.html">Open dashboard →</a>
       <a class="btn-secondary" href="mizan-landing.html">Landing page →</a>
     </div>
   </div>
@@ -1221,8 +1206,8 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
     <span class="footer-arabic">ميزان</span>
     <span class="footer-wordmark">Mizān</span>
   </div>
-  <span>Student Expense Tracker · Stage 1 Complete · 208/208 tests</span>
-  <span>Python · PyQt6 next · FastAPI + React planned</span>
+  <span>Student Expense Tracker · Stage 2 Complete · 243/243 tests</span>
+  <span>Python · FastAPI · React + TypeScript</span>
 </footer>
 
 </div>
@@ -1258,7 +1243,7 @@ footer span { font-family: 'DM Mono', monospace; font-size: 10px; color: hsl(240
   if (testEl) {
     const tIo = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        countUp(testEl, 208, 1200);
+        countUp(testEl, 243, 1200);
         tIo.disconnect();
       }
     }, { threshold: 0.5 });

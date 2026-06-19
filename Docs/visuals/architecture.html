@@ -236,7 +236,7 @@
 <body>
 
   <h1>Student Expense Tracker</h1>
-  <p class="subtitle">Stage 1 Architecture · Pure Python · CLI · JSON Repositories</p>
+  <p class="subtitle">Current Architecture · FastAPI + React · Python · JSON Repositories</p>
 
   <div class="diagram">
 
@@ -245,12 +245,12 @@
       <div class="layer-label">App</div>
       <div class="layer-body">
         <div class="box b-entry">
-          <span>main.py</span>
-          <span class="path">app/main.py</span>
+          <span>React Frontend</span>
+          <span class="path">frontend/ (Vite + TypeScript)</span>
         </div>
         <div class="box b-cli">
-          <span>CliApplication</span>
-          <span class="path">app/cli.py</span>
+          <span>FastAPI</span>
+          <span class="path">app/api.py</span>
         </div>
       </div>
     </div>
@@ -366,9 +366,8 @@
         <div class="box b-json">JsonFuzzyRepo</div>
         <div class="box b-json">JsonTransactionRepo</div>
         <div class="divider"></div>
-        <span class="section-title">Stage 3+</span>
+        <span class="section-title">Planned</span>
         <div class="box b-infra" style="opacity:0.4">Postgres repos</div>
-        <div class="box b-infra" style="opacity:0.4">Web layer</div>
         <div class="divider"></div>
         <div class="box b-infra">LoggerFactory</div>
       </div>
@@ -405,7 +404,7 @@
         <div class="box b-test">test_repositories</div>
         <div class="box b-test">test_shared_cross_cutting</div>
         <div class="box b-test">test_cli_flows</div>
-        <span style="margin-left:8px;font-size:0.72rem;color:#4ade80;font-weight:700">208 / 208 ✓</span>
+        <span style="margin-left:8px;font-size:0.72rem;color:#4ade80;font-weight:700">243 / 243 ✓</span>
       </div>
     </div>
 
@@ -413,11 +412,11 @@
 
   <!-- ── DATA FLOW ── -->
   <div class="flow-section">
-    <h2>Request Data Flow — example: spend add</h2>
+    <h2>Request Data Flow — example: add spend</h2>
     <div class="flow-steps">
-      <div class="flow-step">User: <code>spend add --amount 45 --description "lunch"</code></div>
+      <div class="flow-step">User clicks "Add Spend" in React UI</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">CliApplication parses flags</div>
+      <div class="flow-step">POST /api/spend (FastAPI)</div>
       <div class="flow-arrow">→</div>
       <div class="flow-step">validators.py parses &amp; validates input</div>
       <div class="flow-arrow">→</div>
@@ -425,7 +424,7 @@
       <div class="flow-arrow">→</div>
       <div class="flow-step">TransactionRepository.add()</div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">exit 0</div>
+      <div class="flow-step">200 OK → React UI refreshes</div>
     </div>
   </div>
 
@@ -467,7 +466,7 @@
 
   <!-- ── LEGEND ── -->
   <div class="legend">
-    <div class="legend-item"><div class="legend-swatch" style="background:#2d3a5a;border:1px solid #4a6aaa"></div>Entry / CLI</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#2d3a5a;border:1px solid #4a6aaa"></div>App / API</div>
     <div class="legend-item"><div class="legend-swatch" style="background:#1e3048;border:1px solid #2a5080"></div>Service</div>
     <div class="legend-item"><div class="legend-swatch" style="background:#1a3040;border:1px solid #2a6070"></div>Engine (pure logic)</div>
     <div class="legend-item"><div class="legend-swatch" style="background:#1a3028;border:1px solid #2a6040"></div>Domain Model</div>

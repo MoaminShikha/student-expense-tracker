@@ -1,6 +1,8 @@
 # Mizān — Student Expense Tracker
 
-A web-based budgeting app for students. Mizān (ميزان / מאזן, "balance") tracks one number: **how much money you can actually spend today**, after committed obligations are subtracted.
+> Know exactly how much you can spend today — after bills, before regret.
+
+Mizān (ميزان / מאזן, "balance") is a web-based budgeting app for students. It tracks one number: **how much money you can actually spend today**, after committed obligations are subtracted.
 
 ```
 free money = opening balance − committed charges − recorded spends
@@ -69,7 +71,7 @@ frontend/src/
 ├── services/        # API client (api.ts)
 └── types/           # Shared TypeScript interfaces
 
-tests/unit/          # 260+ unit tests — real JSON files, no mocks
+tests/unit/          # 243 unit tests — real JSON files, no mocks
 ```
 
 ---

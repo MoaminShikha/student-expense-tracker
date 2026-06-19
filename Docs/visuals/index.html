@@ -232,11 +232,11 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
     <span>Docs / visuals</span>
   </div>
   <h1>Visual <em>directory.</em></h1>
-  <p>All HTML design artefacts for the Mizān student expense tracker — landing page, project overview, desktop dashboard, mobile view, and architecture diagram. Open any file directly or use them as a set.</p>
+  <p>All HTML design artefacts for the Mizān student expense tracker — landing page, project overview, and architecture diagram. Open any file directly or use them as a set.</p>
   <div class="header-meta">
-    <span class="meta-chip done">Stage 1 complete · 208/208 tests</span>
-    <span class="meta-chip info">Python · PyQt6 next</span>
-    <span class="meta-chip info">6 files · same directory</span>
+    <span class="meta-chip done">Stage 2 complete · 243 tests</span>
+    <span class="meta-chip info">Python + FastAPI · React + TypeScript</span>
+    <span class="meta-chip info">4 files · same directory</span>
   </div>
 </header>
 
@@ -290,7 +290,7 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
       <div class="card-body">
         <span class="card-type technical">Technical · overview</span>
         <div class="card-title">Project Technical Docs</div>
-        <div class="card-desc">Domain model, BalanceEngine formulas, state machines, 4-layer architecture, CLI commands, charge lifecycles, 208-test suite, and the 6-stage roadmap.</div>
+        <div class="card-desc">Domain model, BalanceEngine formulas, state machines, layered architecture, charge lifecycles, 243-test suite, and the 5-stage roadmap.</div>
         <div class="card-footer">
           <span>mizan-project.html</span>
           <span class="card-open">Open →</span>
@@ -300,72 +300,14 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
 
   </div>
 
-  <!-- Design mockups -->
-  <div class="section-label">Design mockups — the Stage 2 target</div>
+  <!-- System docs -->
+  <div class="section-label">System documentation</div>
   <div class="grid">
-
-    <a class="page-card" href="mizan_dashboard.html">
-      <div class="card-preview dashboard-prev">
-        <div class="preview-dash">
-          <div class="dash-sidebar">
-            <div class="dash-nav-item" style="width:60%;"></div>
-            <div class="dash-nav-item active" style="width:80%;"></div>
-            <div class="dash-nav-item" style="width:70%;"></div>
-            <div class="dash-nav-item" style="width:65%;"></div>
-            <div class="dash-nav-item" style="width:75%;"></div>
-          </div>
-          <div class="dash-main">
-            <div class="dash-topbar"></div>
-            <div class="dash-hero"></div>
-            <div class="dash-panels">
-              <div class="dash-panel"></div>
-              <div class="dash-panel"></div>
-              <div class="dash-panel"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="card-body">
-        <span class="card-type design">Design · desktop</span>
-        <div class="card-title">Desktop Dashboard</div>
-        <div class="card-desc">The full Mizān PyQt6 dashboard design — interactive state switching, animated hero card, sidebar navigation, all three panels. The Stage 2 implementation target.</div>
-        <div class="card-footer">
-          <span>mizan_dashboard.html</span>
-          <span class="card-open">Open →</span>
-        </div>
-      </div>
-    </a>
-
-    <a class="page-card" href="mizan_mobile.html">
-      <div class="card-preview mobile-prev">
-        <div class="preview-mobile">
-          <div class="mobile-phone">
-            <div class="phone-topbar"></div>
-            <div class="phone-body">
-              <div class="phone-hero"></div>
-              <div class="phone-row" style="width:80%;"></div>
-              <div class="phone-row" style="width:60%;"></div>
-              <div class="phone-row" style="width:70%;"></div>
-            </div>
-            <div class="phone-nav"></div>
-          </div>
-        </div>
-      </div>
-      <div class="card-body">
-        <span class="card-type design">Design · mobile</span>
-        <div class="card-title">Mobile Companion</div>
-        <div class="card-desc">Mobile-first view with bottom nav, quick-add sheet, stat carousel, and compact timeline. Designed for logging a transaction in 10 seconds.</div>
-        <div class="card-footer">
-          <span>mizan_mobile.html</span>
-          <span class="card-open">Open →</span>
-        </div>
-      </div>
-    </a>
 
     <a class="page-card" href="architecture.html">
       <div class="card-preview arch-prev">
         <div class="preview-arch">
-          <div class="arch-bar" style="background:hsl(240 22%,13%);"><span class="arch-bar-lbl" style="color:hsl(240,10%,50%);">CLI</span></div>
+          <div class="arch-bar" style="background:hsl(240 22%,13%);"><span class="arch-bar-lbl" style="color:hsl(240,10%,50%);">API + React</span></div>
           <div class="arch-bar" style="background:hsl(217 40% 94%);"><span class="arch-bar-lbl" style="color:hsl(217,60%,38%);">Services</span></div>
           <div class="arch-bar" style="background:hsl(42 50% 92%);"><span class="arch-bar-lbl" style="color:hsl(42,65%,38%);">Domain + BalanceEngine</span></div>
           <div class="arch-bar" style="background:hsl(162 30% 92%);"><span class="arch-bar-lbl" style="color:hsl(162,60%,28%);">Ports (Protocols)</span></div>
@@ -375,7 +317,7 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
       <div class="card-body">
         <span class="card-type system">System · diagram</span>
         <div class="card-title">Architecture Diagram</div>
-        <div class="card-desc">Visual map of the 4-layer architecture — CLI, Services, Domain + Ports, Infrastructure — with data-flow examples and dependency rules.</div>
+        <div class="card-desc">Visual map of the architecture — FastAPI + React, Services, Domain + Ports, Infrastructure — with data-flow examples and dependency rules.</div>
         <div class="card-footer">
           <span>architecture.html</span>
           <span class="card-open">Open →</span>
@@ -391,18 +333,16 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
       <div>
         <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Outbound links</div>
-        <div><span style="color:var(--fg);font-weight:500;">mizan-landing.html</span> → embeds <code style="background:var(--bg);padding:1px 4px;border-radius:3px;">mizan_dashboard.html</code> via iframe · links to project page + mobile</div>
-        <div style="margin-top:8px;"><span style="color:var(--fg);font-weight:500;">mizan-project.html</span> → links to dashboard (open) · links back to landing page</div>
-        <div style="margin-top:8px;"><span style="color:var(--fg);font-weight:500;">mizan_dashboard.html</span> → links to <code style="background:var(--bg);padding:1px 4px;border-radius:3px;">mizan_mobile.html</code> via topbar "Mobile" button</div>
+        <div><span style="color:var(--fg);font-weight:500;">mizan-landing.html</span> → links to project page</div>
+        <div style="margin-top:8px;"><span style="color:var(--fg);font-weight:500;">mizan-project.html</span> → links back to landing page</div>
+        <div style="margin-top:8px;"><span style="color:var(--fg);font-weight:500;">architecture.html</span> → standalone, no outbound links</div>
       </div>
       <div>
         <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Intended reading order</div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">1.</span><span>Landing page — understand the product</span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">2.</span><span>Dashboard — see the design target</span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">3.</span><span>Project docs — understand the mechanics</span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">4.</span><span>Architecture — understand the structure</span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">5.</span><span>Mobile — see the companion view</span></div>
+          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">2.</span><span>Project docs — understand the mechanics</span></div>
+          <div style="display:flex;align-items:baseline;gap:8px;"><span style="color:var(--gold-leaf);font-weight:500;min-width:18px;">3.</span><span>Architecture — understand the structure</span></div>
         </div>
       </div>
     </div>
@@ -416,8 +356,8 @@ site-footer { border-top: 1px solid var(--hairline); padding: 20px 48px; backgro
     <span class="footer-arabic">ميزان</span>
     <span class="footer-wordmark">Mizān</span>
   </div>
-  <span>Docs / visuals · 6 files</span>
-  <span>Stage 1 complete · 208/208 tests</span>
+  <span>Docs / visuals · 4 files</span>
+  <span>Stage 2 complete · 243/243 tests</span>
 </footer>
 
 </div>
