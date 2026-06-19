@@ -2,7 +2,7 @@
 
 > Know exactly how much you can spend today — after bills, before regret.
 
-Personal project — built as a HUJI CS student to solve a real budgeting problem.
+Personal project — built to solve a real budgeting problem.
 
 ---
 
@@ -10,7 +10,7 @@ Personal project — built as a HUJI CS student to solve a real budgeting proble
 
 Your bank balance is a lie. It shows ₪2,000 available while next week's rent, the phone bill, and a subscription are all still sitting in there uncounted. Nothing deducts future obligations until they actually clear — so students spend freely, then hit month-end in crisis.
 
-I kept running into this as a HUJI student, so I built Mizān — ميزان, Arabic for *"balance"* — to try and fix it for myself.
+I kept running into this as a student, so I built Mizān — ميزان, Arabic for *"balance"* — to try and fix it for myself.
 
 ---
 
