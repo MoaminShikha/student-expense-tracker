@@ -1,5 +1,7 @@
 # Mizān — Student Expense Tracker
 
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-c9a84c?style=flat-square) ![Tests](https://img.shields.io/badge/tests-243%20passing-4a7c59?style=flat-square) ![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?style=flat-square) ![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square)
+
 > Know exactly how much you can spend today — after bills, before regret.
 
 Personal project — built to solve a real budgeting problem.
