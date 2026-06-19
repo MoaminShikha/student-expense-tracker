@@ -10,6 +10,9 @@ export function StatColumn({ balance }: StatColumnProps) {
   const monthlySpent = parseFloat(balance.monthly_spent)
   const monthlyBudget = parseFloat(balance.monthly_budget)
   const monthlyLeft = parseFloat(balance.monthly_left)
+  const freeMoney = parseFloat(balance.free_money)
+  const daysRemaining = Math.max(balance.days_in_month - balance.day_of_month + 1, 1)
+  const safeDaily = freeMoney / daysRemaining
 
   const spentPctOfLimit = monthlyBudget > 0
     ? Math.round((monthlySpent / monthlyBudget) * 100)
@@ -19,6 +22,15 @@ export function StatColumn({ balance }: StatColumnProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ borderRadius: '14px', background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--hairline)', padding: '14px 16px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 'var(--t-micro)', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '2px' }}>Safe Daily</div>
+        <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '4px' }}>{daysRemaining} days remaining</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '28px', color: safeDaily >= 0 ? 'var(--fg)' : 'var(--red)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.01em' }}>
+          <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>{currency}</span>
+          {Math.round(safeDaily).toLocaleString()}
+        </div>
+        <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '4px' }}>free money ÷ days left</div>
+      </div>
       <div style={{ borderRadius: '14px', background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--hairline)', padding: '14px 16px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ fontSize: 'var(--t-micro)', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '2px' }}>Spent · MTD</div>
         <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '4px' }}>across all categories</div>
