@@ -92,7 +92,7 @@ export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }
       <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--hairline)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '3px' }}>
           <span style={{ fontSize: 'var(--t-micro)', letterSpacing: '.25em', color: 'var(--muted)', textTransform: 'uppercase' }}>M—01</span>
-          <span style={{ fontFamily: "'Noto Naskh Arabic', serif", fontSize: '25px', color: 'var(--gold-leaf)', direction: 'rtl', lineHeight: 1 }} aria-label="Mizan">ميزان</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '22px', color: 'var(--gold-leaf)', lineHeight: 1 }}>Mizān</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 'var(--t-mini)', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted)' }}>Student Budget</span>
