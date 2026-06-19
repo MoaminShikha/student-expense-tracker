@@ -1,4 +1,5 @@
 import type { CategoryBreakdownMap } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
 const CAT_COLORS: Record<string, string> = {
   food:          'hsl(18 88% 50%)',
@@ -10,6 +11,7 @@ const CAT_COLORS: Record<string, string> = {
 }
 
 export function CategoryBar({ data }: { data: CategoryBreakdownMap }) {
+  const currency = getCurrencySymbol()
   const entries = Object.entries(data)
     .map(([cat, v]) => ({ cat, amount: parseFloat(v.amount), pct: v.pct_of_total }))
     .sort((a, b) => b.amount - a.amount)
@@ -25,7 +27,7 @@ export function CategoryBar({ data }: { data: CategoryBreakdownMap }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
             <span style={{ fontSize: 'var(--t-xs)', textTransform: 'capitalize', color: 'var(--muted-fg)' }}>{cat}</span>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 'var(--t-base)', color: 'var(--fg)' }}>₪ {Math.round(amount).toLocaleString()}</span>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 'var(--t-base)', color: 'var(--fg)' }}>{currency} {Math.round(amount).toLocaleString()}</span>
               <span style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)' }}>{pct.toFixed(1)}%</span>
             </div>
           </div>

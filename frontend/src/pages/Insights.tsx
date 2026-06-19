@@ -1,10 +1,8 @@
 import { MainLayout } from '../components/layout/MainLayout'
 import type { Page } from '../components/layout/Sidebar'
-import { useBalance } from '../hooks/useBalance'
-import { useWeeklySummary } from '../hooks/useWeeklySummary'
 import { useFetch } from '../hooks/useFetch'
-import { getAllTransactions, getTransactionsByCategory } from '../services/api'
-import type { ActivityEntry, CategoryBreakdownMap } from '../types'
+import { getAllTransactions, getTransactionsByCategory, getBalance, getWeeklySummary } from '../services/api'
+import type { ActivityEntry, BalanceResponse, CategoryBreakdownMap, WeeklySummary } from '../types'
 import { WeeklyChart } from '../components/insights/WeeklyChart'
 import { CategoryBar } from '../components/insights/CategoryBar'
 import { NudgesCard } from '../components/insights/NudgesCard'
@@ -17,8 +15,8 @@ const card: React.CSSProperties = { background: 'var(--surface)', borderRadius: 
 const heading: React.CSSProperties = { fontFamily: "'Playfair Display', serif", fontSize: '15px', fontWeight: 700, color: 'var(--fg)', marginBottom: '14px' }
 
 export function Insights({ onNavigate }: InsightsProps) {
-  const { data: balance } = useBalance(0)
-  const { data: weekly } = useWeeklySummary(0)
+  const { data: balance } = useFetch<BalanceResponse | null>(getBalance, null, 0)
+  const { data: weekly } = useFetch<WeeklySummary[]>(getWeeklySummary, [], 0)
   const { data: entries } = useFetch<ActivityEntry[]>(getAllTransactions, [], 0)
   const { data: catData } = useFetch<CategoryBreakdownMap>(getTransactionsByCategory, {}, 0)
 

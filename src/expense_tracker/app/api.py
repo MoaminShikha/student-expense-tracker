@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import calendar
+import os as _os
 from datetime import date
 from decimal import Decimal, InvalidOperation
-from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException
@@ -14,7 +15,6 @@ from pydantic import BaseModel
 from .composition import build_services
 from ..domain.models import (
     FuzzyChargeStatus,
-    FuzzyEntryDirection,
     IncomeSourceTag,
     TransactionCategory,
 )
@@ -24,7 +24,6 @@ _DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
 app = FastAPI(title="Mizan Expense Tracker API")
 
-import os as _os
 _CORS_ORIGINS = _os.environ.get(
     "MIZAN_CORS_ORIGINS", "http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176"
 ).split(",")
@@ -36,9 +35,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@lru_cache(maxsize=None)
+_services = None
+
+
 def _get_services():
-    return build_services(_DATA_DIR)
+    global _services
+    if _services is None:
+        _services = build_services(_DATA_DIR)
+    return _services
 
 
 def _require_session():
@@ -160,7 +164,6 @@ def get_balance():
     upcoming_sorted = sorted(svc.charge_service.list_upcoming(session.session_id), key=lambda c: c.due_date)
     next_due = upcoming_sorted[0] if upcoming_sorted else None
 
-
     month_label = today.strftime("%B %Y")
 
     return {
@@ -260,7 +263,7 @@ def mark_charge_paid(charge_id: str):
 def get_recent_transactions():
     session = _require_session()
     svc = _get_services()
-    txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
+    txs = svc.balance_service.list_all_transactions(session.session_id)
     txs_sorted = sorted(txs, key=lambda t: t.date, reverse=True)[:10]
     return [
         {
@@ -278,7 +281,7 @@ def get_recent_transactions():
 def get_transactions_by_category():
     session = _require_session()
     svc = _get_services()
-    txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
+    txs = svc.balance_service.list_all_transactions(session.session_id)
 
     totals: dict[str, Decimal] = {}
     counts: dict[str, int] = {}
@@ -303,8 +306,8 @@ def get_transactions_by_category():
 def get_all_transactions():
     session = _require_session()
     svc = _get_services()
-    spend_txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
-    income_entries = svc.balance_service._income_repository.list_for_session(session.session_id)
+    spend_txs = svc.balance_service.list_all_transactions(session.session_id)
+    income_entries = svc.balance_service.list_all_income(session.session_id)
     rows = [
         {"entry_id": str(t.transaction_id), "type": "spend", "amount": str(t.amount),
          "description": t.description, "category": t.category.value if t.category else None, "date": t.date.isoformat()}
@@ -324,11 +327,11 @@ def get_streak():
     session = _require_session()
     svc = _get_services()
     today = date.today()
-    txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
-    incomes = svc.balance_service._income_repository.list_for_session(session.session_id)
+    txs = svc.balance_service.list_all_transactions(session.session_id)
+    incomes = svc.balance_service.list_all_income(session.session_id)
     active_days = {t.date for t in txs} | {i.date for i in incomes}
     streak = 0
-    for offset in range(14):
+    for offset in range(365):
         if (today - timedelta(days=offset)) in active_days:
             streak += 1
         else:
@@ -343,7 +346,7 @@ def get_weekly_summary(weeks: int = 8):
     svc = _get_services()
     today = date.today()
     start_of_week = today - timedelta(days=today.weekday())
-    txs = svc.balance_service._transaction_repository.list_for_session(session.session_id)
+    txs = svc.balance_service.list_all_transactions(session.session_id)
     result = []
     for i in range(weeks - 1, -1, -1):
         week_start = start_of_week - timedelta(weeks=i)
@@ -354,19 +357,17 @@ def get_weekly_summary(weeks: int = 8):
 
 
 @app.delete("/api/entry/{entry_id}")
-def delete_entry(entry_id: str, entry_type: str):
-    """Delete a spend or income entry by ID. entry_type must be 'spend' or 'income'."""
+def delete_entry(entry_id: str, entry_type: Literal["spend", "income"]):
+    """Delete a spend or income entry by ID."""
     svc = _get_services()
     try:
         uid = UUID(entry_id)
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid entry_id.")
     if entry_type == "spend":
-        removed = svc.balance_service._transaction_repository.delete(uid)
-    elif entry_type == "income":
-        removed = svc.balance_service._income_repository.delete(uid)
+        removed = svc.balance_service.delete_spend(uid)
     else:
-        raise HTTPException(status_code=422, detail="entry_type must be 'spend' or 'income'.")
+        removed = svc.balance_service.delete_income(uid)
     if not removed:
         raise HTTPException(status_code=404, detail="Entry not found.")
     return {"deleted": entry_id}
@@ -440,7 +441,7 @@ def add_income(body: IncomeBody):
 def get_pending_fuzzy_charges():
     session = _require_session()
     svc = _get_services()
-    pending = svc.fuzzy_charge_service._fuzzy_charge_repository.list_pending(session.session_id)
+    pending = svc.fuzzy_charge_service.list_pending(session.session_id)
     active = [
         f for f in pending
         if f.status in {FuzzyChargeStatus.PENDING, FuzzyChargeStatus.OVERDUE}

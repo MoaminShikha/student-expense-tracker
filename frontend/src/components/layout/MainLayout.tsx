@@ -64,7 +64,7 @@ export function MainLayout({ balance, onSync, syncing, activePage, onNavigate, c
           <span>Insights</span>
         </button>
 
-        <button type="button" className="bottom-nav-item">
+        <button type="button" className={`bottom-nav-item${activePage === 'Settings' ? ' bottom-nav-item--active' : ''}`} onClick={() => onNavigate('Settings')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>

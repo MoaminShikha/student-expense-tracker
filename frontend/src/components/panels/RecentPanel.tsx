@@ -1,4 +1,5 @@
-import type { Transaction } from '../../types'
+import type { ActivityEntry } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
 const CAT_COLORS: Record<string, string> = {
   food: 'var(--cat-food)',
@@ -8,7 +9,8 @@ const CAT_COLORS: Record<string, string> = {
 }
 
 interface RecentPanelProps {
-  transactions: Transaction[]
+  entries: ActivityEntry[]
+  onViewAll?: () => void
 }
 
 function formatDate(dateStr: string): string {
@@ -22,7 +24,8 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-export function RecentPanel({ transactions }: RecentPanelProps) {
+export function RecentPanel({ entries, onViewAll }: RecentPanelProps) {
+  const currency = getCurrencySymbol()
   return (
     <article style={{ borderRadius: '14px', background: 'var(--surface)', boxShadow: 'inset 0 0 0 1px var(--hairline)', padding: '16px 18px' }} aria-labelledby="panel-recent">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '2px' }}>
@@ -31,35 +34,36 @@ export function RecentPanel({ transactions }: RecentPanelProps) {
             <h2 id="panel-recent" style={{ fontSize: 'var(--t-sm)', color: 'var(--fg)', fontWeight: 500 }}>Recent</h2>
             <div aria-hidden="true" style={{ width: '4px', height: '4px', background: 'var(--gold)', flexShrink: 0, marginBottom: '1px' }} />
           </div>
-          <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '11px' }}>Last {transactions.length} entries</div>
+          <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '11px' }}>Last {entries.length} entries</div>
         </div>
         <button
           type="button"
+          onClick={onViewAll}
           style={{ fontSize: 'var(--t-sm)', color: 'var(--gold-leaf)', cursor: 'pointer', background: 'none', border: 'none', fontFamily: "'DM Mono', monospace", padding: '2px 4px' }}
         >
           All →
         </button>
       </div>
 
-      {transactions.length === 0 && (
+      {entries.length === 0 && (
         <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', padding: '8px 0' }}>No transactions yet.</div>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {transactions.map((tx, i) => {
+        {entries.map((tx, i) => {
           const catKey = (tx.category ?? '').toLowerCase()
           const catColor = CAT_COLORS[catKey] ?? 'var(--muted)'
           const amt = parseFloat(tx.amount)
 
           return (
             <div
-              key={tx.transaction_id}
+              key={tx.entry_id}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
                 padding: `${i === 0 ? '0' : '8px'} 0 8px`,
-                borderBottom: i < transactions.length - 1 ? '1px solid var(--hairline)' : 'none',
+                borderBottom: i < entries.length - 1 ? '1px solid var(--hairline)' : 'none',
               }}
             >
               <div
@@ -91,7 +95,7 @@ export function RecentPanel({ transactions }: RecentPanelProps) {
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, fontFeatureSettings: "'lnum' 1,'tnum' 1", color: 'var(--fg)' }}>
-                  <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
+                  <span style={{ fontSize: 'var(--t-xs)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>{currency}</span>
                   {Math.round(amt).toLocaleString()}
                 </div>
                 <div style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)', marginTop: '1px' }}>

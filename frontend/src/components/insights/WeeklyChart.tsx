@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { WeeklySummary } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
-// ponytail: plain SVG area chart instead of recharts — no dep needed for 8 data points
 export function WeeklyChart({ data }: { data: WeeklySummary[] }) {
+  const currency = getCurrencySymbol()
   const [weeks, setWeeks] = useState<4 | 8>(8)
   const slice = data.slice(-weeks)
 
@@ -38,7 +39,7 @@ export function WeeklyChart({ data }: { data: WeeklySummary[] }) {
         {yTicks.map(t => (
           <g key={t.val}>
             <line x1={PAD.l} y1={t.y} x2={W - PAD.r} y2={t.y} stroke="hsl(36 16% 90%)" strokeWidth="1" />
-            <text x={PAD.l - 6} y={t.y + 4} textAnchor="end" fontSize="9" fill="hsl(222 12% 55%)" fontFamily="DM Mono, monospace">₪{t.val}</text>
+            <text x={PAD.l - 6} y={t.y + 4} textAnchor="end" fontSize="9" fill="hsl(222 12% 55%)" fontFamily="DM Mono, monospace">{currency}{t.val}</text>
           </g>
         ))}
         {/* area fill */}

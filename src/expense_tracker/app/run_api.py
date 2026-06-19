@@ -6,7 +6,7 @@ import uvicorn
 def main() -> None:
     uvicorn.run(
         "expense_tracker.app.api:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=8000,
         reload=True,
     )

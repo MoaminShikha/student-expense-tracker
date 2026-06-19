@@ -1,7 +1,6 @@
 import type {
   BalanceResponse,
   CommittedCharge,
-  Transaction,
   CategoryBreakdownMap,
   AddSpendInput,
   AddIncomeInput,
@@ -25,14 +24,11 @@ export const getBalance = () =>
 export const getChargesUpcoming = () =>
   fetchJSON<CommittedCharge[]>(`${BASE}/charges/upcoming`)
 
-export const getTransactions = () =>
-  fetchJSON<Transaction[]>(`${BASE}/transactions/recent`)
-
 export const getTransactionsByCategory = () =>
   fetchJSON<CategoryBreakdownMap>(`${BASE}/transactions/by-category`)
 
 export const postSpend = (data: AddSpendInput) =>
-  fetchJSON<Transaction>(`${BASE}/spend`, {
+  fetchJSON<unknown>(`${BASE}/spend`, {
     method: 'POST',
     body: JSON.stringify(data),
   })

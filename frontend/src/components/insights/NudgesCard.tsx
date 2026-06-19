@@ -1,4 +1,5 @@
 import type { BalanceResponse, ActivityEntry, WeeklySummary } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
 interface NudgesCardProps {
   balance: BalanceResponse
@@ -11,7 +12,7 @@ const COLOR: Record<Level, string> = { green: 'var(--green)', amber: 'var(--ambe
 const BG: Record<Level, string> = { green: 'var(--green-bg)', amber: 'var(--amber-bg)', red: 'var(--red-bg)' }
 const ICON: Record<Level, string> = { green: '✓', amber: '↑', red: '⚠' }
 
-function computeNudges(balance: BalanceResponse, entries: ActivityEntry[], weekly: WeeklySummary[]) {
+function computeNudges(balance: BalanceResponse, entries: ActivityEntry[], weekly: WeeklySummary[], currency: string) {
   const nudges: { level: Level; text: string }[] = []
   const spent = parseFloat(balance.monthly_spent)
   const free = parseFloat(balance.free_money)
@@ -20,7 +21,7 @@ function computeNudges(balance: BalanceResponse, entries: ActivityEntry[], weekl
   const projected = free - dailyBurn * daysLeft
 
   if (balance.balance_state === 'crisis') nudges.push({ level: 'red', text: 'Budget exceeded — free money is below zero.' })
-  if (balance.balance_state !== 'crisis' && projected < 0) nudges.push({ level: 'amber', text: `At your current burn rate you'll exceed budget by ₪ ${Math.abs(Math.round(projected)).toLocaleString()} this month.` })
+  if (balance.balance_state !== 'crisis' && projected < 0) nudges.push({ level: 'amber', text: `At your current burn rate you'll exceed budget by ${currency} ${Math.abs(Math.round(projected)).toLocaleString()} this month.` })
   if (weekly.length >= 2) {
     const cur = weekly[weekly.length - 1].total_spend
     const prev = weekly[weekly.length - 2].total_spend
@@ -33,13 +34,13 @@ function computeNudges(balance: BalanceResponse, entries: ActivityEntry[], weekl
   }
   const dom = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0]
   if (dom && spent > 0 && dom[1] / spent > 0.4) nudges.push({ level: 'amber', text: `${dom[0].charAt(0).toUpperCase() + dom[0].slice(1)} is ${Math.round((dom[1] / spent) * 100)}% of total spending.` })
-  if (!nudges.length && projected > 0) nudges.push({ level: 'green', text: `Projected to finish the month with ₪ ${Math.round(projected).toLocaleString()} remaining.` })
+  if (!nudges.length && projected > 0) nudges.push({ level: 'green', text: `Projected to finish the month with ${currency} ${Math.round(projected).toLocaleString()} remaining.` })
 
   return nudges.slice(0, 3)
 }
 
 export function NudgesCard({ balance, entries, weeklySummary }: NudgesCardProps) {
-  const nudges = computeNudges(balance, entries, weeklySummary)
+  const nudges = computeNudges(balance, entries, weeklySummary, getCurrencySymbol())
   if (!nudges.length) return <div style={{ color: 'var(--muted)', fontSize: 'var(--t-sm)', textAlign: 'center', padding: '20px 0' }}>Add more transactions to get insights.</div>
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

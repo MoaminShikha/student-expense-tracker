@@ -7,13 +7,36 @@ interface TopbarProps {
   syncing: boolean
 }
 
+const STATE_ICONS = {
+  green: (
+    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2 6.5L5 9.5L10 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  amber: (
+    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M6 2L11 10H1L6 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M6 5.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6" cy="9" r="0.6" fill="currentColor"/>
+    </svg>
+  ),
+  red: (
+    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.6"/>
+      <path d="M6 3.5V6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6" cy="8.5" r="0.6" fill="currentColor"/>
+    </svg>
+  ),
+}
+
 export function Topbar({ balance, onSync, syncing }: TopbarProps) {
-  const [period, setPeriod] = React.useState<'W' | 'M' | 'Y'>('M')
+  const [lastSync, setLastSync] = React.useState(() =>
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  )
 
   const stateRaw = balance?.balance_state ?? 'normal'
   const state: 'green' | 'amber' | 'red' =
     stateRaw === 'crisis' ? 'red' : stateRaw === 'caution' ? 'amber' : 'green'
-  const lastSync = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
   const pillLabel = state === 'green' ? 'On track' : state === 'amber' ? 'Caution' : 'Over budget'
   const pillColors = {
@@ -25,6 +48,11 @@ export function Topbar({ balance, onSync, syncing }: TopbarProps) {
 
   const today = new Date()
   const dayName = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+  function handleSync() {
+    onSync()
+    setLastSync(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+  }
 
   return (
     <header
@@ -51,35 +79,9 @@ export function Topbar({ balance, onSync, syncing }: TopbarProps) {
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
         <div
-          role="group"
-          aria-label="Period"
-          style={{ display: 'flex', border: '1px solid var(--hairline)', borderRadius: '999px', overflow: 'hidden' }}
-        >
-          {(['W', 'M', 'Y'] as const).map((p) => (
-            <button
-              key={p}
-              type="button"
-              aria-pressed={period === p}
-              onClick={() => setPeriod(p)}
-              style={{
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 'var(--t-xs)',
-                padding: '3px 10px',
-                cursor: 'pointer',
-                color: period === p ? 'var(--fg)' : 'var(--muted-fg)',
-                background: period === p ? 'var(--paper-warm)' : 'transparent',
-                border: 'none',
-                fontWeight: period === p ? 500 : 400,
-              }}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
-
-        <div
           role="status"
           aria-live="polite"
+          aria-label={`Budget status: ${pillLabel}`}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -90,15 +92,9 @@ export function Topbar({ balance, onSync, syncing }: TopbarProps) {
             background: pc.bg,
           }}
         >
-          <div
-            aria-hidden="true"
-            style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              background: pc.color,
-            }}
-          />
+          <span style={{ color: pc.color, display: 'flex', alignItems: 'center' }}>
+            {STATE_ICONS[state]}
+          </span>
           <span style={{ fontSize: 'var(--t-xs)', fontWeight: 500, letterSpacing: '.07em', color: pc.color }}>
             {pillLabel}
           </span>
@@ -106,9 +102,9 @@ export function Topbar({ balance, onSync, syncing }: TopbarProps) {
 
         <button
           type="button"
-          onClick={onSync}
+          onClick={handleSync}
           disabled={syncing}
-          title="Re-sync now"
+          aria-label={syncing ? 'Syncing…' : `Re-sync data, last synced ${lastSync}`}
           style={{
             display: 'flex',
             alignItems: 'center',

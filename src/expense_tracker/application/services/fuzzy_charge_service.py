@@ -135,6 +135,10 @@ class FuzzyChargeService:
                           income_entry.income_id)
         return updated_entry
 
+    def list_pending(self, session_id: UUID) -> list[FuzzyCharge]:
+        """Return all pending fuzzy charges for a session."""
+        return self._fuzzy_charge_repository.list_pending(session_id)
+
     def list_pending_for_month(self, session_id: UUID, year: int, month: int) -> list[FuzzyCharge]:
         """
         List pending fuzzy entries whose expected_date falls in the given month.

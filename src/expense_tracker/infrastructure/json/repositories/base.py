@@ -12,17 +12,22 @@ on-disk mtime.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import Generic, Protocol, TypeVar
 
 from ..safe_file_io import load_json_safely, save_json_safely
 
 T = TypeVar("T")
 
 
+class _Mapper(Protocol[T]):
+    def from_dict(self, record: dict) -> T: ...
+    def to_dict(self, entity: T) -> dict: ...
+
+
 class JsonStore(Generic[T]):
     """Base adapter for a list of entities persisted to one JSON file."""
 
-    def __init__(self, storage_path: Path | str, mapper: Any) -> None:
+    def __init__(self, storage_path: Path | str, mapper: _Mapper[T]) -> None:
         """
         :param storage_path: Path to the JSON storage file.
         :param mapper: Mapper translating entities to and from records.

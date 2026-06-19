@@ -4,6 +4,7 @@ import type { Page } from '../components/layout/Sidebar'
 import type { ActivityEntry } from '../types'
 import { useFetch } from '../hooks/useFetch'
 import { getAllTransactions, deleteEntry } from '../services/api'
+import { getCurrencySymbol } from './Settings'
 
 interface ActivityProps {
   onNavigate: (page: Page) => void
@@ -43,6 +44,8 @@ export function Activity({ onNavigate }: ActivityProps) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const currency = getCurrencySymbol()
 
   const filtered = useMemo(() =>
     entries
@@ -54,8 +57,8 @@ export function Activity({ onNavigate }: ActivityProps) {
   const balanceMap = useMemo(() => computeRunningBalance(entries), [entries])
 
   async function handleDelete(entry: ActivityEntry) {
-    if (!confirm(`Delete "${entry.description}"?`)) return
     setDeleting(entry.entry_id)
+    setConfirmId(null)
     try {
       await deleteEntry(entry.entry_id, entry.type as 'spend' | 'income')
       setRefreshKey(k => k + 1)
@@ -111,6 +114,7 @@ export function Activity({ onNavigate }: ActivityProps) {
                 const balAfter = balanceMap.get(entry.entry_id) ?? 0
                 const isSpend = entry.type === 'spend'
                 const isDeleting = deleting === entry.entry_id
+                const isConfirming = confirmId === entry.entry_id
                 return (
                   <tr key={entry.entry_id} style={{ borderBottom: idx < filtered.length - 1 ? '1px solid var(--hairline)' : 'none', fontSize: 'var(--t-sm)', opacity: isDeleting ? 0.4 : 1 }}>
                     <td style={{ padding: '10px 16px', color: 'var(--muted)', whiteSpace: 'nowrap' }}>
@@ -124,23 +128,42 @@ export function Activity({ onNavigate }: ActivityProps) {
                     <td style={{ padding: '10px 16px', color: 'var(--fg)' }}>{entry.description}</td>
                     <td style={{ padding: '10px 16px', color: 'var(--muted)', fontSize: 'var(--t-xs)' }}>{entry.category ?? '—'}</td>
                     <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: "'Playfair Display', serif", fontWeight: 700, color: isSpend ? 'var(--red)' : 'var(--green)', whiteSpace: 'nowrap' }}>
-                      {isSpend ? '−' : '+'}₪ {parseFloat(entry.amount).toLocaleString()}
+                      {isSpend ? '−' : '+'}{currency} {parseFloat(entry.amount).toLocaleString()}
                     </td>
                     <td style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--muted)', fontFamily: "'DM Mono', monospace", fontSize: 'var(--t-xs)', whiteSpace: 'nowrap' }}>
-                      ₪ {Math.round(balAfter).toLocaleString()}
+                      {currency} {Math.round(balAfter).toLocaleString()}
                     </td>
-                    <td style={{ padding: '10px 8px', textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(entry)}
-                        disabled={isDeleting}
-                        aria-label={`Delete ${entry.description}`}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '13px', padding: '2px 6px', borderRadius: '4px', lineHeight: 1 }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--red)' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
-                      >
-                        ×
-                      </button>
+                    <td style={{ padding: '10px 8px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {isConfirming ? (
+                        <span style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(entry)}
+                            style={{ background: 'var(--red)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: 'var(--t-mini)', cursor: 'pointer' }}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmId(null)}
+                            style={{ background: 'none', border: '1px solid var(--hairline-s)', borderRadius: '4px', padding: '2px 8px', fontSize: 'var(--t-mini)', cursor: 'pointer', color: 'var(--muted-fg)' }}
+                          >
+                            Cancel
+                          </button>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmId(entry.entry_id)}
+                          disabled={isDeleting}
+                          aria-label={`Delete ${entry.description}`}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '13px', padding: '2px 6px', borderRadius: '4px', lineHeight: 1 }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--red)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
+                        >
+                          ×
+                        </button>
+                      )}
                     </td>
                   </tr>
                 )

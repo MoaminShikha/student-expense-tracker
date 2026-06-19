@@ -1,6 +1,7 @@
 import React from 'react'
 import { postIncome } from '../../services/api'
 import { INCOME_SOURCE_TAGS } from '../../types'
+import { MODAL_STYLE, PANEL_STYLE, INPUT_STYLE } from './modal-styles'
 
 interface AddIncomeModalProps {
   open: boolean
@@ -8,43 +9,10 @@ interface AddIncomeModalProps {
   onSuccess: () => void
 }
 
-const MODAL_STYLE: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  zIndex: 100,
-  background: 'hsl(240 28% 12% / 0.4)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}
-
-const PANEL_STYLE: React.CSSProperties = {
-  background: 'var(--surface)',
-  borderRadius: '16px',
-  padding: '24px',
-  width: '360px',
-  maxWidth: '95vw',
-  boxShadow: '0 20px 60px hsl(240 28% 12% / 0.2)',
-  border: '1px solid var(--hairline)',
-}
-
-const INPUT_STYLE: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  border: '1px solid var(--hairline)',
-  borderRadius: '8px',
-  background: 'var(--bg)',
-  color: 'var(--fg)',
-  fontFamily: "'DM Mono', monospace",
-  fontSize: 'var(--t-sm)',
-  marginTop: '4px',
-}
-
 export function AddIncomeModal({ open, onClose, onSuccess }: AddIncomeModalProps) {
-  const today = new Date().toISOString().split('T')[0]
   const [amount, setAmount] = React.useState('')
   const [sourceTag, setSourceTag] = React.useState<typeof INCOME_SOURCE_TAGS[number]>(INCOME_SOURCE_TAGS[0])
-  const [date, setDate] = React.useState(today)
+  const [date, setDate] = React.useState(() => new Date().toISOString().split('T')[0])
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -62,7 +30,7 @@ export function AddIncomeModal({ open, onClose, onSuccess }: AddIncomeModalProps
       onClose()
       setAmount('')
       setSourceTag(INCOME_SOURCE_TAGS[0])
-      setDate(today)
+      setDate(new Date().toISOString().split('T')[0])
     } catch (e) {
       console.error('AddIncome:', e)
       setError('Failed to add income. Is the backend running?')

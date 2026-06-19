@@ -66,3 +66,19 @@ class BalanceService:
         self._logger.info("Built balance snapshot with free money %s.", snapshot.free_money)
         return snapshot
 
+    def list_all_transactions(self, session_id: UUID) -> list:
+        """Return all spend transactions for a session."""
+        return self._transaction_repository.list_for_session(session_id)
+
+    def list_all_income(self, session_id: UUID) -> list:
+        """Return all income entries for a session."""
+        return self._income_repository.list_for_session(session_id)
+
+    def delete_spend(self, transaction_id: UUID) -> bool:
+        """Delete a spend transaction by ID. Returns True if found and removed."""
+        return self._transaction_repository.delete(transaction_id)
+
+    def delete_income(self, income_id: UUID) -> bool:
+        """Delete an income entry by ID. Returns True if found and removed."""
+        return self._income_repository.delete(income_id)
+

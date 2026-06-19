@@ -1,10 +1,12 @@
 import type { BalanceResponse } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
 interface StatColumnProps {
   balance: BalanceResponse
 }
 
 export function StatColumn({ balance }: StatColumnProps) {
+  const currency = getCurrencySymbol()
   const monthlySpent = parseFloat(balance.monthly_spent)
   const monthlyBudget = parseFloat(balance.monthly_budget)
   const monthlyLeft = parseFloat(balance.monthly_left)
@@ -21,7 +23,7 @@ export function StatColumn({ balance }: StatColumnProps) {
         <div style={{ fontSize: 'var(--t-micro)', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '2px' }}>Spent · MTD</div>
         <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginBottom: '4px' }}>across all categories</div>
         <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '28px', color: 'var(--gold-leaf)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.01em' }}>
-          <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
+          <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>{currency}</span>
           {Math.round(monthlySpent).toLocaleString()}
         </div>
         <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '4px' }}>{spentPctOfLimit}% of limit</div>
@@ -34,7 +36,7 @@ export function StatColumn({ balance }: StatColumnProps) {
         </div>
         {nextDue && (
           <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '28px', color: 'var(--red)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.01em' }}>
-            <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
+            <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>{currency}</span>
             {Math.round(parseFloat(nextDue.amount)).toLocaleString()}
           </div>
         )}
@@ -51,7 +53,7 @@ export function StatColumn({ balance }: StatColumnProps) {
           <span style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)' }}>{balance.month_label}</span>
         </div>
         <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '26px', color: 'var(--green)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.01em' }}>
-          <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>₪</span>
+          <span style={{ fontSize: 'var(--t-base)', fontStyle: 'italic', opacity: 0.4, marginRight: '1px' }}>{currency}</span>
           {Math.round(monthlyLeft).toLocaleString()}
         </div>
         <div style={{ fontSize: 'var(--t-sm)', color: 'var(--muted)', marginTop: '4px', lineHeight: 1.4 }}>
@@ -63,8 +65,8 @@ export function StatColumn({ balance }: StatColumnProps) {
             <div style={{ flex: Math.max(monthlyLeft, 0) || 1, borderRadius: '2px', background: 'hsl(36 14% 76% / 0.5)', alignSelf: 'stretch' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
-            <span style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)' }}>₪{Math.round(monthlySpent).toLocaleString()} spent</span>
-            <span style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)' }}>₪{Math.round(monthlyLeft).toLocaleString()} left</span>
+            <span style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)' }}>{currency}{Math.round(monthlySpent).toLocaleString()} spent</span>
+            <span style={{ fontSize: 'var(--t-mini)', color: 'var(--muted)' }}>{currency}{Math.round(monthlyLeft).toLocaleString()} left</span>
           </div>
         </div>
       </div>

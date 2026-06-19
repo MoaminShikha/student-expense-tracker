@@ -1,5 +1,6 @@
 import React from 'react'
 import { postCharge } from '../../services/api'
+import { MODAL_STYLE, PANEL_STYLE, INPUT_STYLE } from './modal-styles'
 
 interface AddChargeModalProps {
   open: boolean
@@ -7,45 +8,12 @@ interface AddChargeModalProps {
   onSuccess: () => void
 }
 
-const MODAL_STYLE: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  zIndex: 100,
-  background: 'hsl(240 28% 12% / 0.4)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}
-
-const PANEL_STYLE: React.CSSProperties = {
-  background: 'var(--surface)',
-  borderRadius: '16px',
-  padding: '24px',
-  width: '380px',
-  maxWidth: '95vw',
-  boxShadow: '0 20px 60px hsl(240 28% 12% / 0.2)',
-  border: '1px solid var(--hairline)',
-  maxHeight: '90vh',
-  overflowY: 'auto',
-}
-
-const INPUT_STYLE: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  border: '1px solid var(--hairline)',
-  borderRadius: '8px',
-  background: 'var(--bg)',
-  color: 'var(--fg)',
-  fontFamily: "'DM Mono', monospace",
-  fontSize: 'var(--t-sm)',
-  marginTop: '4px',
-}
+const CHARGE_PANEL_STYLE = { ...PANEL_STYLE, width: '380px', maxHeight: '90vh', overflowY: 'auto' as const }
 
 export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps) {
-  const today = new Date().toISOString().split('T')[0]
   const [name, setName] = React.useState('')
   const [amount, setAmount] = React.useState('')
-  const [dueDate, setDueDate] = React.useState(today)
+  const [dueDate, setDueDate] = React.useState(() => new Date().toISOString().split('T')[0])
   const [recurring, setRecurring] = React.useState(false)
   const [dayOfMonth, setDayOfMonth] = React.useState('')
   const [submitting, setSubmitting] = React.useState(false)
@@ -73,7 +41,7 @@ export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps
       onClose()
       setName('')
       setAmount('')
-      setDueDate(today)
+      setDueDate(new Date().toISOString().split('T')[0])
       setRecurring(false)
       setDayOfMonth('')
     } catch (e) {
@@ -86,7 +54,7 @@ export function AddChargeModal({ open, onClose, onSuccess }: AddChargeModalProps
 
   return (
     <div style={MODAL_STYLE} onClick={onClose}>
-      <div style={PANEL_STYLE} onClick={(e) => e.stopPropagation()}>
+      <div style={CHARGE_PANEL_STYLE} onClick={(e) => e.stopPropagation()}>
         <h2 style={{ fontSize: 'var(--t-lg)', fontFamily: "'Playfair Display', serif", color: 'var(--fg)', marginBottom: '16px' }}>Add Charge</h2>
         <form onSubmit={(e) => void handleSubmit(e)}>
           <label style={{ fontSize: 'var(--t-sm)', color: 'var(--muted-fg)' }}>

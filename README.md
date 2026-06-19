@@ -64,7 +64,7 @@ src/expense_tracker/
 
 frontend/src/
 ├── components/      # UI components (dashboard, forms, layout, insights)
-├── hooks/           # Data-fetching hooks (useFetch, useBalance, …)
+├── hooks/           # Data-fetching hooks (useFetch)
 ├── pages/           # Dashboard, Activity, Insights, Settings
 ├── services/        # API client (api.ts)
 └── types/           # Shared TypeScript interfaces
@@ -102,4 +102,4 @@ pytest
 
 ## License
 
-MIT
+PolyForm Noncommercial 1.0.0 — free to use and modify for noncommercial purposes; selling or commercial exploitation is prohibited. See [LICENSE](LICENSE).

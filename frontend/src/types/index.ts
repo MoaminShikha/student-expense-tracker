@@ -33,14 +33,6 @@ export interface CommittedCharge {
   recurring_rule_id: string | null
 }
 
-export interface Transaction {
-  transaction_id: string
-  amount: string
-  description: string
-  category: string | null
-  date: string
-}
-
 // by-category endpoint returns a dict: { category: { amount, count, pct_of_total } }
 export type CategoryBreakdownMap = Record<
   string,
@@ -53,15 +45,6 @@ export interface CategoryBreakdown {
   amount: number
   count: number
   pct: number
-}
-
-export interface FuzzyCharge {
-  fuzzy_id: string
-  name: string
-  direction: string
-  status: string
-  expected_date: string | null
-  estimated_amount: string | null
 }
 
 // POST bodies — amounts are strings per API contract

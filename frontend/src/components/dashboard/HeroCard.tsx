@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Timeline } from './Timeline'
 import type { BalanceResponse, ActivityEntry, CommittedCharge } from '../../types'
+import { getCurrencySymbol } from '../../pages/Settings'
 
 interface HeroCardProps {
   balance: BalanceResponse
@@ -30,7 +30,6 @@ function useCountUp(target: number, duration = 800) {
     function tick(now: number) {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3)
       setValue(Math.round(target * eased))
       if (progress < 1) {
@@ -53,17 +52,13 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
 
   const freeMoney = parseFloat(balance.free_money)
   const monthlySpent = parseFloat(balance.monthly_spent)
-  // ponytail: monthlyBudget kept for future legend use
+  const currency = getCurrencySymbol()
 
   const displayValue = useCountUp(Math.round(freeMoney))
 
   return (
-    <motion.article
+    <article
       aria-labelledby="hero-heading"
-      animate={{
-        borderColor: sc.outline,
-      }}
-      transition={{ duration: 0.5 }}
       style={{
         borderRadius: '14px',
         padding: '18px 22px 16px',
@@ -92,21 +87,22 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
         </div>
         <div>
           <span style={{ fontSize: 'var(--t-micro)', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--muted)', display: 'block', textAlign: 'right' }}>Period</span>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, color: 'var(--fg)', display: 'block', textAlign: 'right' }}>
+          <span
+            aria-label={`Day ${balance.day_of_month} of ${balance.days_in_month}`}
+            style={{ fontFamily: "'Playfair Display', serif", fontSize: 'var(--t-md)', fontWeight: 700, color: 'var(--fg)', display: 'block', textAlign: 'right' }}
+          >
             {balance.day_of_month} / {balance.days_in_month}
           </span>
         </div>
       </div>
 
       <div aria-live="polite" aria-atomic="true" style={{ display: 'flex', alignItems: 'baseline', gap: '2px', lineHeight: 1 }}>
-        <span aria-hidden="true" style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '22px', color: 'var(--fg)', opacity: 0.38 }}>₪</span>
-        <AnimatePresence mode="wait">
-          <span
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: '52px', color: 'var(--fg)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.03em' }}
-          >
-            {displayValue.toLocaleString()}
-          </span>
-        </AnimatePresence>
+        <span aria-hidden="true" style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '22px', color: 'var(--fg)', opacity: 0.38 }}>{currency}</span>
+        <span
+          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: '52px', color: 'var(--fg)', fontFeatureSettings: "'lnum' 1,'tnum' 1", letterSpacing: '-.03em' }}
+        >
+          {displayValue.toLocaleString()}
+        </span>
         <span className="visually-hidden">shekels</span>
       </div>
 
@@ -133,9 +129,9 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
       {daysLeft > 0 && (
         <div style={{ display: 'flex', gap: '20px', marginBottom: '12px', flexWrap: 'wrap' }}>
           {[
-            { label: 'Daily burn', value: `₪ ${Math.round(monthlySpent / Math.max(balance.day_of_month, 1)).toLocaleString()}` },
-            { label: 'Allow/day',  value: `₪ ${Math.round(freeMoney / daysLeft).toLocaleString()}` },
-            { label: 'Proj. end',  value: `₪ ${Math.round(freeMoney - (monthlySpent / Math.max(balance.day_of_month, 1)) * daysLeft).toLocaleString()}` },
+            { label: 'Daily burn', value: `${currency} ${Math.round(monthlySpent / Math.max(balance.day_of_month, 1)).toLocaleString()}` },
+            { label: 'Allow/day',  value: `${currency} ${Math.round(freeMoney / daysLeft).toLocaleString()}` },
+            { label: 'Proj. end',  value: `${currency} ${Math.round(freeMoney - (monthlySpent / Math.max(balance.day_of_month, 1)) * daysLeft).toLocaleString()}` },
           ].map(({ label, value }) => (
             <div key={label}>
               <div style={{ fontSize: 'var(--t-micro)', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '1px' }}>{label}</div>
@@ -156,7 +152,6 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
         periodStart={`1 ${balance.month_label.split(' ')[0]}`}
         periodEnd={`${balance.days_in_month} ${balance.month_label.split(' ')[0]}`}
         events={[
-          // ponytail: filter to current month before mapping
           ...events
             .filter(e => {
               const [y, m] = e.date.split('-')
@@ -187,6 +182,6 @@ export function HeroCard({ balance, events = [], charges = [] }: HeroCardProps) 
             })),
         ]}
       />
-    </motion.article>
+    </article>
   )
 }

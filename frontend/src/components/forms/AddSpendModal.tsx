@@ -1,5 +1,6 @@
 import React from 'react'
 import { postSpend } from '../../services/api'
+import { MODAL_STYLE, PANEL_STYLE, INPUT_STYLE } from './modal-styles'
 
 interface AddSpendModalProps {
   open: boolean
@@ -9,44 +10,11 @@ interface AddSpendModalProps {
 
 const CATEGORIES = ['food', 'education', 'transport', 'entertainment', 'other']
 
-const MODAL_STYLE: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  zIndex: 100,
-  background: 'hsl(240 28% 12% / 0.4)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}
-
-const PANEL_STYLE: React.CSSProperties = {
-  background: 'var(--surface)',
-  borderRadius: '16px',
-  padding: '24px',
-  width: '360px',
-  maxWidth: '95vw',
-  boxShadow: '0 20px 60px hsl(240 28% 12% / 0.2)',
-  border: '1px solid var(--hairline)',
-}
-
-const INPUT_STYLE: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  border: '1px solid var(--hairline)',
-  borderRadius: '8px',
-  background: 'var(--bg)',
-  color: 'var(--fg)',
-  fontFamily: "'DM Mono', monospace",
-  fontSize: 'var(--t-sm)',
-  marginTop: '4px',
-}
-
 export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) {
-  const today = new Date().toISOString().split('T')[0]
   const [amount, setAmount] = React.useState('')
   const [description, setDescription] = React.useState('')
   const [category, setCategory] = React.useState(CATEGORIES[0])
-  const [date, setDate] = React.useState(today)
+  const [date, setDate] = React.useState(() => new Date().toISOString().split('T')[0])
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -66,7 +34,7 @@ export function AddSpendModal({ open, onClose, onSuccess }: AddSpendModalProps) 
       setAmount('')
       setDescription('')
       setCategory(CATEGORIES[0])
-      setDate(today)
+      setDate(new Date().toISOString().split('T')[0])
     } catch (e) {
       console.error('AddSpend:', e)
       setError('Failed to add spend. Is the backend running?')

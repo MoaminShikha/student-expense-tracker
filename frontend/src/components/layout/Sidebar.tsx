@@ -58,8 +58,6 @@ const NAV_ITEMS = [
   },
 ]
 
-const NAVIGABLE: Page[] = ['Dashboard', 'Activity', 'Insights', 'Settings']
-
 export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }: SidebarProps) {
   const totalSegs = 14
   const onSegs = Math.min(streakDays, totalSegs)
@@ -110,22 +108,21 @@ export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }
             </div>
             {items.map(({ label, icon }) => {
               const isActive = activePage === label
-              const isNavigable = NAVIGABLE.includes(label)
               return (
                 <button
                   key={label}
                   type="button"
                   aria-current={isActive ? 'page' : undefined}
-                  onClick={() => isNavigable && onNavigate?.(label)}
+                  onClick={() => onNavigate?.(label)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
-                    height: '33px',
+                    height: '44px',
                     padding: '0 12px 0 18px',
                     border: 'none',
                     borderLeft: `2px solid ${isActive ? 'var(--gold)' : 'transparent'}`,
-                    cursor: isNavigable ? 'pointer' : 'default',
+                    cursor: 'pointer',
                     width: '100%',
                     background: isActive ? 'hsl(36 20% 94%)' : 'transparent',
                     fontFamily: "'DM Mono', monospace",
@@ -133,7 +130,10 @@ export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }
                     letterSpacing: '.03em',
                     color: isActive ? 'var(--fg)' : 'var(--muted-fg)',
                     textAlign: 'left',
+                    outline: 'none',
                   }}
+                  onFocus={e => { (e.currentTarget as HTMLElement).style.outline = '2px solid var(--gold)'; (e.currentTarget as HTMLElement).style.outlineOffset = '-2px' }}
+                  onBlur={e => { (e.currentTarget as HTMLElement).style.outline = 'none' }}
                 >
                   {icon}
                   <span style={{ flex: 1 }}>{label}</span>
@@ -164,7 +164,7 @@ export function Sidebar({ streakDays = 0, activePage = 'Dashboard', onNavigate }
                 key={i}
                 style={{
                   flex: 1,
-                  height: '6px',
+                  height: '8px',
                   borderRadius: '3px',
                   background: i < onSegs ? 'var(--gold)' : 'var(--hairline)',
                 }}

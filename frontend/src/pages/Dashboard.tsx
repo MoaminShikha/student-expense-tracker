@@ -9,12 +9,9 @@ import { RecentPanel } from '../components/panels/RecentPanel'
 import { AddSpendModal } from '../components/forms/AddSpendModal'
 import { AddIncomeModal } from '../components/forms/AddIncomeModal'
 import { AddChargeModal } from '../components/forms/AddChargeModal'
-import { useBalance } from '../hooks/useBalance'
-import { useCharges } from '../hooks/useCharges'
-import { useTransactions } from '../hooks/useTransactions'
 import { useFetch } from '../hooks/useFetch'
-import { initSession, getAllTransactions } from '../services/api'
-import type { ActivityEntry } from '../types'
+import { initSession, getAllTransactions, getBalance, getChargesUpcoming } from '../services/api'
+import type { ActivityEntry, BalanceResponse, CommittedCharge } from '../types'
 import type { Page } from '../components/layout/Sidebar'
 
 function SessionInitForm({ onSuccess }: { onSuccess: () => void }) {
@@ -84,17 +81,15 @@ interface DashboardProps {
 }
 
 export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: DashboardProps) {
-  const { data: balance, loading: balLoading, error: balError } = useBalance(refreshKey)
-  const { data: charges } = useCharges(refreshKey)
-  const { data: transactions } = useTransactions(refreshKey)
+  const { data: balance, loading: balLoading, error: balError } = useFetch<BalanceResponse | null>(getBalance, null, refreshKey)
+  const { data: charges } = useFetch<CommittedCharge[]>(getChargesUpcoming, [], refreshKey)
   const { data: allEntries } = useFetch<ActivityEntry[]>(getAllTransactions, [], refreshKey)
 
   const [syncing, setSyncing] = React.useState(false)
   const [modal, setModal] = React.useState<'spend' | 'income' | 'charge' | null>(null)
 
-  async function handleSync() {
+  function handleSync() {
     setSyncing(true)
-    await new Promise((r) => setTimeout(r, 700))
     onMutation()
     setSyncing(false)
   }
@@ -166,7 +161,7 @@ export function Dashboard({ refreshKey, onMutation, activePage, onNavigate }: Da
       >
         <CategoryPanel refreshKey={refreshKey} totalSpent={balance.monthly_spent} />
         <UpcomingPanel charges={charges} onMutation={onMutation} />
-        <RecentPanel transactions={transactions} />
+        <RecentPanel entries={allEntries.filter(e => e.type === 'spend').slice(0, 10)} onViewAll={() => onNavigate('Activity')} />
       </section>
 
       <footer style={{ marginTop: '4px', paddingTop: '12px', borderTop: '1px solid var(--hairline)', display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '12px', alignItems: 'center' }}>
