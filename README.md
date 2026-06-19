@@ -6,6 +6,8 @@
 
 Personal project — built to solve a real budgeting problem.
 
+**[The problem](#the-problem) · [How it works](#how-it-works) · [Screenshot](#screenshot) · [Stack](#stack) · [Quick start](#quick-start) · [Tests](#tests) · [License](#license)**
+
 ---
 
 ## The problem
